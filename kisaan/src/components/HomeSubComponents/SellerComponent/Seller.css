@@ -1,0 +1,24 @@
+/* All select elements on page */
+
+  
+  /* Style by class. Effects the text of the contained options. */
+  .blue {
+    color: white;
+    background-color: darkslategrey;
+    border-radius: 5px;
+   
+  }
+
+  .city{
+    color: white;
+    background-color: darkslategrey;
+    border-radius: 5px;
+    width: 250px;
+  }
+
+  .border1{
+    border: #dbdbdb solid 1px;
+    padding: 15px 15px;
+  }
+  
+ 

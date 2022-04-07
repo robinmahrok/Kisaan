@@ -1,0 +1,12 @@
+/* All select elements on page */
+
+  
+  /* Style by class. Effects the text of the contained options. */
+  .blue {
+    color: white;
+    background-color: darkslategrey;
+    border-radius: 5px;
+   
+  }
+  
+ 
