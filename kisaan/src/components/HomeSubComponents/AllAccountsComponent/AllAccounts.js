@@ -188,6 +188,7 @@ export default function AllAccounts() {
       }
     })
     .catch((err) => {
+      setPrompt(0);
       console.log(err);
     });
  

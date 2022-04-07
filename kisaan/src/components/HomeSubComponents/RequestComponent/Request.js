@@ -77,6 +77,7 @@ export default function Request() {
           setAppOrRej("Rejected")
           setLoadEdit(false);
       alert("Data is Updated");
+      GetRequests();
         // add load to remove buttons
       }
       else console.log(response.data.message)

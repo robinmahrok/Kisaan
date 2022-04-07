@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import axios from "axios";
 import './otpVerify.css'
 import { Spinner } from "react-bootstrap";
@@ -15,6 +15,17 @@ export default function OtpVerify() {
   const [verify, setVerify] = useState(false);
   const [load, setLoad] = useState(false);
   const [load2, setLoad2] = useState(false);
+
+
+  
+  useEffect(() => {
+    if (!sessionStorage.getItem("email")) {
+      alert("No email found!");
+      history.push("/");
+    }
+
+    setEmail(sessionStorage.getItem("email"));
+  });
 
   const sendOTP = (e) => {
     e.preventDefault();
@@ -37,15 +48,7 @@ export default function OtpVerify() {
       });
   };
 
-  const handleOnChangeEmail = (e) => {
-    e.preventDefault();
-    if (!sessionStorage.getItem("email")) {
-      alert("No email found!");
-      history.push("/");
-    }
 
-    setEmail(sessionStorage.getItem("email"));
-  };
 
   const handleOnChangeUserOTP = (e) => {
     e.preventDefault();
@@ -103,8 +106,8 @@ export default function OtpVerify() {
                 type="text"
                 name="Email"
                 value={email}
-                readOnly
-                onClick={handleOnChangeEmail}
+                readOnly={true}
+                disabled={true}
               />
               <button
                 style={{ marginLeft: "20%" }}

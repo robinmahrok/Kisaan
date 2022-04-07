@@ -24,12 +24,15 @@ export default function Buyer() {
   const [imageLink, setImageLink] = useState();
   const [productListState, setProductList] = useState([]);
   const [productListPage, setProductListPage] = useState([]);
-  const [itemsPerPage, setitemsPerPage] = useState(6);
+  const [itemsPerPage, setitemsPerPage] = useState(2);
+  const [myId, setMyId] = useState("");
   var productListpagination=[];
 
   var productList = [];
   const [nullItems, setnullItems] = useState(false);
   var prodVardata = {};
+  var prodAllVardata = {};
+
   const [quantity, setQuantity] = useState("");
   const [Email, setEmail] = useState("");
   const [Name, setName] = useState("");
@@ -52,9 +55,12 @@ export default function Buyer() {
       var name = nameEmail.split(",")[0];
       var userId = nameEmail.split(",")[1];
       var contact = nameEmail.split(",")[2];
+      var id = nameEmail.split(",")[3];
+
       setEmail(userId);
       setName(name);
       setContact(contact);
+      setMyId(id);
       var data = {
         token: localStorage.getItem("token"),
       };
@@ -70,31 +76,25 @@ export default function Buyer() {
              else  {
                 setnullItems(false)
                 setImageLink(baseUrl+"/static/images/");
-            prodVardata = response.data.message;
-            setTotalItems(prodVardata.length);
+            prodVardata=response.data.message;
+            Object.entries(prodVardata).map(([key, value]) => {
+                if(key<=itemsPerPage &&value.SellerId!=id)
+        {productList.push(value);
+        productListpagination.push(value)}
+              });
+              setProductList(productList);
+                setProductListPage(productListpagination);
+            setTotalItems(productList.length);
             //pagination start
-            if(prodVardata.length%itemsPerPage!=0)
-            var pageLimitvar=Math.floor((prodVardata.length/itemsPerPage)+1);
-            else var pageLimitvar=Math.floor((prodVardata.length/itemsPerPage));
+            if(productList.length%itemsPerPage!=0)
+            var pageLimitvar=Math.floor((productList.length/itemsPerPage)+1);
+            else var pageLimitvar=Math.floor((productList.length/itemsPerPage));
              
             setPageLimit(pageLimitvar);
-            console.log(pageLimitvar)
           let start = Math.floor((current - 1) / pageLimitvar) * pageLimitvar;
            setPages(new Array(pageLimitvar).fill().map((_, idx) => start + idx + 1));
              //pagination end
-           Object.entries(prodVardata).map(([key, value]) => {
-              productList.push(value);
-            });
-            setProductList(productList);
-            Object.entries(prodVardata).map(([key, value]) => {
-            console.log(key);
-                if(key<itemsPerPage)
-                { 
-                    console.log(key);
-                    productListpagination.push(value)
-                }
-              });
-              setProductListPage(productListpagination);
+           
             }
          } else {
             alert(response.data.message);
@@ -108,7 +108,6 @@ export default function Buyer() {
   }, []);
 
 const goToNextPage=()=> {
-    console.log("nex",current)
     
     if(current<totalItems)
     { 
@@ -123,14 +122,12 @@ var firstElement,lastElement,lastIndex;
        if(index>=firstElement-1 && index<=lastElement-1)
     productListpagination.push(value)
    })
-   console.log(productListpagination)
    setProductListPage(productListpagination);
         setCurrent((page) => page + 1);
     }
  }
 
  const  goToPreviousPage=()=> {
-    console.log("prev",current)
 
      if(current>1)
      {
@@ -139,7 +136,6 @@ var firstElement,lastElement,lastIndex;
         firstElement=((current-1)*itemsPerPage-itemsPerPage)+1;
         lastElement=(firstElement+itemsPerPage)-1;
        productListState.map((value,index)=>{
-           console.log(index)
            if(index>=firstElement && index<=lastElement)
         productListpagination.push(value)
        })
@@ -153,7 +149,6 @@ var firstElement,lastElement,lastIndex;
 
  const  changePage=(e,i)=> {
     e.preventDefault();
-    console.log("page ",current)
 
     if(current<totalItems)
     {
@@ -164,11 +159,6 @@ var firstElement,lastElement,lastIndex;
         if(lastIndex>itemsPerPage)
         lastElement=(firstElement+itemsPerPage)-1;
         else lastElement=lastIndex+firstElement-1;
-
-        console.log("first ",firstElement)
-        console.log("index ",lastIndex)
-        console.log("element ",lastElement)
-        console.log(productListpagination)
 
         Object.entries(productListState).map(([key, value])=>{
             console.log(key)
@@ -193,7 +183,6 @@ var firstElement,lastElement,lastIndex;
     var token=localStorage.getItem("token");
     var nameEmail = Token(token);
     var buyerId = nameEmail.split(",")[3];
-    console.log(s.SellerId)
    var data={
     sellerId:s.SellerId,
     buyerId:buyerId,
@@ -228,14 +217,7 @@ axios.post(baseUrl + "/getRequestData", data)
 else
     setShowSeller(true);
   }
-
 })
-  
-
-   
-   
-
- 
    
   };
 

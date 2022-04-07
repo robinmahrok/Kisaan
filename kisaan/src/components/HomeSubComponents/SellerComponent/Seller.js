@@ -335,8 +335,8 @@ else {
               <input
                 style={{ borderRadius: "7px" }}
                 type="number"
-                maxLength="6"
-                minLength="6"
+                min="100000"
+                max="999999"
                 name="zip"
                 onChange={handleOnChangeZip}
                 value={zipcode}
