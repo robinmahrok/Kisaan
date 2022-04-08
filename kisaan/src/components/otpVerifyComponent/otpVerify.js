@@ -23,8 +23,9 @@ export default function OtpVerify() {
       alert("No email found!");
       history.push("/");
     }
-
+else{
     setEmail(sessionStorage.getItem("email"));
+}
   });
 
   const sendOTP = (e) => {
@@ -100,25 +101,20 @@ export default function OtpVerify() {
             <h2>OTP Verification</h2>
             <br></br>
             <p>
-              <label>Email : </label>
-              <input
-                style={{ borderRadius: "7px" }}
-                type="text"
-                name="Email"
-                value={email}
-                readOnly={true}
-                disabled={true}
-              />
+              <label>Email : </label> &nbsp;
+              <label className="label">{email}</label>
+                
               <button
                 style={{ marginLeft: "20%" }}
                 className="btn btn-success"
                 onClick={sendOTP}
               >
-                Send OTP
+                Click Here
                 {load && (
                   <Spinner animation="border" variant="primary"></Spinner>
                 )}
               </button>
+              <label>&nbsp;to send OTP</label>
             </p>
             {send && (
               <div>

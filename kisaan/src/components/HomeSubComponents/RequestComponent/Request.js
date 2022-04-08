@@ -181,8 +181,8 @@ export default function Request() {
               </div>
             )}
             {prompt == 0 && (
-              <div>
-                <h5>No Requests Found</h5>
+              <div style={{"paddingTop":"10px"}}>
+                <h6>No Requests Found</h6>
               </div>
             )}
           </form>

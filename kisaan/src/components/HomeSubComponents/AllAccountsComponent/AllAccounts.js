@@ -175,7 +175,7 @@ export default function AllAccounts() {
     .then((response) => {
       setLoad(false);
       if (response.data.status) {
-        if(response.data.message!=null)
+        if(response.data.message.length!=0)
         {
           // console.log(response.data.message)
         setData2(response.data.message);
@@ -257,8 +257,8 @@ export default function AllAccounts() {
               </div>
             )}
             {prompt == 0 && (
-              <div>
-                <h5>No Accounts Found</h5>
+              <div style={{"paddingTop":"10px"}}>
+                <h6>No Items Found</h6>
               </div>
             )}
           </form>
