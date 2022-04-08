@@ -45,7 +45,7 @@ export default function OtpVerify() {
         setLoad(false);
         if (response.data.status) {
           setOTP(response.data.message);
-          alert("Mail Sent!");
+          alert("OTP Sent!");
           setSend(true);
         } else {
           alert(response.data.message);
@@ -122,7 +122,7 @@ export default function OtpVerify() {
             <h2>Forgot Password</h2>
             <br></br>
             <p>
-              <label>Email : </label>
+              <label>Email : </label> &nbsp;
               <input
                 style={{ borderRadius: "7px" }}
                 type="text"

@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import "./home.css";
-import { Spinner, Modal } from "react-bootstrap";
-import { baseUrl } from "../../baseUrl";
+import { Spinner } from "react-bootstrap";
 import {  useHistory } from "react-router-dom";
 import Header from "../headerComponent/header";
 import Footer from "../footerComponent/footer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Token from "../../utils/utils";
 
 export default function Home() {

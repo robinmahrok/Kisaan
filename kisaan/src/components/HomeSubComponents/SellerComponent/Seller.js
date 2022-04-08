@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Seller.css";
-import { Spinner, Modal } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent/header";
 import Footer from "../../footerComponent/footer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Token from "../../../utils/utils";
 import {statesofIndia} from "../../../utils/states.json";
 
@@ -30,14 +27,12 @@ export default function Seller() {
   const [Contact, setContact] = useState();
   const [price, setPrice] = useState(false);
   const [address, setAddress] = useState("");
-  const [idField, setIdField] = useState(false);
   const [image, setImage] = useState({ image: null });
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [zipcode, setZipcode] = useState("");
   const [load, setLoad] = useState(false);
-  const eye = <FontAwesomeIcon icon={faEye} />;
-  const eyeSlash = <FontAwesomeIcon icon={faEyeSlash} />;
+
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
