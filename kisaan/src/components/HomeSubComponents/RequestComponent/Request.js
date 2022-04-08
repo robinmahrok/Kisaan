@@ -102,7 +102,7 @@ export default function Request() {
     .then((response) => {
       setLoad(false);
       if (response.data.status) {
-        if(response.data.message!=null)
+        if(response.data.message.length!=0)
         {
           var resp=response.data.message;
          setData2(response.data.message);
@@ -116,6 +116,7 @@ export default function Request() {
     })
     .catch((err) => {
       console.log(err);
+      setPrompt(0)
     });
  
   };
