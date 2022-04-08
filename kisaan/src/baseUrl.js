@@ -1,1 +1,1 @@
-module.exports = { baseUrl: "http://localhost:3005" };
+module.exports = { baseUrl: process.env.REACT_APP_BASEURL };
