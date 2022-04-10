@@ -28,7 +28,9 @@ export default function Buyer() {
  const [Email, setEmail] = useState("");
   const [Name, setName] = useState("");
   const [Contact, setContact] = useState();
+  const [followSeller, setFollowSeller] = useState("");
   const [showSeller, setShowSeller] = useState(false);
+  
   const [current, setCurrent] = useState(0);
   const PER_PAGE = 2;
 const offset = current * PER_PAGE;
@@ -97,6 +99,11 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
       }
     });
     setsellerData(s);
+    if(showSeller)
+    setShowSeller(false);
+    else 
+    setShowSeller(true);
+
     var token = localStorage.getItem("token");
     var nameEmail = Token(token);
     var buyerId = nameEmail.split(",")[3];
@@ -109,22 +116,49 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
     };
     axios.post(baseUrl + "/getRequestData", data).then((response) => {
       if (response.data.status == false) {
+        setFollowSeller("Follow");
+      }
+      else { 
+         if (response.data.message == "-1") {
+        setFollowSeller("Declined");
+      } else if (response.data.message == "0") {
+        setFollowSeller("Requested");
+      } else if (response.data.message == "1") {
+        setFollowSeller("Following");
+      }
+  }
+})
+  }
+  const connectSeller = (e, id) => {
+    var token = localStorage.getItem("token");
+    var nameEmail = Token(token);
+    var buyerId = nameEmail.split(",")[3];
+    var data = {
+      sellerId: sellerData.SellerId,
+      buyerId: buyerId,
+      token: token,
+      buyerName: nameEmail.split(",")[0],
+      sellerName: sellerData.SellerName,
+    };
+    axios.post(baseUrl + "/getRequestData", data).then((response) => {
+      if (response.data.status == false) {
         axios.post(baseUrl + "/addRequest", data).then((response) => {
           if (response.data.status) {
             alert(response.data.message);
           } else console.log(response.data.message);
         });
-      } else if (response.data.message == "-1") {
-        alert("User has declined your request");
-      } else if (response.data.message == "0") {
-        alert("Your Request is already submitted");
-      } else if (response.data.message == "1") {
-        if (showSeller == true) setShowSeller(false);
-        else setShowSeller(true);
       }
+      else { 
+         if (response.data.message == "-1") {
+        setFollowSeller("Declined");
+      } else if (response.data.message == "0") {
+        setFollowSeller("Requested");
+      } else if (response.data.message == "1") {
+        setFollowSeller("Following");
+      }
+    }
     });
   };
-
   return (
     <div className="App">
       <Header></Header>
@@ -200,9 +234,9 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
                         color="primary"
                         onClick={(e) => viewDetails(e, itemDetail._id)}
                       >
-                        Request Details of seller
+                        Get Details of seller
                       </Button>
-                      {showSeller == true && itemDetail._id == sellerData._id && (
+                      {showSeller && itemDetail._id == sellerData._id && (
                         <div>
                           <Typography
                             style={{
@@ -249,6 +283,15 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
                               Address- {sellerData.Address}
                             </div>
                           </Typography>
+                          <Button
+                        size="medium"
+                        variant="contained"
+                        color="primary"
+
+                        onClick={(e) => connectSeller(e, itemDetail._id)}
+                      >
+                        {followSeller}
+                      </Button>
                         </div>
                       )}
                     </CardContent>

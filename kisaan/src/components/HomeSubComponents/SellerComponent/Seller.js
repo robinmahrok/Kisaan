@@ -32,6 +32,10 @@ export default function Seller() {
   const [city, setCity] = useState("");
   const [zipcode, setZipcode] = useState("");
   const [load, setLoad] = useState(false);
+  const [showOther, setShowOther] = useState(false);
+  const [otherVariety, setOtherVariety] = useState("");
+  
+
 
 
   useEffect(() => {
@@ -82,11 +86,26 @@ export default function Seller() {
         });
       }
     });
+    console.log(varietyList)
+    varietyList.push("Other")
     setVarietyList(varietyList);
     setProduct(e.target.value);
   };
 
   const handleOnChangeVariety = (e) => {
+    e.preventDefault();
+    if(e.target.value=="Other")
+    {
+      setShowOther(true);
+      setVariety("")
+      console.log("show other true")
+    }
+    else
+    { setShowOther(false)
+      setVariety(e.target.value);}
+  };
+
+  const handleOnChangeOtherVariety = (e) => {
     e.preventDefault();
     setVariety(e.target.value);
   };
@@ -263,8 +282,23 @@ else {
                     {list}
                   </option>
                 ))}
+              
+               
               </select>
-              <br />
+              {
+                  showOther&& <div style={{"paddingLeft":"130px"}}>
+                  <input
+                  type="text"
+                  style={{ borderRadius: "7px" }}
+                  placeholder="Enter Other Variety"
+                  onChange={handleOnChangeOtherVariety}
+                  value={variety}
+                  name="otherVariety"
+                  required={true}
+                />{" "}
+                </div>
+                }
+                {!showOther && <br/>}
               <br />
               <label>Enter Quantity (in Kgs) : </label> &nbsp;
               <input
