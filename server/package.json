@@ -19,7 +19,8 @@
   },
   "scripts": {
     "test": "npm start",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build":"node server.js"
   },
   "author": "Robin Singh",
   "license": "ISC"
