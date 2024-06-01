@@ -1,12 +1,16 @@
 import secret from "../config/config";
-import jwt from "jsonwebtoken";
+import { isExpired, decodeToken } from "react-jwt";
 
 export default function Token(token) {
   try {
-    var decoded = jwt.verify(token, secret.TOKEN_SECRET);
+    const tokenValue = decodeToken(token);
+    // var decoded = jwt.verify(token, secret.TOKEN_SECRET);
+    console.log(tokenValue,'---------');
+
+    var userId = tokenValue.email;
+    return userId;
   } catch (e) {
-    return "error";
+    return "error "+e;
   }
-  var userId = decoded.email;
-  return userId;
+ 
 }

@@ -1,5 +1,5 @@
-{
-    "statesofIndia":[
+
+const statesofIndia = [
       {"key":"AP","name":"Andhra Pradesh"},
       {"key":"AR","name":"Arunachal Pradesh"},
       {"key":"AS","name":"Assam"},
@@ -32,4 +32,5 @@
       {"key":"WB","name":"West Bengal"}
 
 ]
-}
+
+export default statesofIndia;

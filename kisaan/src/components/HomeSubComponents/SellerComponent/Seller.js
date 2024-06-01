@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent/header";
 import Footer from "../../footerComponent/footer";
 import Token from "../../../utils/utils";
-import {statesofIndia} from "../../../utils/states.json";
+import statesofIndia from "../../../utils/states";
 
 export default function Seller() {
   var history = useHistory();

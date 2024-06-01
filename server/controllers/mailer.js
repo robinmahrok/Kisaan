@@ -1,7 +1,9 @@
 const nodemailer = require("nodemailer");
-const EMAIL_USERNAME = "yaassmobileapp@gmail.com";
+const EMAIL_USERNAME = "";
 const COMMON_NAME = "Robin Singh";
 const { credentials, token } = require("../config/config");
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 
 const mailSettings = {
   host: "smtp.gmail.com",
@@ -10,18 +12,9 @@ const mailSettings = {
   service: "Gmail",
   from: `"${COMMON_NAME}"`,
   auth: {
-    //OAuth2 details added
-    type: "OAuth2",
-    user: EMAIL_USERNAME,
-    clientId: credentials.web.client_id,
-    clientSecret: credentials.web.client_secret,
-    refreshToken: token.refresh_token,
-    accessToken: token.access_token,
-    expires: token.expiry_date,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
+    user: process.env?.EMAIL_USERNAME,
+    pass: process.env?.EMAIL_PASSWORD  
+  }  
 };
 let transporter = nodemailer.createTransport(mailSettings);
 

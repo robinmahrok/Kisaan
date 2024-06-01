@@ -27,7 +27,7 @@ export default function Home() {
     } else {
       history.push("/");
     }
-  });
+  },[]);
 
 
 
