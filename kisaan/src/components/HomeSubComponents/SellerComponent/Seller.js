@@ -6,14 +6,13 @@ import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent/header";
 import Footer from "../../footerComponent/footer";
-import Token from "../../../utils/utils";
+import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
 
 export default function Seller() {
   var history = useHistory();
   const [product, setProduct] = useState("");
   const [variety, setVariety] = useState("");
-  
   const [productListState, setProductList] = useState([]);
   const [cityList, setCityList] = useState([]);
 
@@ -34,7 +33,7 @@ export default function Seller() {
   const [load, setLoad] = useState(false);
   const [showOther, setShowOther] = useState(false);
   const [otherVariety, setOtherVariety] = useState("");
-  
+
 
 
 
@@ -94,15 +93,15 @@ export default function Seller() {
 
   const handleOnChangeVariety = (e) => {
     e.preventDefault();
-    if(e.target.value=="Other")
-    {
+    if (e.target.value == "Other") {
       setShowOther(true);
       setVariety("")
       console.log("show other true")
     }
-    else
-    { setShowOther(false)
-      setVariety(e.target.value);}
+    else {
+      setShowOther(false)
+      setVariety(e.target.value);
+    }
   };
 
   const handleOnChangeOtherVariety = (e) => {
@@ -113,15 +112,15 @@ export default function Seller() {
   const handleOnChangeState = (e) => {
     e.preventDefault();
     setState(e.target.value);
-    axios.get("https://citystate.herokuapp.com/cities?State_like="+e.target.value).then((response=>{
-    var checkres=[];
-    for(var i=0;i<response.data.length-1;i++)
-    {
-      if(response.data[i].City!=response.data[i+1].City)
-      checkres.push(response.data[i].City)
-    }
-    setCityList(checkres)
-    }))
+    // axios.get("https://citystate.herokuapp.com/cities?State_like="+e.target.value).then((response=>{
+    // var checkres=[];
+    // for(var i=0;i<response.data.length-1;i++)
+    // {
+    //   if(response.data[i].City!=response.data[i+1].City)
+    //   checkres.push(response.data[i].City)
+    // }
+    // setCityList(checkres)
+    // }))
 
   };
   const handleOnChangeCity = (e) => {
@@ -161,7 +160,7 @@ export default function Seller() {
   const handleOnSubmit = (e) => {
     e.preventDefault();
     setLoad(true);
-    var token=localStorage.getItem("token");
+    var token = localStorage.getItem("token");
     var nameEmail = Token(token);
     var sellerId = nameEmail.split(",")[3];
     var data = {
@@ -173,64 +172,62 @@ export default function Seller() {
       Variety: variety,
       Quantity: quantity,
       State: state,
-      City:city,
+      City: city,
       Pin: zipcode,
       Address: address,
       Price: price,
       token: localStorage.getItem("token"),
     };
-var validate=true;
+    var validate = true;
     Object.entries(data).map(([k, v]) => {
-      if(v=="")
-      validate=false;
+      if (v == "")
+        validate = false;
     });
-if(validate==false)
-{
- alert("All fields are mandatory!!")
- setLoad(false);
-}
-else {
-  validate=true;
-    axios
-      .post(baseUrl + "/addSellerData", data)
-      .then((response) => {
-        setLoad(false);
-        if (response.data.status) {
-          var id = response.data.message;
-          const formData = new FormData();
-          if(image.image!=null)
-          {
-          formData.append("file", image.image);
-          formData.append("fileName", id);
+    if (validate == false) {
+      alert("All fields are mandatory!!")
+      setLoad(false);
+    }
+    else {
+      validate = true;
+      axios
+        .post(baseUrl + "/addSellerData", data)
+        .then((response) => {
+          setLoad(false);
+          if (response.data.status) {
+            var id = response.data.message;
+            const formData = new FormData();
+            if (image.image != null) {
+              formData.append("file", image.image);
+              formData.append("fileName", id);
 
-          fetch(baseUrl + "/uploadFile", {
-            method: "POST",
-            body: formData,
-          })
-            .then((res) => {
-              if (res.status == 200) {
-                alert("Your data is successfully saved");
-                setLoad(false);
-               history.push('/home')
-              } else {
-                alert("Can not update the data");
-                setLoad(false);
-              }
-            })
-            .catch((err) => {
-              alert(err);
-              setLoad(false);
-            });
+              fetch(baseUrl + "/uploadFile", {
+                method: "POST",
+                body: formData,
+              })
+                .then((res) => {
+                  if (res.status == 200) {
+                    alert("Your data is successfully saved");
+                    setLoad(false);
+                    history.push('/home')
+                  } else {
+                    alert("Can not update the data");
+                    setLoad(false);
+                  }
+                })
+                .catch((err) => {
+                  alert(err);
+                  setLoad(false);
+                });
+            }
+            else alert("Please add any image first")
+          } else {
+            alert(response.data.message);
           }
-          else alert("Please add any image first")
-        } else {
-          alert(response.data.message);
-        }
-      })
-      .catch((err) => {
-        alert(err);
-        setLoad(false);
-      });
+        })
+        .catch((err) => {
+          alert(err);
+          setLoad(false);
+        });
     }
   };
 
@@ -282,23 +279,23 @@ else {
                     {list}
                   </option>
                 ))}
-              
-               
+
+
               </select>
               {
-                  showOther&& <div style={{"paddingLeft":"130px"}}>
+                showOther && <div style={{ "paddingLeft": "130px" }}>
                   <input
-                  type="text"
-                  style={{ borderRadius: "7px" }}
-                  placeholder="Enter Other Variety"
-                  onChange={handleOnChangeOtherVariety}
-                  value={variety}
-                  name="otherVariety"
-                  required={true}
-                />{" "}
+                    type="text"
+                    style={{ borderRadius: "7px" }}
+                    placeholder="Enter Other Variety"
+                    onChange={handleOnChangeOtherVariety}
+                    value={variety}
+                    name="otherVariety"
+                    required={true}
+                  />{" "}
                 </div>
-                }
-                {!showOther && <br/>}
+              }
+              {!showOther && <br />}
               <br />
               <label>Enter Quantity (in Kgs) : </label> &nbsp;
               <input
@@ -325,33 +322,33 @@ else {
               <br />
               <br />
               <label>Enter Complete Pickup Address: </label> &nbsp;
-              <br/>
+              <br />
               <div className="border1">
-              
-              <label>State : </label> &nbsp;
-              <select
-                className="blue"
-                defaultValue="def"
-                onChange={handleOnChangeState}
-                required
-              >
-                <option value="def" hidden disabled>
-                  [Please select any one]
-                </option>
-                {statesofIndia.map((list, i) => (
-                  <option key={i} value={list.name}>
-                    {list.name}
+
+                <label>State : </label> &nbsp;
+                <select
+                  className="blue"
+                  defaultValue="def"
+                  onChange={handleOnChangeState}
+                  required
+                >
+                  <option value="def" hidden disabled>
+                    [Please select any one]
                   </option>
-                ))}
-              </select> &nbsp;&nbsp;
-              <label>City : </label> &nbsp;
-              <select
-                className="city"
-                defaultValue="def"
-                onChange={handleOnChangeCity}
-                required
-              >
-                <option value="def" hidden disabled>
+                  {statesofIndia.map((list, i) => (
+                    <option key={i} value={list.name}>
+                      {list.name}
+                    </option>
+                  ))}
+                </select> &nbsp;&nbsp;
+                <label>City : </label> &nbsp;
+                <input
+                  className="city"
+                  defaultValue=""
+                  onChange={handleOnChangeCity}
+                  required
+                />
+                {/* <option value="def" hidden disabled>
                   [Please select any one]
                 </option>
                 {cityList && cityList.map((list, i) => (
@@ -359,28 +356,28 @@ else {
                     {list}
                   </option>
                 ))}
-              </select> &nbsp;&nbsp;
-               <label>Zip Code : </label> &nbsp;
-              <input
-                style={{ borderRadius: "7px" }}
-                type="number"
-                min="100000"
-                max="999999"
-                name="zip"
-                onChange={handleOnChangeZip}
-                value={zipcode}
-                required
-              />{" "}
-              <br />
-              <br />
-              <label>Enter Town/Village : </label> &nbsp;
-              <textarea
-                style={{ borderRadius: "7px" }}
-                name="address"
-                onChange={handleOnChangeAddress}
-                value={address}
-                required
-              />{" "}
+              </select> &nbsp;&nbsp; */}
+                <label>Zip Code : </label> &nbsp;
+                <input
+                  style={{ borderRadius: "7px" }}
+                  type="number"
+                  min="100000"
+                  max="999999"
+                  name="zip"
+                  onChange={handleOnChangeZip}
+                  value={zipcode}
+                  required
+                />{" "}
+                <br />
+                <br />
+                <label>Enter Town/Village : </label> &nbsp;
+                <textarea
+                  style={{ borderRadius: "7px" }}
+                  name="address"
+                  onChange={handleOnChangeAddress}
+                  value={address}
+                  required
+                />{" "}
               </div>
               <br />
               <br />
@@ -395,10 +392,10 @@ else {
               <br />
               <button
                 style={{ marginLeft: "20%" }}
-                className="btn btn-secondary"
+                className="btn btn-primary button"
                 onClick={handleOnSubmit}
               >
-                Submit
+                {!load && <span>Submit</span>}
                 {load && (
                   <Spinner animation="border" variant="primary"></Spinner>
                 )}

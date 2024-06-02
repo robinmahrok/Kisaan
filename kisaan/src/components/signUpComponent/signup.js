@@ -5,7 +5,7 @@ import { baseUrl } from "../../baseUrl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-
+import { mobileValidator } from "../../utils/utils";
 import "./signup.css";
 import { useHistory } from "react-router";
 
@@ -15,15 +15,12 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const eye = <FontAwesomeIcon icon={faEye} />;
   const eyeSlash = <FontAwesomeIcon icon={faEyeSlash} />;
-
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, seterror] = useState("");
-
   const [load, setLoad] = useState(false);
 
   const handleOnChangeName = (e) => {
@@ -74,34 +71,43 @@ export default function SignUp() {
       password: password,
     };
 
-    axios
-      .post(baseUrl + "/signup", userObj)
-      .then((response) => {
-        setLoad(false);
-        if (response.data.status) {
-          sessionStorage.setItem("email", email);
-          alert("Data Saved!");
-          history.push("/otpVerify");
-        } else {
-          alert(response.data.message);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (mobileValidator(contact)) {
+      axios
+        .post(baseUrl + "/signup", userObj)
+        .then((response) => {
+          setLoad(false);
+          if (response.data.status) {
+            sessionStorage.setItem("email", email);
+            alert("Data Saved!");
+            history.push("/otpVerify");
+          } else {
+            alert(response.data.message);
+          }
+        })
+        .catch((err) => {
+          setLoad(false);
+          console.log(err);
+        });
+    } else {
+      setLoad(false);
+      alert("Please enter valid contact number!");
+    }
   };
+
+
+
   return (
     <div className="App">
       <header className="App-header-login">
-      <link
+        <link
           rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossOrigin="anonymous"
         />
         <div>
-          <form>
-            <h2>Kisaan</h2>
+          <form className="form">
+            <h2>Create Account</h2>
             <br></br>
             <label>Name : </label>
             <input
@@ -113,8 +119,6 @@ export default function SignUp() {
               required
             />{" "}
             <br />
-            <br />
-           
             <label>Contact No. : </label>
             <input
               style={{ borderRadius: "7px" }}
@@ -125,7 +129,6 @@ export default function SignUp() {
               required
             />{" "}
             <br />
-            <br />
             <label>Email : </label>
             <input
               style={{ borderRadius: "7px" }}
@@ -134,7 +137,6 @@ export default function SignUp() {
               onChange={handleOnChangeEmail}
               value={email}
             />{" "}
-            <br />
             <br />
             <label>Password : </label>
             <input
@@ -146,7 +148,6 @@ export default function SignUp() {
               required
             />{" "}
             <br />
-            <br />
             <label>Confirm Password : </label>
             <input
               type={showPassword ? "text" : "password"}
@@ -156,31 +157,27 @@ export default function SignUp() {
               name="confirmpassword"
               required
             />{" "}
-            <i onClick={handleClickShowPassword}>
+            <i className="eye" onClick={handleClickShowPassword}>
               {showPassword ? eyeSlash : eye}
             </i>
             <div className="text-danger" style={{ fontSize: "15px" }}>
               {" "}
               {error}{" "}
             </div>
-            <br />
             <button
-              style={{ marginLeft: "20%" }}
-              className="btn btn-success"
+              className="btn btn-success button"
               onClick={SignUpUser}
             >
-              SignUp
+              {!load && <span>Create Account</span>}
               {load && <Spinner animation="border" variant="primary"></Spinner>}
             </button>
           </form>
-          <br />
 
           <p>
             {" "}
-            Already have an account?
+            Already have an account? &nbsp;
             <button
-              style={{ marginLeft: "20px" }}
-              className="btn btn-primary"
+              className="btn btn-primary button"
               onClick={loginUser}
             >
               Login

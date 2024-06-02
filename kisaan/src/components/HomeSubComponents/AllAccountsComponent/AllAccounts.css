@@ -9,4 +9,76 @@
    
   }
   
- 
+ /* General table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table header styling */
+thead {
+  background-color: #343a40;
+}
+
+th {
+  color: #fff;
+  text-align: left;
+  padding: 8px;
+}
+
+/* Table body styling */
+tbody tr:nth-child(odd) {
+  background-color: #2c2f33;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #23272b;
+}
+
+td {
+  text-align: l;
+  padding: 8px;
+  color: #fff;
+}
+
+input, textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+/* Responsive styling */
+@media screen and (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  th {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 10px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #ccc;
+  }
+
+  .btn {
+    margin-top: 5px;
+  }
+}

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./home.css";
 import { Spinner } from "react-bootstrap";
-import {  useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Header from "../headerComponent/header";
 import Footer from "../footerComponent/footer";
-import Token from "../../utils/utils";
+import { Token } from "../../utils/utils";
 
 export default function Home() {
   var history = useHistory();
@@ -13,7 +13,7 @@ export default function Home() {
 
 
   const [load, setLoad] = useState(false);
- 
+
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -27,7 +27,7 @@ export default function Home() {
     } else {
       history.push("/");
     }
-  },[]);
+  }, []);
 
 
 
@@ -61,34 +61,34 @@ export default function Home() {
               <br />
               <label>Are you a seller or buyer? &nbsp;</label>
               <button
-                  style={{ marginLeft: "20%" }}
-                  className="btn btn-primary"
-                  onClick={seller}
-                >
-                  Seller
-                  {load && (
-                    <Spinner animation="border" variant="primary"></Spinner>
-                  )}
-                </button>
-                  <br />
-                  <br />
-                <button
-                  style={{ marginLeft: "20%" }}
-                  className="btn btn-primary"
-                  onClick={buyer}
-                >
-                  Buyer
-                  {load && (
-                    <Spinner animation="border" variant="primary"></Spinner>
-                  )}
-                </button>
+                style={{ marginLeft: "20%" }}
+                className="btn btn-primary"
+                onClick={seller}
+              >
+                Seller
+                {load && (
+                  <Spinner animation="border" variant="primary"></Spinner>
+                )}
+              </button>
+              <br />
+              <br />
+              <button
+                style={{ marginLeft: "20%" }}
+                className="btn btn-primary"
+                onClick={buyer}
+              >
+                Buyer
+                {load && (
+                  <Spinner animation="border" variant="primary"></Spinner>
+                )}
+              </button>
               <br />
               <br />
             </div>
           </form>
+        </div>
       </div>
+      <Footer></Footer>
     </div>
-    <Footer></Footer>
-</div>
   );
 }

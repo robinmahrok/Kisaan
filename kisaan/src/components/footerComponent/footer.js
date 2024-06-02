@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Token from "../../utils/utils";
+import { Token } from "../../utils/utils";
 
 export default function Footer() {
   let history = useHistory();

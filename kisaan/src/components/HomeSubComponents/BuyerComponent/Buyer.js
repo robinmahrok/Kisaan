@@ -5,7 +5,7 @@ import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent/header";
 import Footer from "../../footerComponent/footer";
-import Token from "../../../utils/utils";
+import { Token } from "../../../utils/utils";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
@@ -25,18 +25,18 @@ export default function Buyer() {
   var productList = [];
   const [nullItems, setnullItems] = useState(false);
   var prodVardata = {};
- const [Email, setEmail] = useState("");
+  const [Email, setEmail] = useState("");
   const [Name, setName] = useState("");
   const [Contact, setContact] = useState();
   const [followSeller, setFollowSeller] = useState("");
   const [showSeller, setShowSeller] = useState(false);
-  
+
   const [current, setCurrent] = useState(0);
   const PER_PAGE = 2;
-const offset = current * PER_PAGE;
-const currentPageData = productListState
+  const offset = current * PER_PAGE;
+  const currentPageData = productListState
     .slice(offset, offset + PER_PAGE)
-const pageCount = Math.ceil(productListState.length / PER_PAGE);
+  const pageCount = Math.ceil(productListState.length / PER_PAGE);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -86,7 +86,7 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
 
   function handlePageClick({ selected: selectedPage }) {
     setCurrent(selectedPage);
-}
+  }
 
 
   const viewDetails = (e, id) => {
@@ -99,10 +99,10 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
       }
     });
     setsellerData(s);
-    if(showSeller)
-    setShowSeller(false);
-    else 
-    setShowSeller(true);
+    if (showSeller)
+      setShowSeller(false);
+    else
+      setShowSeller(true);
 
     var token = localStorage.getItem("token");
     var nameEmail = Token(token);
@@ -118,16 +118,16 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
       if (response.data.status == false) {
         setFollowSeller("Follow");
       }
-      else { 
-         if (response.data.message == "-1") {
-        setFollowSeller("Declined");
-      } else if (response.data.message == "0") {
-        setFollowSeller("Requested");
-      } else if (response.data.message == "1") {
-        setFollowSeller("Following");
+      else {
+        if (response.data.message == "-1") {
+          setFollowSeller("Declined");
+        } else if (response.data.message == "0") {
+          setFollowSeller("Requested");
+        } else if (response.data.message == "1") {
+          setFollowSeller("Following");
+        }
       }
-  }
-})
+    })
   }
   const connectSeller = (e, id) => {
     var token = localStorage.getItem("token");
@@ -148,15 +148,15 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
           } else console.log(response.data.message);
         });
       }
-      else { 
-         if (response.data.message == "-1") {
-        setFollowSeller("Declined");
-      } else if (response.data.message == "0") {
-        setFollowSeller("Requested");
-      } else if (response.data.message == "1") {
-        setFollowSeller("Following");
+      else {
+        if (response.data.message == "-1") {
+          setFollowSeller("Declined");
+        } else if (response.data.message == "0") {
+          setFollowSeller("Requested");
+        } else if (response.data.message == "1") {
+          setFollowSeller("Following");
+        }
       }
-    }
     });
   };
   return (
@@ -284,14 +284,13 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
                             </div>
                           </Typography>
                           <Button
-                        size="medium"
-                        variant="contained"
-                        color="primary"
-
-                        onClick={(e) => connectSeller(e, itemDetail._id)}
-                      >
-                        {followSeller}
-                      </Button>
+                            size="medium"
+                            variant="contained"
+                            color="primary"
+                            onClick={(e) => connectSeller(e, itemDetail._id)}
+                          >
+                            {followSeller}
+                          </Button>
                         </div>
                       )}
                     </CardContent>
@@ -301,16 +300,16 @@ const pageCount = Math.ceil(productListState.length / PER_PAGE);
           </Grid>
         </Container>
         <ReactPaginate
-        previousLabel={"← Previous"}
-        nextLabel={"Next →"}
-        pageCount={pageCount}
-        onPageChange={handlePageClick}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-      />
+          previousLabel={"← Previous"}
+          nextLabel={"Next →"}
+          pageCount={pageCount}
+          onPageChange={handlePageClick}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+        />
       </div>
       <Footer></Footer>
     </div>

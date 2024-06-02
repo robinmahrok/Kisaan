@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./header.css";
 import { useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Token from "../../utils/utils";
+import { Token } from "../../utils/utils";
 
 export default function Header() {
   let history = useHistory();
@@ -79,7 +79,7 @@ export default function Header() {
     if (e.target.value == "Logout") {
       localStorage.removeItem("token");
       history.push("/");
-    
+
     }
   };
 

@@ -3,10 +3,10 @@ import axios from "axios";
 import "./Request.css";
 import { Table, Spinner } from "react-bootstrap";
 import { baseUrl } from "../../../baseUrl";
-import {  useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent/header";
 import Footer from "../../footerComponent/footer";
-import Token from "../../../utils/utils";
+import { Token } from "../../../utils/utils";
 
 export default function Request() {
   var history = useHistory();
@@ -15,14 +15,9 @@ export default function Request() {
   const [Email, setEmail] = useState("");
   const [sellerId, setSellerId] = useState("");
   const [appOrRej, setAppOrRej] = useState("");
-
-
   const [data2, setData2] = useState();
   const [index, setIndex] = useState();
-
-
   const [prompt, setPrompt] = useState(-1);
-
   const [load, setLoad] = useState(false);
   const [loadEdit, setLoadEdit] = useState(true);
 
@@ -42,82 +37,79 @@ export default function Request() {
     } else {
       history.push("/");
     }
-  },[]);
+  }, []);
 
 
-  const handleApprove=(e,id)=>{
+  const handleApprove = (e, id) => {
     e.preventDefault();
     setLoadEdit(false)
     setIndex(id);
     var keyValue;
-    
-    var targetValue=e.target.value;
 
-    data2.map((key,value)=>
-    {
-      if(value===id)
-     keyValue=key;
-  })
-  console.log(targetValue)
-  var data={
-    token: localStorage.getItem("token"),
-    id:keyValue._id,
-    decision:targetValue
-  }
-  axios
-  .post(baseUrl + "/ApproveOrDeny", data)
-  .then((response) => {
-    if (response.data.status) {
-      if(response.data.message!=null)
-      { 
-    if(targetValue=="Approve")
-          setAppOrRej("Approved")
-          else 
-          setAppOrRej("Rejected")
-          setLoadEdit(false);
-      alert("Data is Updated");
-      GetRequests();
-        // add load to remove buttons
-      }
-      else console.log(response.data.message)
-    } else {
-     alert(response.data.status)
-  
+    var targetValue = e.target.value;
+
+    data2.map((key, value) => {
+      if (value === id)
+        keyValue = key;
+    })
+    console.log(targetValue)
+    var data = {
+      token: localStorage.getItem("token"),
+      id: keyValue._id,
+      decision: targetValue
     }
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+    axios
+      .post(baseUrl + "/ApproveOrDeny", data)
+      .then((response) => {
+        if (response.data.status) {
+          if (response.data.message != null) {
+            if (targetValue == "Approve")
+              setAppOrRej("Approved")
+            else
+              setAppOrRej("Rejected")
+            setLoadEdit(false);
+            alert("Data is Updated");
+            GetRequests();
+            // add load to remove buttons
+          }
+          else console.log(response.data.message)
+        } else {
+          alert(response.data.status)
+
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
   }
 
- 
-  
+
+
 
   const GetRequests = () => {
     setLoad(true)
     axios
-    .post(baseUrl + "/allRequests", { token: localStorage.getItem("token") })
-    .then((response) => {
-      setLoad(false);
-      if (response.data.status) {
-        if(response.data.message.length!=0)
-        {
-          var resp=response.data.message;
-         setData2(response.data.message);
-        setPrompt(1);
+      .post(baseUrl + "/allRequests", { token: localStorage.getItem("token") })
+      .then((response) => {
+        setLoad(false);
+        if (response.data.status) {
+          if (response.data.message.length != 0) {
+            var resp = response.data.message;
+            setData2(response.data.message);
+            setPrompt(1);
+          }
+          else setPrompt(0)
+        } else {
+          setPrompt(0);
+
         }
-        else setPrompt(0)
-      } else {
-        setPrompt(0);
-       
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      setPrompt(0)
-    });
- 
+      })
+      .catch((err) => {
+        console.log(err);
+        setPrompt(0)
+      });
+
   };
 
   return (
@@ -133,16 +125,16 @@ export default function Request() {
         <div>
           <form>
             <h2>My Requests &nbsp;<button className="btn btn-primary" onClick={GetRequests}>
-                Refresh
-                {load && (
-                  <Spinner animation="border" variant="primary"></Spinner>
-                )}
-              </button></h2>
-            
-              
+              Refresh
+              {load && (
+                <Spinner animation="border" variant="primary"></Spinner>
+              )}
+            </button></h2>
+
+
             {prompt == 1 && (
               <div>
-                
+
                 <Table striped bordered hover variant="dark">
                   <thead>
                     <tr>
@@ -154,25 +146,25 @@ export default function Request() {
                   <tbody>
                     {data2.map((listValue, i) => (
                       <tr key={i}>
-                        <td>{i+1}</td>
+                        <td>{i + 1}</td>
                         <td>{listValue.BuyerName}</td>
-                       <td> 
-                {listValue.Status==0 && <button className="btn btn-info" value="Approve"  onClick={(e)=>handleApprove(e,i)}>
-                Approve
-              </button>} &nbsp;
-             {
-                 listValue.Status==1 && <button className="btn btn-success" disabled={true}>
-                 Approved
-               </button>
-             }
-              {
-                 listValue.Status==-1 && <button className="btn btn-danger" disabled={true}>
-                 Rejected
-               </button>
-             }
-            { listValue.Status==0 && <button className="btn btn-danger" value="Deny" onClick={(e)=>handleApprove(e,i)} >
-              Deny
-              </button> }</td>
+                        <td>
+                          {listValue.Status == 0 && <button className="btn btn-info" value="Approve" onClick={(e) => handleApprove(e, i)}>
+                            Approve
+                          </button>} &nbsp;
+                          {
+                            listValue.Status == 1 && <button className="btn btn-success" disabled={true}>
+                              Approved
+                            </button>
+                          }
+                          {
+                            listValue.Status == -1 && <button className="btn btn-danger" disabled={true}>
+                              Rejected
+                            </button>
+                          }
+                          {listValue.Status == 0 && <button className="btn btn-danger" value="Deny" onClick={(e) => handleApprove(e, i)} >
+                            Deny
+                          </button>}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -180,7 +172,7 @@ export default function Request() {
               </div>
             )}
             {prompt == 0 && (
-              <div style={{"paddingTop":"10px"}}>
+              <div style={{ "paddingTop": "10px" }}>
                 <h6>No Requests Found</h6>
               </div>
             )}

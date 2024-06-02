@@ -40,6 +40,7 @@ export default function Login() {
         }
       })
       .catch((err) => {
+        setLoad(false);
         console.log(err);
       });
   };
@@ -53,8 +54,8 @@ export default function Login() {
           crossOrigin="anonymous"
         />
         <div>
-          <form>
-            <h2>Kisaan</h2>
+          <form className="form">
+            <h2>Welcome Kisaan!</h2>
             <br></br>
             <label>Email : </label>
             <input
@@ -67,7 +68,6 @@ export default function Login() {
               required
             />{" "}
             <br />
-            <br />
             <label>Password : </label>
             <input
               type="password"
@@ -79,19 +79,17 @@ export default function Login() {
               required
             />{" "}
             <br />
-            <br />
             <button
-              style={{ marginLeft: "20%" }}
-              className="btn btn-success"
+              className="btn btn-success button"
               onClick={LoginUser}
             >
-              Login
+              {!load && <span>Login</span>}
               {load && <Spinner animation="border" variant="primary"></Spinner>}
             </button>
           </form>
           <br />
           <Link to="/forgotPassword">
-            <button style={{ marginLeft: "20px" }} className="btn btn-primary">
+            <button className="btn btn-primary button">
               Forgot Password
             </button>
           </Link>

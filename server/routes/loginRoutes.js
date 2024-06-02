@@ -9,7 +9,7 @@ var globalEmail = "";
 module.exports = function (router) {
   var error = "";
   router.get("/", (req, res) => {
-    res.status(200).send({message:"Working"})
+    res.status(200).send({ message: "Working" })
   });
 
   //signup api
@@ -37,9 +37,9 @@ module.exports = function (router) {
       res
         .status(200)
         .send({ status: false, message: "email/password not found" });
-    } else if ( req.body.contact == null ||
+    } else if (req.body.contact == null ||
       typeof req.body.contact == undefined ||
-      req.body.contact.length == 0){
+      req.body.contact.length == 0) {
       res.status(200).send({ status: false, message: "undefined User Details" });
     }
 
@@ -162,13 +162,25 @@ module.exports = function (router) {
             } else {
               res.status(200).send({
                 status: true,
-                message: otpVal,
               });
             }
           });
         }
       });
     }
+  });
+
+  router.post("/verifyOtp", (req, res) => {
+    var email = req.body.email;
+
+    userInfo.find({ Email: email, Otp: req.body.otp }).then((data) => {
+      if (data.length == 0) {
+        res.status(200).send({ status: false, message: "Invalid Email" });
+        // res.redirect('/otphtml');
+      } else {
+        res.status(200).send({ status: true, message: "OTP Verified" });
+      }
+    });
   });
 
   //verify OTP api
@@ -266,7 +278,7 @@ module.exports = function (router) {
         utils.validatePassword(password, dbpass, function (err, data) {
           if (!err && data) {
             if (otpver == "Verified") {
-              var nameEmail = name + "," + email+","+contact+","+id;
+              var nameEmail = name + "," + email + "," + contact + "," + id;
               const token = utils.generateAccessToken(nameEmail);
               res.status(200).send({ status: true, message: token });
             } else {

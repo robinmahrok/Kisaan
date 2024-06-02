@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./header.css";
-import {  useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Header from "./header";
 import Footer from "../footerComponent/footer";
-import Token from "../../utils/utils";
+import { Token } from "../../utils/utils";
 
 export default function ContactUs() {
   var history = useHistory();

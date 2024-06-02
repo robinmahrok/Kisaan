@@ -56,6 +56,27 @@ export default function OtpVerify() {
       });
   };
 
+  const verifyOtp = (e) => {
+    e.preventDefault();
+
+    setLoad(true);
+
+    axios
+      .post(baseUrl + "/verifyOtp", { email: email, otp: Enteredotp })
+      .then((response) => {
+        setLoad(false);
+        if (response.data.status) {
+          setVerify(true);
+        } else {
+          alert(response.data.message);
+        }
+      })
+      .catch((err) => {
+        setLoad(false);
+        console.log(err);
+      });
+  };
+
   const handleOnChangeConfirmPassword = (e) => {
     // e.preventDefault();
 
@@ -74,18 +95,6 @@ export default function OtpVerify() {
   const handleOnChangeUserOTP = (e) => {
     e.preventDefault();
     setEnteredOTP(e.target.value);
-  };
-
-  const handleOnChangeOTP = (e) => {
-    e.preventDefault();
-    if (Enteredotp == otp) {
-      alert("OTP verified");
-
-      setVerify(true);
-    } else {
-      alert("Wrong OTP!");
-      setVerify(false);
-    }
   };
 
   const UpdatePassword = (e) => {
@@ -118,11 +127,11 @@ export default function OtpVerify() {
           crossOrigin="anonymous"
         />
         <div>
-          <form>
-            <h2>Forgot Password</h2>
+          <form className="form">
+            {!verify && <h2>Forgot Password</h2>}
             <br></br>
-            <p>
-              <label>Email : </label> &nbsp;
+            {!verify && <p>
+              <label>Email : </label>
               <input
                 style={{ borderRadius: "7px" }}
                 type="text"
@@ -132,18 +141,19 @@ export default function OtpVerify() {
                 value={email}
                 required
               />
-              <button
-                style={{ marginLeft: "20%" }}
+              <br />
+              {!send && <button
+                style={{ "marginLeft": "20%", "margin-top": '15px' }}
                 className="btn btn-success"
                 onClick={sendOTP}
               >
-                Send OTP
+                {!load && <span>Send OTP</span>}
                 {load && (
                   <Spinner animation="border" variant="primary"></Spinner>
                 )}
-              </button>
-            </p>
-            {send && (
+              </button>}
+            </p>}
+            {send && !verify && (
               <div>
                 <br />
                 <br />
@@ -160,9 +170,12 @@ export default function OtpVerify() {
                 <button
                   style={{ marginLeft: "20%" }}
                   className="btn btn-success"
-                  onClick={handleOnChangeOTP}
+                  onClick={verifyOtp}
                 >
-                  Verify
+                  {!load2 && <span>Verify</span>}
+                  {load2 && (
+                    <Spinner animation="border" variant="primary"></Spinner>
+                  )}
                 </button>
               </div>
             )}
@@ -170,7 +183,8 @@ export default function OtpVerify() {
             <br />
 
             {verify && (
-              <div>
+              <div className="form">
+                <h3>Enter a new password</h3>
                 <label>Password : </label>
                 <input
                   type="password"
@@ -192,7 +206,7 @@ export default function OtpVerify() {
                   name="confirmpassword"
                   required
                 />{" "}
-                <i onClick={handleClickShowPassword}>
+                <i onClick={handleClickShowPassword} className="eye">
                   {showPassword ? eyeSlash : eye}
                 </i>
                 <div className="text-danger" style={{ fontSize: "15px" }}>
@@ -201,11 +215,10 @@ export default function OtpVerify() {
                 </div>
                 <br />
                 <button
-                  style={{ marginLeft: "20%" }}
-                  className="btn btn-success"
+                  className="btn btn-success button"
                   onClick={UpdatePassword}
                 >
-                  Update Password
+                  {!load2 && <span>Update Password</span>}
                   {load2 && (
                     <Spinner animation="border" variant="primary"></Spinner>
                   )}

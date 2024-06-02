@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import './otpVerify.css'
 import { Spinner } from "react-bootstrap";
@@ -17,15 +17,14 @@ export default function OtpVerify() {
   const [load2, setLoad2] = useState(false);
 
 
-  
   useEffect(() => {
     if (!sessionStorage.getItem("email")) {
       alert("No email found!");
       history.push("/");
     }
-else{
-    setEmail(sessionStorage.getItem("email"));
-}
+    else {
+      setEmail(sessionStorage.getItem("email"));
+    }
   });
 
   const sendOTP = (e) => {
@@ -56,35 +55,47 @@ else{
     setEnteredOTP(e.target.value);
   };
 
-  const handleOnChangeOTP = (e) => {
+  const verifyOtp = (e) => {
     e.preventDefault();
     setLoad2(true);
-    if (Enteredotp == otp) {
-      axios
-        .post(baseUrl + "/otpVerify", { email: email })
-        .then((response) => {
-          setLoad2(false);
-          if (response.data.status) {
-            setVerify(true);
-            sessionStorage.removeItem("email");
-            setSend(true);
-            alert("OTP Verified");
-            history.push("/");
-          } else {
-          setLoad2(false);
-            alert(response.data.message);
-          }
-        })
-        .catch((err) => {
-          setLoad2(false);
-          console.log(err);
-        });
-    } else {
-      alert("Wrong OTP!");
-      setVerify(false);
-      setLoad2(false);
+    axios
+      .post(baseUrl + "/verifyOtp", { email: email, otp: Enteredotp })
+      .then(async (response) => {
+        setLoad2(false);
+        if (response.data.status) {
+          await handleOnChangeOTP()
+        } else {
+          alert(response.data.message);
+        }
+      })
+      .catch((err) => {
+        setLoad2(false);
+        console.log(err);
+      });
+  };
 
-    }
+
+  const handleOnChangeOTP = () => {
+    setLoad2(true);
+    axios
+      .post(baseUrl + "/otpVerify", { email: email })
+      .then((response) => {
+        setLoad2(false);
+        if (response.data.status) {
+          setVerify(true);
+          sessionStorage.removeItem("email");
+          setSend(true);
+          alert("OTP Verified");
+          history.push("/");
+        } else {
+          setLoad2(false);
+          alert(response.data.message);
+        }
+      })
+      .catch((err) => {
+        setLoad2(false);
+        console.log(err);
+      });
   };
 
   return (
@@ -97,29 +108,27 @@ else{
           crossOrigin="anonymous"
         />
         <div>
-          <form>
+          <form className="form">
             <h2>OTP Verification</h2>
             <br></br>
             <p>
               <label>Email : </label> &nbsp;
               <label className="label">{email}</label>
-                
-              <button
-                style={{ marginLeft: "20%" }}
-                className="btn btn-success"
+              <br />
+              <br />
+              {!send && <div><button
+                className="btn btn-success button"
                 onClick={sendOTP}
               >
-                Click Here
+                {!load && <span>Click Here</span>}
                 {load && (
                   <Spinner animation="border" variant="primary"></Spinner>
                 )}
               </button>
-              <label>&nbsp;to send OTP</label>
+                <label>&nbsp;to send OTP</label></div>}
             </p>
             {send && (
               <div>
-                <br />
-                <br />
 
                 <label>Enter OTP : </label>
                 <input
@@ -132,10 +141,10 @@ else{
                 />
                 <button
                   style={{ marginLeft: "20%" }}
-                  className="btn btn-success"
-                  onClick={handleOnChangeOTP}
+                  className="btn btn-success button"
+                  onClick={verifyOtp}
                 >
-                  Verify
+                  {!load2 && <span>Verify</span>}
                   {load2 && (
                     <Spinner animation="border" variant="success"></Spinner>
                   )}
