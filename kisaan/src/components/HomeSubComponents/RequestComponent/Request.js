@@ -52,7 +52,6 @@ export default function Request() {
       if (value === id)
         keyValue = key;
     })
-    console.log(targetValue)
     var data = {
       token: localStorage.getItem("token"),
       id: keyValue._id,
@@ -72,7 +71,7 @@ export default function Request() {
             GetRequests();
             // add load to remove buttons
           }
-          else console.log(response.data.message)
+          else alert(response?.data?.message);
         } else {
           alert(response.data.status)
 

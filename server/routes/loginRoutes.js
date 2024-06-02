@@ -15,7 +15,6 @@ module.exports = function (router) {
   //signup api
   router.post("/signup", (req, res) => {
     req.session.email1 = req.body.email;
-    console.log(req.body.email);
     var name = req.body.name,
       email = req.body.email,
       contact = req.body.contact,

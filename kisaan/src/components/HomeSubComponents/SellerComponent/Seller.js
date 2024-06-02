@@ -85,7 +85,6 @@ export default function Seller() {
         });
       }
     });
-    console.log(varietyList)
     varietyList.push("Other")
     setVarietyList(varietyList);
     setProduct(e.target.value);
@@ -96,7 +95,6 @@ export default function Seller() {
     if (e.target.value == "Other") {
       setShowOther(true);
       setVariety("")
-      console.log("show other true")
     }
     else {
       setShowOther(false)

@@ -84,7 +84,6 @@ export default function Header() {
 
   const handleOnChangeHome = (e) => {
     e.preventDefault();
-    console.log("hhhhhhhhhhhhh");
     setAbout(false);
     setHome(true);
     setContact(false);

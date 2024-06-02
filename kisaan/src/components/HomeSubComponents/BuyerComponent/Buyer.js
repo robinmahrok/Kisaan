@@ -23,7 +23,7 @@ export default function Buyer() {
   const [myId, setMyId] = useState("");
 
   var productList = [];
-  const [nullItems, setnullItems] = useState(false);
+  const [nullItems, setnullItems] = useState(true);
   var prodVardata = {};
   const [Email, setEmail] = useState("");
   const [Name, setName] = useState("");
@@ -145,7 +145,8 @@ export default function Buyer() {
         axios.post(baseUrl + "/addRequest", data).then((response) => {
           if (response.data.status) {
             alert(response.data.message);
-          } else console.log(response.data.message);
+          } else {
+            alert(response?.data?.message);}
         });
       }
       else {

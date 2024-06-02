@@ -60,7 +60,6 @@ module.exports = function (router) {
   });
 
   router.post("/products", (req, res) => {
-    // console.log(req.body)
     var token = req.body.token;
 
     var auth = utils.authenticateToken(token);
@@ -154,7 +153,6 @@ module.exports = function (router) {
               .limit(10)
               .exec(function (err, docs) {
                 if (!err) {
-                  console.log(docs[0]._id);
                   res.status(200).send({ status: true, message: docs[0]._id });
                 } else res.status(200).send({ status: false, message: err });
               });
@@ -173,14 +171,12 @@ module.exports = function (router) {
         .sort({ _id: -1 })
         .exec(function (err, docs) {
           if (!err) {
-            console.log(docs,'==========');
             let items = []
             for(let i=0;i<docs.length;i++){
               if(docs[i].Email != email){
                 items.push(docs[i]);
               }
             }
-            // console.log(docs[0]._id);
             res.status(200).send({ status: true, message: items });
           } else res.status(200).send({ status: false, message: err });
         });
@@ -196,7 +192,6 @@ module.exports = function (router) {
         .sort({ _id: -1 })
         .exec(function (err, data) {
           if (!err) {
-            // console.log(docs[0]._id);
             res.status(200).send({ status: true, message: data });
           } else res.status(200).send({ status: false, message: "No Items found" });
         });
@@ -308,7 +303,6 @@ module.exports = function (router) {
         .sort({ _id: -1 })
         .exec(function (err, data) {
           if (!err) {
-            // console.log(docs[0]._id);
             res.status(200).send({ status: true, message: data });
           } else res.status(200).send({ status: false, message: "No Requests found" });
         });

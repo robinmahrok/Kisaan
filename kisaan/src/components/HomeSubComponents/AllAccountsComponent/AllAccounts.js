@@ -108,7 +108,9 @@ export default function AllAccounts() {
               alert("Data is Deleted");
               GetItems();
             }
-            else console.log(response.data.message)
+            else {
+              alert(response?.data?.message)
+            }
           } else {
             alert(response.data.status)
 
@@ -148,13 +150,13 @@ export default function AllAccounts() {
         .post(baseUrl + "/editItems", data)
         .then((response) => {
           if (response.data.status) {
-            if (response.data.message != null) {
+            if (response?.data?.message != null) {
               alert("Data is Updated");
               GetItems();
             }
-            else console.log(response.data.message)
+            else {alert(response?.data?.message)}
           } else {
-            alert(response.data.status)
+            alert(response?.data?.status)
 
           }
         })
@@ -172,9 +174,7 @@ export default function AllAccounts() {
         setLoad(false);
         if (response.data.status) {
           if (response.data.message.length != 0) {
-            // console.log(response.data.message)
             let edit = {}
-            console.log("jjjjjjjjjjjjj");
             for (let i = 0; i < response.data.message.length; i++) {
               edit[i] = true
             }
