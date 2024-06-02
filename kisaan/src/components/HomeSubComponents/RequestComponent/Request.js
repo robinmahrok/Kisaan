@@ -125,7 +125,7 @@ export default function Request() {
         <div>
           <form>
             <h2>My Requests &nbsp;<button className="btn btn-primary" onClick={GetRequests}>
-              Refresh
+              {!load && <span>Refresh</span>}
               {load && (
                 <Spinner animation="border" variant="primary"></Spinner>
               )}

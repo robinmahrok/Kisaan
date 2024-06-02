@@ -14,4 +14,11 @@ select {
     right:15px;
   }
   
+  .nav-link{
+    color: white !important;
+  }
+
+  .navbar-toggler {
+    border-color: white !important;
+  }
  

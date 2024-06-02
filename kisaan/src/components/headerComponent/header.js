@@ -3,6 +3,7 @@ import "./header.css";
 import { useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Token } from "../../utils/utils";
+import { Navbar, Nav } from 'react-bootstrap';
 
 export default function Header() {
   let history = useHistory();
@@ -30,7 +31,7 @@ export default function Header() {
     } else {
       history.push("/");
     }
-  });
+  }, []);
 
   const handleOnChangeContact = (e) => {
     e.preventDefault();
@@ -58,7 +59,6 @@ export default function Header() {
     setContact(false);
     setProfile(false);
     setrequest(true);
-
     history.push("/request");
   };
 
@@ -69,7 +69,6 @@ export default function Header() {
     setContact(false);
     setProfile(false);
     setrequest(false);
-
     history.push("/aboutUs");
   };
 
@@ -85,13 +84,12 @@ export default function Header() {
 
   const handleOnChangeHome = (e) => {
     e.preventDefault();
-
+    console.log("hhhhhhhhhhhhh");
     setAbout(false);
     setHome(true);
     setContact(false);
     setProfile(false);
     setrequest(false);
-
     history.push("/home");
   };
 
@@ -104,67 +102,31 @@ export default function Header() {
         crossOrigin="anonymous"
       />
       <div>
-        <nav className="navbar navbar-expand-sm bg-primary navbar-dark">
-          <ul className="navbar-nav">
-            <li className="nav-item active">
-              <button
-                className="btn btn-primary"
-                autoFocus={home}
-                onClick={handleOnChangeHome}
-              >
-                Home
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-primary"
-                autoFocus={profile}
-                onClick={handleOnChangeAccounts}
-              >
-                My Items
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-primary"
-                onClick={handleOnChangeRequest}
-              >
-                Requests
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-primary"
-                autoFocus={about}
-                onClick={handleOnChangeAbout}
-              >
-                About Us
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className="btn btn-primary"
-                autoFocus={contact}
-                onClick={handleOnChangeContact}
-              >
-                Contact Us
-              </button>
-            </li>
-            <li className="nav-item" style={{ alignContent: "right" }}>
-              <select
-                className="blueText"
-                onChange={handleOnChangeSelect}
-                required
-              >
-                <option value="" defaultValue hidden>
-                  {" "}
-                  {name}{" "}
-                </option>
-                <option value="Logout">Log Out</option>
-              </select>
-            </li>
-          </ul>
-        </nav>
+        <Navbar bg="primary" expand="sm" variant="dark">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <Nav.Link onClick={handleOnChangeHome} >Home</Nav.Link>
+              <Nav.Link onClick={handleOnChangeAccounts}>My Items</Nav.Link>
+              <Nav.Link onClick={handleOnChangeRequest}>Requests</Nav.Link>
+              <Nav.Link onClick={handleOnChangeAbout}>About Us</Nav.Link>
+              <Nav.Link onClick={handleOnChangeContact}>Contact Us</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
+        <div className="nav-item" style={{ alignContent: "right" }}>
+          <select
+            className="blueText"
+            onChange={handleOnChangeSelect}
+            required
+          >
+            <option value="" defaultValue hidden>
+              {" "}
+              {name}{" "}
+            </option>
+            <option value="Logout">Log Out</option>
+          </select>
+        </div>
       </div>
     </div>
   );

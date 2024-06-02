@@ -242,9 +242,8 @@ export default function Seller() {
           crossOrigin="anonymous"
         />
         <div>
-          <form>
-            <h2>Seller</h2>
-
+          <form className="form">
+            <h2 style={{"display": "flex", "justify-content": "space-evenly"}}>Seller Dashboard</h2>
             <div>
               <label>Select Your Product : </label> &nbsp;
               <select
@@ -325,7 +324,7 @@ export default function Seller() {
               <br />
               <div className="border1">
 
-                <label>State : </label> &nbsp;
+                <label>State : </label>
                 <select
                   className="blue"
                   defaultValue="def"
@@ -340,14 +339,14 @@ export default function Seller() {
                       {list.name}
                     </option>
                   ))}
-                </select> &nbsp;&nbsp;
-                <label>City : </label> &nbsp;
+                </select> &nbsp;
+                <label>City : </label>
                 <input
-                  className="city"
+                  // className="city"
                   defaultValue=""
                   onChange={handleOnChangeCity}
                   required
-                />
+                />&nbsp;
                 {/* <option value="def" hidden disabled>
                   [Please select any one]
                 </option>
@@ -357,7 +356,7 @@ export default function Seller() {
                   </option>
                 ))}
               </select> &nbsp;&nbsp; */}
-                <label>Zip Code : </label> &nbsp;
+                <label>Zip Code : </label>
                 <input
                   style={{ borderRadius: "7px" }}
                   type="number"
@@ -367,17 +366,15 @@ export default function Seller() {
                   onChange={handleOnChangeZip}
                   value={zipcode}
                   required
-                />{" "}
-                <br />
-                <br />
-                <label>Enter Town/Village : </label> &nbsp;
+                />{" "} &nbsp;
+                <label>Enter Town/Village : </label>
                 <textarea
                   style={{ borderRadius: "7px" }}
                   name="address"
                   onChange={handleOnChangeAddress}
                   value={address}
                   required
-                />{" "}
+                />{" "} &nbsp;
               </div>
               <br />
               <br />
