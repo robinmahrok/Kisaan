@@ -168,12 +168,20 @@ module.exports = function (router) {
     var token = req.body.token;
     var auth = utils.authenticateToken(token);
     if (auth != false) {
+      var email = auth.email.split(",")[1];
       SellerInfo.find({})
         .sort({ _id: -1 })
         .exec(function (err, docs) {
           if (!err) {
+            console.log(docs,'==========');
+            let items = []
+            for(let i=0;i<docs.length;i++){
+              if(docs[i].Email != email){
+                items.push(docs[i]);
+              }
+            }
             // console.log(docs[0]._id);
-            res.status(200).send({ status: true, message: docs });
+            res.status(200).send({ status: true, message: items });
           } else res.status(200).send({ status: false, message: err });
         });
     } else res.status(200).send({ status: false, message: "Invalid Token" });

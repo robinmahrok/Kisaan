@@ -54,3 +54,10 @@
     box-shadow: none;
     color: rgb(149, 22, 22);
   }
+
+
+  @media (max-width:767px) {
+    .MuiGrid-grid-xs-6{
+      max-width: max-content !important;
+    }
+  }

@@ -62,7 +62,7 @@ input, textarea {
   }
 
   td {
-    display: flex;
+    display: flow-root;
     justify-content: space-between;
     align-items: center;
     border: none;

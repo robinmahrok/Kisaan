@@ -124,12 +124,13 @@ export default function Request() {
         />
         <div>
           <form>
-            <h2>My Requests &nbsp;<button className="btn btn-primary" onClick={GetRequests}>
-              {!load && <span>Refresh</span>}
+            <h2>My Requests &nbsp;{!load && <button className="btn btn-primary" onClick={GetRequests}>
+              <span>Refresh</span>
+            </button>}
               {load && (
                 <Spinner animation="border" variant="primary"></Spinner>
               )}
-            </button></h2>
+              </h2>
 
 
             {prompt == 1 && (
@@ -146,7 +147,7 @@ export default function Request() {
                   <tbody>
                     {data2.map((listValue, i) => (
                       <tr key={i}>
-                        <td>{i + 1}</td>
+                        <td>{i + 1}.</td>
                         <td>{listValue.BuyerName}</td>
                         <td>
                           {listValue.Status == 0 && <button className="btn btn-info" value="Approve" onClick={(e) => handleApprove(e, i)}>

@@ -192,6 +192,7 @@ export default function Buyer() {
                         component="img"
                         height="150"
                       />
+                      <br/>
                       <Typography variant="body1" component="h2">
                         Product- {itemDetail.Product}
                       </Typography>
@@ -228,14 +229,14 @@ export default function Buyer() {
                         }}
                         color="textSecondary"
                       ></Typography>
-                      <Button
+                     {(!showSeller || itemDetail._id != sellerData._id) &&  <Button
                         size="medium"
                         variant="contained"
                         color="primary"
                         onClick={(e) => viewDetails(e, itemDetail._id)}
                       >
                         Get Details of seller
-                      </Button>
+                      </Button>}
                       {showSeller && itemDetail._id == sellerData._id && (
                         <div>
                           <Typography
@@ -283,6 +284,7 @@ export default function Buyer() {
                               Address- {sellerData.Address}
                             </div>
                           </Typography>
+                          <br/>
                           <Button
                             size="medium"
                             variant="contained"
@@ -299,7 +301,7 @@ export default function Buyer() {
               ))}
           </Grid>
         </Container>
-        <ReactPaginate
+        {nullItems == false  && <ReactPaginate
           previousLabel={"← Previous"}
           nextLabel={"Next →"}
           pageCount={pageCount}
@@ -309,7 +311,7 @@ export default function Buyer() {
           nextLinkClassName={"pagination__link"}
           disabledClassName={"pagination__link--disabled"}
           activeClassName={"pagination__link--active"}
-        />
+        />}
       </div>
       <Footer></Footer>
     </div>

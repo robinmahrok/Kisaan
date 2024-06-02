@@ -190,7 +190,7 @@ export default function AllAccounts() {
         }
       })
       .catch((err) => {
-        setPrompt(0);
+        setLoad(false);
         console.log(err);
       });
 
@@ -208,12 +208,14 @@ export default function AllAccounts() {
         />
         <div>
           <form>
-            <h2>My Items &nbsp;<button className="btn btn-primary" onClick={GetItems}>
+            <h2>My Items &nbsp;
+              {!load && <button className="btn btn-primary" onClick={GetItems}>
               Refresh
+            </button>}
               {load && (
                 <Spinner animation="border" variant="primary"></Spinner>
               )}
-            </button></h2>
+              </h2>
 
 
             {prompt == 1 && (
@@ -235,7 +237,7 @@ export default function AllAccounts() {
                   <tbody>
                     {data2.map((listValue, i) => (
                       <tr key={i}>
-                        <td>{i + 1}</td>
+                        <td>{i + 1}.</td>
                         <td><input type="text" style={{ "width": "100px", "color": "black" }} value={listValue.Product} disabled={true} /></td>
                         <td><input type="text" style={{ "width": "100px", "color": "black" }} value={listValue.Variety} disabled={true} /></td>
                         <td><input type="number" style={{ "width": "100px", "color": "black" }} onChange={handleOnChangePrice} defaultValue={listValue.Price} disabled={i != index || loadEdit[i]} /></td>
