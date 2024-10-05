@@ -20,12 +20,8 @@ export default function Buyer() {
   const [sellerData, setsellerData] = useState([]);
   const [imageLink, setImageLink] = useState();
   const [productListState, setProductList] = useState([]);
-  const [myId, setMyId] = useState("");
 
   const [nullItems, setnullItems] = useState(true);
-  const [Email, setEmail] = useState("");
-  const [Name, setName] = useState("");
-  const [Contact, setContact] = useState();
   const [followSeller, setFollowSeller] = useState("");
   const [showSeller, setShowSeller] = useState(false);
 
@@ -39,35 +35,34 @@ export default function Buyer() {
     if (localStorage.getItem("token")) {
       const token = localStorage.getItem("token");
       const nameEmail = Token(token);
-      const [name, userId, contact, id] = nameEmail.split(",");
-
-      setEmail(userId);
-      setName(name);
-      setContact(contact);
-      setMyId(id);
-      const data = { token: localStorage.getItem("token") };
-
-      axios
-        .post(baseUrl + "/getItemsList", data)
-        .then((response) => {
-          if (response.data.status) {
-            setImageLink(baseUrl + "/static/images/");
-            const prodVardata = response.data.message;
-            if (!prodVardata.length) {
-              setnullItems(true);
+      if(nameEmail){
+        const [id] = nameEmail.split(",");
+        const data = { token: localStorage.getItem("token") };
+  
+        axios
+          .post(baseUrl + "/getItemsList", data)
+          .then((response) => {
+            if (response.data.status) {
+              setImageLink(baseUrl + "/static/images/");
+              const prodVardata = response.data.message;
+              if (!prodVardata.length) {
+                setnullItems(true);
+              } else {
+                setnullItems(false);
+                const productList = prodVardata.filter(item => item.SellerId !== id);
+                setProductList(productList);
+              }
             } else {
-              setnullItems(false);
-              const productList = prodVardata.filter(item => item.SellerId !== id);
-              setProductList(productList);
+              alert(response.data.message);
             }
-          } else {
-            alert(response.data.message);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          alert(err);
-        });
+          })
+          .catch((err) => {
+            console.error(err);
+            alert(err);
+          });
+      } else {
+        history.push("/");
+      }
     } else {
       history.push("/");
     }

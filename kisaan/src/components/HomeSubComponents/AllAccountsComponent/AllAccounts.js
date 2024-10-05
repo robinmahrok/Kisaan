@@ -10,8 +10,6 @@ import { Token } from "../../../utils/utils";
 
 export default function AllAccounts() {
   var history = useHistory();
-  const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [contact, setContact] = useState("");
@@ -27,11 +25,11 @@ export default function AllAccounts() {
     if (localStorage.getItem("token")) {
       var token = localStorage.getItem("token");
       var nameEmail = Token(token);
-      var name = nameEmail.split(",")[0];
-      var userId = nameEmail.split(",")[1];
-      setEmail(userId);
-      setName(name);
-      GetItems();
+      if (nameEmail) {
+        GetItems();
+      } else {
+        history.push("/");
+      }
     } else {
       history.push("/");
     }
