@@ -1,0 +1,26 @@
+.about-us {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure it takes up full height */
+  }
+  
+  .about-content {
+    flex: 1; /* Allow this section to grow */
+    max-width: 800px; /* Optional: limit the width */
+    margin: 0 auto; /* Center the content */
+    padding: 40px; /* Padding for spacing */
+    text-align: center; /* Center the text */
+    color: #333; /* Dark text for readability */
+  }
+  
+  .about-title {
+    font-size: 36px; /* Larger font size for the title */
+    margin-bottom: 20px; /* Space below title */
+  }
+  
+  .about-description {
+    font-size: 18px; /* Standard font size for descriptions */
+    line-height: 1.5; /* Improve readability with line height */
+    margin-bottom: 20px; /* Space below paragraphs */
+  }
+  

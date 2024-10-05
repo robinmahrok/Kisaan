@@ -3,8 +3,7 @@ import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { mobileValidator } from "../../utils/utils";
 import "./signup.css";
 import { useHistory } from "react-router";
@@ -23,57 +22,28 @@ export default function SignUp() {
   const [error, seterror] = useState("");
   const [load, setLoad] = useState(false);
 
-  const handleOnChangeName = (e) => {
-    e.preventDefault();
-    setName(e.target.value);
-  };
-
-  const handleOnChangeEmail = (e) => {
-    e.preventDefault();
-    setEmail(e.target.value);
-  };
-  const handleOnChangeContactNumber = (e) => {
-    e.preventDefault();
-    setContact(e.target.value);
-  };
-
-  const handleOnChangePassword = (e) => {
-    e.preventDefault();
-    setPassword(e.target.value);
-  };
+  const handleOnChangeName = (e) => setName(e.target.value);
+  const handleOnChangeEmail = (e) => setEmail(e.target.value);
+  const handleOnChangeContactNumber = (e) => setContact(e.target.value);
+  const handleOnChangePassword = (e) => setPassword(e.target.value);
+  
   const handleOnChangeConfirmPassword = (e) => {
-    // e.preventDefault();
-
-    if (e.target.value !== password) {
-      seterror("Password and confirm password should be equal");
-    } else {
-      seterror("");
-    }
-    setConfirmPassword(e.target.value);
+    const value = e.target.value;
+    setConfirmPassword(value);
+    seterror(value !== password ? "Password and confirm password should be equal" : "");
   };
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const loginUser = () => {
-    history.push("/");
-  };
-
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const loginUser = () => history.push("/");
+  
   const SignUpUser = (e) => {
     e.preventDefault();
     setLoad(true);
 
-    const userObj = {
-      name: name,
-      email: email,
-      contact: contact,
-      password: password,
-    };
+    const userObj = { name, email, contact, password };
 
     if (mobileValidator(contact)) {
-      axios
-        .post(baseUrl + "/signup", userObj)
+      axios.post(`${baseUrl}/signup`, userObj)
         .then((response) => {
           setLoad(false);
           if (response.data.status) {
@@ -90,98 +60,75 @@ export default function SignUp() {
         });
     } else {
       setLoad(false);
-      alert("Please enter valid contact number!");
+      alert("Please enter a valid contact number!");
     }
   };
-
-
 
   return (
     <div className="App">
       <header className="App-header-login">
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossOrigin="anonymous"
-        />
         <div>
-          <form className="form">
+          <form className="form" onSubmit={SignUpUser}>
             <h2>Create Account</h2>
-            <br></br>
-            <label>Name : </label>
+            <label htmlFor="name">Name:</label>
             <input
-              style={{ borderRadius: "7px" }}
               type="text"
-              name="name"
+              id="name"
               onChange={handleOnChangeName}
               value={name}
               required
-            />{" "}
-            <br />
-            <label>Contact No. : </label>
+            />
+            
+            <label htmlFor="contact">Contact No.:</label>
             <input
-              style={{ borderRadius: "7px" }}
-              type="number"
-              name="contactNumber"
+              type="tel"
+              id="contact"
               onChange={handleOnChangeContactNumber}
               value={contact}
               required
-            />{" "}
-            <br />
-            <label>Email : </label>
+            />
+            
+            <label htmlFor="email">Email:</label>
             <input
-              style={{ borderRadius: "7px" }}
               type="email"
-              name="email"
+              id="email"
               onChange={handleOnChangeEmail}
               value={email}
-            />{" "}
-            <br />
-            <label>Password : </label>
-            <input
-              type="password"
-              style={{ borderRadius: "7px" }}
-              onChange={handleOnChangePassword}
-              value={password}
-              name="password"
               required
-            />{" "}
-            <br />
-            <label>Confirm Password : </label>
+            />
+            
+            <label htmlFor="password">Password:</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                onChange={handleOnChangePassword}
+                value={password}
+                required
+              />
+              <i className="eye" onClick={handleClickShowPassword}>
+                {showPassword ? eyeSlash : eye}
+              </i>
+            </div>
+
+            <label htmlFor="confirmPassword">Confirm Password:</label>
             <input
               type={showPassword ? "text" : "password"}
-              style={{ borderRadius: "7px" }}
+              id="confirmPassword"
               onChange={handleOnChangeConfirmPassword}
               value={confirmPassword}
-              name="confirmpassword"
               required
-            />{" "}
-            <i className="eye" onClick={handleClickShowPassword}>
-              {showPassword ? eyeSlash : eye}
-            </i>
-            <div className="text-danger" style={{ fontSize: "15px" }}>
-              {" "}
-              {error}{" "}
-            </div>
-            <button
-              className="btn btn-success button"
-              onClick={SignUpUser}
-            >
-              {!load && <span>Create Account</span>}
-              {load && <Spinner animation="border" variant="primary"></Spinner>}
+            />
+            <div className="text-danger">{error}</div>
+            
+            <button type="submit" disabled={load}>
+              {load ? <Spinner animation="border" variant="light" /> : "Create Account"}
             </button>
           </form>
 
           <p>
-            {" "}
             Already have an account? &nbsp;
-            <button
-              className="btn btn-primary button"
-              onClick={loginUser}
-            >
-              Login
-            </button>
+            <button onClick={loginUser}>Login</button>
           </p>
         </div>
       </header>

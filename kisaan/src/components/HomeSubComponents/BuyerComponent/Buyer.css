@@ -1,63 +1,84 @@
-/* All select elements on page */
+.App-buyer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-  
-  /* Style by class. Effects the text of the contained options. */
-  .blue {
-    color: white;
-    background-color: darkslategrey;
-    border-radius: 5px;
-   
-  }
-  
-  .border1{
-    border: darkgray solid 1px;
-    padding: 10px 15px;
-  }
+.App-header {
+  flex: 1;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
 
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 20px;
-  }
-  
+.no-items {
+  text-align: center;
+  color: #dc3545; /* Bootstrap danger color for alert */
+  margin-top: 20px;
+}
 
-  
-  .paginationItem span {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  .pagination__link {
-    border: none;
-    background: rgb(162, 160, 175);
-    padding: 10px;
-    color: rgb(8, 2, 23);
-    box-shadow: 0 0 3px rgba(64, 45, 163, 0.4);
-    margin: 0 10px;
-    border-radius: 5px;
-    /* cursor: pointer; */
-  }
-  
-  .pagination__link--active {
-    /* border: 5px; */
-    background: darkslategray;
-    color: white;
-    border-radius: 5px;
-   border: darkslategray solid 5px;
-  }
-  
-  .pagination__link--disabled {
-    pointer-events: none;
-    box-shadow: none;
-    color: rgb(149, 22, 22);
-  }
+.product-card {
+  transition: transform 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #ffffff;
+}
 
+.product-card:hover {
+  transform: scale(1.02);
+}
 
-  @media (max-width:767px) {
-    .MuiGrid-grid-xs-6{
-      max-width: max-content !important;
-    }
-  }
+.product-title {
+  font-weight: bold;
+}
+
+.view-details-button,
+.connect-button {
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.view-details-button:hover,
+.connect-button:hover {
+  background-color: #007bff; /* Bootstrap primary color */
+}
+
+.seller-details {
+  margin-top: 10px;
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.pickup-address {
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination__link {
+  margin: 0 5px;
+  padding: 8px 12px;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination__link--disabled {
+  color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination__link--active {
+  background-color: #007bff;
+  color: #ffffff;
+}

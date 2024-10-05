@@ -1,12 +1,56 @@
-/* All select elements on page */
+.app-container {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
-  
-  /* Style by class. Effects the text of the contained options. */
-  .blue {
-    color: white;
-    background-color: darkslategrey;
-    border-radius: 5px;
-   
-  }
-  
- 
+.content-container {
+  flex: 1;
+  padding: 2rem;
+}
+
+.welcome-section {
+  margin-bottom: 2rem;
+}
+
+.welcome-text {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.user-email {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.action-button {
+  width: 45%;
+  font-size: 1rem;
+  padding: 0.8rem;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+}

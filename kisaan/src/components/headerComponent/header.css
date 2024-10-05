@@ -1,24 +1,58 @@
-/* All select elements on page */
-select {
-    position: right;
-  }
+/* src/header.css */
+
+.header {
+  background-color: #2c3e50; /* Primary color */
   
-  /* Style by class. Effects the text of the contained options. */
-  .blueText {
-    color: white;
-    background-color: black;
-    /* background-color: #0275d8; */
-    border-radius: 5px;
-    position:absolute;
-    top:15px;    
-    right:15px;
-  }
-  
-  .nav-link{
-    color: white !important;
+}
+
+.header-navbar {
+  padding: 10px !important; /* Increased padding for a better layout */
+}
+
+.header-navbar .navbar-brand {
+  font-size: 24px; /* Increased font size for the brand */
+  font-weight: bold; /* Made the brand text bold */
+  color: #ffffff; /* White color for the brand */
+  transition: color 0.3s; /* Smooth color transition */
+}
+
+.header-navbar .navbar-brand:hover {
+  color: #f1c40f; /* Highlight color on hover */
+}
+
+.header-navbar .nav-link {
+  font-size: 16px; /* Font size for navigation links */
+  margin-right: 20px; /* Space between links */
+  color: #ffffff; /* White color for nav links */
+  transition: color 0.3s; /* Smooth color transition */
+}
+
+.header-navbar .nav-link:hover {
+  color: #f1c40f; /* Highlight color on hover */
+}
+
+.user-dropdown {
+  margin-left: auto; /* Align the dropdown to the right */
+  padding: 5px 10px; /* Padding for the dropdown */
+  border-radius: 5px; /* Rounded corners */
+  border: 1px solid #ced4da; /* Border for the dropdown */
+  background-color: #ffffff; /* White background for the dropdown */
+  color: #333; /* Dark text color for better contrast */
+  font-size: 16px; /* Font size for dropdown text */
+  transition: border 0.3s; /* Smooth border transition */
+}
+
+.user-dropdown:hover {
+  border-color: #f1c40f; /* Change border color on hover */
+}
+
+/* Add responsive design */
+@media (max-width: 768px) {
+  .header-navbar .nav-link {
+    margin-right: 10px; /* Reduce space on smaller screens */
   }
 
-  .navbar-toggler {
-    border-color: white !important;
+  .user-dropdown {
+    margin-top: 10px; /* Adjust margin on mobile view */
   }
- 
+}

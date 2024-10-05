@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Seller.css";
-import { Spinner } from "react-bootstrap";
+import { Spinner, Form, Button, Alert } from "react-bootstrap";
 import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
-import Header from "../../headerComponent/header";
-import Footer from "../../footerComponent/footer";
+import Header from "../../headerComponent";
+import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
 
 export default function Seller() {
-  var history = useHistory();
+  const history = useHistory();
   const [product, setProduct] = useState("");
   const [variety, setVariety] = useState("");
   const [productListState, setProductList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-
-  var productList = [];
   const [varietyListState, setVarietyList] = useState([]);
-  var varietyList = [];
-  var prodVardata = {};
   const [quantity, setQuantity] = useState("");
-  const [Email, setEmail] = useState("");
-  const [Name, setName] = useState("");
-  const [Contact, setContact] = useState();
-  const [price, setPrice] = useState(false);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [price, setPrice] = useState("");
   const [address, setAddress] = useState("");
   const [image, setImage] = useState({ image: null });
   const [state, setState] = useState("");
@@ -33,73 +28,54 @@ export default function Seller() {
   const [load, setLoad] = useState(false);
   const [showOther, setShowOther] = useState(false);
   const [otherVariety, setOtherVariety] = useState("");
-
-
-
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      var token = localStorage.getItem("token");
-      var nameEmail = Token(token);
-
-      var name = nameEmail.split(",")[0];
-      var userId = nameEmail.split(",")[1];
-      var contact = nameEmail.split(",")[2];
+    const token = localStorage.getItem("token");
+    if (token) {
+      const nameEmail = Token(token);
+      const name = nameEmail.split(",")[0];
+      const userId = nameEmail.split(",")[1];
+      const contact = nameEmail.split(",")[2];
       setEmail(userId);
       setName(name);
       setContact(contact);
-      var data = {
-        token: localStorage.getItem("token"),
-      };
 
-      axios
-        .post(baseUrl + "/products", data)
+      axios.post(baseUrl + "/products", { token })
         .then((response) => {
           if (response.data.status) {
-            JSON.stringify(response.data.message);
-            prodVardata = response.data.message;
-            localStorage.setItem("prodVarData", JSON.stringify(prodVardata));
-            Object.entries(prodVardata).map(([key, value]) => {
-              productList.push(key);
-            });
-            setProductList(productList);
+            const prodVarData = response.data.message;
+            localStorage.setItem("prodVarData", JSON.stringify(prodVarData));
+            setProductList(Object.keys(prodVarData));
           } else {
-            alert(response.data.message);
+            setErrorMessage(response.data.message);
           }
         })
         .catch((err) => {
-          console.log(err);
-          alert(err);
+          console.error(err);
+          setErrorMessage(err.message);
         });
-    } else history.push("/");
-  }, []);
+    } else {
+      history.push("/");
+    }
+  }, [history]);
 
   const handleOnChangeProduct = (e) => {
     e.preventDefault();
-    var prodVar = localStorage.getItem("prodVarData");
-    var prodVarObj = JSON.parse(prodVar);
-    Object.entries(prodVarObj).map(([key, value]) => {
-      if (e.target.value == key) {
-        Object.entries(value[0]).map(([k, v]) => {
-          varietyList.push(v);
-        });
-      }
-    });
-    varietyList.push("Other")
-    setVarietyList(varietyList);
-    setProduct(e.target.value);
+    const prodVar = JSON.parse(localStorage.getItem("prodVarData"));
+    const selectedProduct = e.target.value;
+    const varieties = prodVar[selectedProduct][0];
+    
+    setVarietyList(Object.values(varieties));
+    setVarietyList((prev) => [...prev, "Other"]);
+    setProduct(selectedProduct);
   };
 
   const handleOnChangeVariety = (e) => {
     e.preventDefault();
-    if (e.target.value == "Other") {
-      setShowOther(true);
-      setVariety("")
-    }
-    else {
-      setShowOther(false)
-      setVariety(e.target.value);
-    }
+    const selectedVariety = e.target.value;
+    setVariety(selectedVariety);
+    setShowOther(selectedVariety === "Other");
   };
 
   const handleOnChangeOtherVariety = (e) => {
@@ -110,17 +86,9 @@ export default function Seller() {
   const handleOnChangeState = (e) => {
     e.preventDefault();
     setState(e.target.value);
-    // axios.get("https://citystate.herokuapp.com/cities?State_like="+e.target.value).then((response=>{
-    // var checkres=[];
-    // for(var i=0;i<response.data.length-1;i++)
-    // {
-    //   if(response.data[i].City!=response.data[i+1].City)
-    //   checkres.push(response.data[i].City)
-    // }
-    // setCityList(checkres)
-    // }))
-
+    // You may want to fetch cities based on the selected state here
   };
+
   const handleOnChangeCity = (e) => {
     e.preventDefault();
     setCity(e.target.value);
@@ -149,23 +117,21 @@ export default function Seller() {
   const handleOnChangeFile = (e) => {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      var img = e.target.files[0];
-
-      setImage({ image: img });
+      setImage({ image: e.target.files[0] });
     }
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
     setLoad(true);
-    var token = localStorage.getItem("token");
-    var nameEmail = Token(token);
-    var sellerId = nameEmail.split(",")[3];
-    var data = {
+    const token = localStorage.getItem("token");
+    const sellerId = Token(token).split(",")[3];
+    
+    const data = {
       SellerId: sellerId,
-      Name: Name,
-      Email: Email,
-      Contact: Contact,
+      Name: name,
+      Email: email,
+      Contact: contact,
       Product: product,
       Variety: variety,
       Quantity: quantity,
@@ -174,64 +140,52 @@ export default function Seller() {
       Pin: zipcode,
       Address: address,
       Price: price,
-      token: localStorage.getItem("token"),
+      token,
     };
-    var validate = true;
-    Object.entries(data).map(([k, v]) => {
-      if (v == "")
-        validate = false;
-    });
-    if (validate == false) {
-      alert("All fields are mandatory!!")
-      setLoad(false);
-    }
-    else {
-      validate = true;
-      axios
-        .post(baseUrl + "/addSellerData", data)
-        .then((response) => {
-          setLoad(false);
-          if (response.data.status) {
-            var id = response.data.message;
-            const formData = new FormData();
-            if (image.image != null) {
-              formData.append("file", image.image);
-              formData.append("fileName", id);
 
-              fetch(baseUrl + "/uploadFile", {
-                method: "POST",
-                body: formData,
-              })
-                .then((res) => {
-                  if (res.status == 200) {
-                    alert("Your data is successfully saved");
-                    setLoad(false);
-                    history.push('/home')
-                  } else {
-                    alert("Can not update the data");
-                    setLoad(false);
-                  }
-                })
-                .catch((err) => {
-                  alert(err);
-                  setLoad(false);
-                });
-            }
-            else alert("Please add any image first")
+    const isValid = Object.values(data).every((field) => field);
+    if (!isValid) {
+      setErrorMessage("All fields are mandatory!");
+      setLoad(false);
+      return;
+    }
+    
+    try {
+      const response = await axios.post(baseUrl + "/addSellerData", data);
+      if (response.data.status) {
+        const id = response.data.message;
+        if (image.image) {
+          const formData = new FormData();
+          formData.append("file", image.image);
+          formData.append("fileName", id);
+
+          const uploadResponse = await fetch(baseUrl + "/uploadFile", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (uploadResponse.status === 200) {
+            alert("Your data is successfully saved");
+            history.push('/home');
           } else {
-            alert(response.data.message);
+            setErrorMessage("Could not upload the image.");
           }
-        })
-        .catch((err) => {
-          alert(err);
-          setLoad(false);
-        });
+        } else {
+          setErrorMessage("Please add an image first.");
+        }
+      } else {
+        setErrorMessage(response.data.message);
+      }
+    } catch (err) {
+      setErrorMessage(err.message);
+    } finally {
+      setLoad(false);
     }
   };
 
   return (
-    <div className="App">
-      <Header></Header>
+    <div className="App-seller">
+      <Header />
       <div className="App-header">
         <link
           rel="stylesheet"
@@ -240,166 +194,118 @@ export default function Seller() {
           crossOrigin="anonymous"
         />
         <div>
-          <form className="form">
-            <h2 style={{"display": "flex", "justify-content": "space-evenly"}}>Seller Dashboard</h2>
-            <div>
-              <label>Select Your Product : </label> &nbsp;
-              <select
-                className="blue"
-                defaultValue={"first"}
-                onChange={handleOnChangeProduct}
-                required
-              >
-                <option value="first" hidden disabled>
-                  [Please select any one]
-                </option>
+          <h2 className="text-center mb-4">Seller Dashboard</h2>
+          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+          <Form onSubmit={handleOnSubmit} className="form">
+            <Form.Group>
+              <Form.Label>Select Your Product:</Form.Label>
+              <Form.Control as="select" onChange={handleOnChangeProduct} required>
+                <option value="" hidden>[Please select any one]</option>
                 {productListState.map((list, i) => (
-                  <option key={i} value={list}>
-                    {list}
-                  </option>
+                  <option key={i} value={list}>{list}</option>
                 ))}
-              </select>
-              <br />
-              <br />
-              <label>Select Your Variety : </label>&nbsp;
-              <select
-                className="blue"
-                defaultValue="def"
-                onChange={handleOnChangeVariety}
-                required
-              >
-                <option value="def" hidden disabled>
-                  [Please select any one]
-                </option>
+              </Form.Control>
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Select Your Variety:</Form.Label>
+              <Form.Control as="select" onChange={handleOnChangeVariety} required>
+                <option value="" hidden>[Please select any one]</option>
                 {varietyListState.map((list, i) => (
-                  <option key={i} value={list}>
-                    {list}
-                  </option>
+                  <option key={i} value={list}>{list}</option>
                 ))}
+              </Form.Control>
+              {showOther && (
+                <Form.Control
+                  type="text"
+                  placeholder="Enter Other Variety"
+                  onChange={handleOnChangeOtherVariety}
+                  value={variety}
+                  required
+                />
+              )}
+            </Form.Group>
 
-
-              </select>
-              {
-                showOther && <div style={{ "paddingLeft": "130px" }}>
-                  <input
-                    type="text"
-                    style={{ borderRadius: "7px" }}
-                    placeholder="Enter Other Variety"
-                    onChange={handleOnChangeOtherVariety}
-                    value={variety}
-                    name="otherVariety"
-                    required={true}
-                  />{" "}
-                </div>
-              }
-              {!showOther && <br />}
-              <br />
-              <label>Enter Quantity (in Kgs) : </label> &nbsp;
-              <input
+            <Form.Group>
+              <Form.Label>Enter Quantity (in Kgs):</Form.Label>
+              <Form.Control
                 type="number"
-                style={{ borderRadius: "7px" }}
                 placeholder="Enter Quantity"
                 onChange={handleOnChangeQuantity}
                 value={quantity}
-                name="quantity"
                 required
-              />{" "}
-              <br />
-              <br />
-              <label>Enter Price (per kg) : </label> &nbsp;
-              <input
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Enter Price (per kg):</Form.Label>
+              <Form.Control
                 type="number"
-                style={{ borderRadius: "7px" }}
                 placeholder="Enter Price"
                 onChange={handleOnChangePrice}
                 value={price}
-                name="price"
                 required
-              />{" "}
-              <br />
-              <br />
-              <label>Enter Complete Pickup Address: </label> &nbsp;
-              <br />
-              <div className="border1">
+              />
+            </Form.Group>
 
-                <label>State : </label>
-                <select
-                  className="blue"
-                  defaultValue="def"
-                  onChange={handleOnChangeState}
-                  required
-                >
-                  <option value="def" hidden disabled>
-                    [Please select any one]
-                  </option>
-                  {statesofIndia.map((list, i) => (
-                    <option key={i} value={list.name}>
-                      {list.name}
-                    </option>
-                  ))}
-                </select> &nbsp;
-                <label>City : </label>
-                <input
-                  // className="city"
-                  defaultValue=""
-                  onChange={handleOnChangeCity}
-                  required
-                />&nbsp;
-                {/* <option value="def" hidden disabled>
-                  [Please select any one]
-                </option>
-                {cityList && cityList.map((list, i) => (
-                  <option key={i} value={list}>
-                    {list}
-                  </option>
-                ))}
-              </select> &nbsp;&nbsp; */}
-                <label>Zip Code : </label>
-                <input
-                  style={{ borderRadius: "7px" }}
-                  type="number"
-                  min="100000"
-                  max="999999"
-                  name="zip"
-                  onChange={handleOnChangeZip}
-                  value={zipcode}
-                  required
-                />{" "} &nbsp;
-                <label>Enter Town/Village : </label>
-                <textarea
-                  style={{ borderRadius: "7px" }}
-                  name="address"
-                  onChange={handleOnChangeAddress}
-                  value={address}
-                  required
-                />{" "} &nbsp;
-              </div>
-              <br />
-              <br />
-              <label>Upload Image of Seed : </label> &nbsp;
-              <input
+            <Form.Group>
+              <Form.Label>Enter Complete Pickup Address:</Form.Label>
+              <Form.Row>
+                <Form.Group as={Form.Col}>
+                  <Form.Label>State:</Form.Label>
+                  <Form.Control as="select" onChange={handleOnChangeState} required>
+                    <option value="" hidden>[Please select any one]</option>
+                    {statesofIndia.map((list, i) => (
+                      <option key={i} value={list.name}>{list.name}</option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+                <Form.Group as={Form.Col}>
+                  <Form.Label>City:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    onChange={handleOnChangeCity}
+                    value={city}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group as={Form.Col}>
+                  <Form.Label>Zip Code:</Form.Label>
+                  <Form.Control
+                    type="text"
+                    onChange={handleOnChangeZip}
+                    value={zipcode}
+                    required
+                  />
+                </Form.Group>
+              </Form.Row>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Detailed Address"
+                onChange={handleOnChangeAddress}
+                value={address}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Upload Image:</Form.Label>
+              <Form.Control
                 type="file"
-                style={{ borderRadius: "7px" }}
                 onChange={handleOnChangeFile}
-                required={true}
-              />{" "}
-              <br />
-              <br />
-              <button
-                style={{ marginLeft: "20%" }}
-                className="btn btn-primary button"
-                onClick={handleOnSubmit}
-              >
-                {!load && <span>Submit</span>}
-                {load && (
-                  <Spinner animation="border" variant="primary"></Spinner>
-                )}
-              </button>
-            </div>
-          </form>
+                accept="image/*"
+                required
+              />
+            </Form.Group>
+
+            <Button variant="primary" type="submit" disabled={load}>
+              {load ? <Spinner animation="border" size="sm" /> : "Submit"}
+            </Button>
+          </Form>
         </div>
       </div>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 }

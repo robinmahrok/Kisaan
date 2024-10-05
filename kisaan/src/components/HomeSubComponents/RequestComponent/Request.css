@@ -1,12 +1,34 @@
-/* All select elements on page */
+.request-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto; /* Center the container */
+}
 
-  
-  /* Style by class. Effects the text of the contained options. */
-  .blue {
-    color: white;
-    background-color: darkslategrey;
-    border-radius: 5px;
-   
-  }
-  
- 
+.request-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.refresh-button {
+  margin-left: 20px;
+  width: 10%;
+}
+
+.request-table {
+  margin-top: 20px;
+}
+
+.action-button {
+  margin-right: 10px;
+}
+
+.no-requests {
+  padding-top: 10px;
+  text-align: center;
+  color: #f0f0f0; /* Optional: Use a lighter color for no requests text */
+}
+
+.App-header {
+  min-height: max-content;
+}

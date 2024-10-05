@@ -1,160 +1,140 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import './otpVerify.css'
+import './otpVerify.css';
 import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { useHistory } from "react-router-dom";
 
 export default function OtpVerify() {
-  let history = useHistory();
-
+  const history = useHistory();
   const [email, setEmail] = useState("");
   const [send, setSend] = useState(false);
-  const [Enteredotp, setEnteredOTP] = useState(0);
-  const [otp, setOTP] = useState(0);
-  const [verify, setVerify] = useState(false);
+  const [enteredOtp, setEnteredOtp] = useState("");
   const [load, setLoad] = useState(false);
   const [load2, setLoad2] = useState(false);
-
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    if (!sessionStorage.getItem("email")) {
+    const emailFromSession = sessionStorage.getItem("email");
+    if (!emailFromSession) {
       alert("No email found!");
       history.push("/");
+    } else {
+      setEmail(emailFromSession);
     }
-    else {
-      setEmail(sessionStorage.getItem("email"));
-    }
-  });
+  }, [history]);
 
   const sendOTP = (e) => {
     e.preventDefault();
-
     setLoad(true);
+    setErrorMessage("");
+
     axios
-      .post(baseUrl + "/sendOtp", { email: email })
+      .post(baseUrl + "/sendOtp", { email })
       .then((response) => {
         setLoad(false);
         if (response.data.status) {
-          setOTP(response.data.message);
           alert("OTP Sent!");
           setSend(true);
         } else {
-          alert(response.data.message);
+          setErrorMessage(response.data.message);
         }
       })
       .catch((err) => {
-        console.log(err);
+        setLoad(false);
+        setErrorMessage("Failed to send OTP. Please try again.");
       });
   };
 
-
-
   const handleOnChangeUserOTP = (e) => {
-    e.preventDefault();
-    setEnteredOTP(e.target.value);
+    setEnteredOtp(e.target.value);
   };
 
   const verifyOtp = (e) => {
     e.preventDefault();
     setLoad2(true);
-    axios
-      .post(baseUrl + "/verifyOtp", { email: email, otp: Enteredotp })
-      .then(async (response) => {
-        setLoad2(false);
-        if (response.data.status) {
-          await handleOnChangeOTP()
-        } else {
-          alert(response.data.message);
-        }
-      })
-      .catch((err) => {
-        setLoad2(false);
-        console.log(err);
-      });
-  };
+    setErrorMessage("");
 
-
-  const handleOnChangeOTP = () => {
-    setLoad2(true);
     axios
-      .post(baseUrl + "/otpVerify", { email: email })
+      .post(baseUrl + "/verifyOtp", { email, otp: enteredOtp })
       .then((response) => {
         setLoad2(false);
         if (response.data.status) {
-          setVerify(true);
+          alert("OTP Verified!");
           sessionStorage.removeItem("email");
-          setSend(true);
-          alert("OTP Verified");
           history.push("/");
         } else {
-          setLoad2(false);
-          alert(response.data.message);
+          setErrorMessage(response.data.message);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         setLoad2(false);
-        console.log(err);
+        setErrorMessage("Failed to verify OTP. Please try again.");
       });
   };
 
   return (
-    <div className="App">
-      <header className="App-header-login">
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossOrigin="anonymous"
-        />
-        <div>
-          <form className="form">
-            <h2>OTP Verification</h2>
-            <br></br>
-            <p>
-              <label>Email : </label> &nbsp;
-              <label className="label">{email}</label>
-              <br />
-              <br />
-              {!send && <div><button
-                className="btn btn-success button"
+    <div className="otp-container">
+      <div className="otp-form">
+        <h2>OTP Verification</h2>
+
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+        <form onSubmit={verifyOtp}>
+          <div className="form-group">
+            <label>Email:</label>
+            <span className="email-display">{email}</span>
+          </div>
+
+          {!send && (
+            <div className="form-group">
+              <button
+                className="btn btn-primary btn-block"
                 onClick={sendOTP}
+                disabled={load}
               >
-                {!load && <span>Click Here</span>}
-                {load && (
-                  <Spinner animation="border" variant="primary"></Spinner>
+                {load ? (
+                  <>
+                    Sending... <Spinner animation="border" size="sm" />
+                  </>
+                ) : (
+                  "Send OTP"
                 )}
               </button>
-                <label>&nbsp;to send OTP</label></div>}
-            </p>
-            {send && (
-              <div>
+            </div>
+          )}
 
-                <label>Enter OTP : </label>
+          {send && (
+            <>
+              <div className="form-group">
+                <label>Enter OTP:</label>
                 <input
-                  style={{ borderRadius: "7px" }}
                   type="text"
-                  placeholder="OTP"
-                  name="otp"
+                  className="form-control"
+                  placeholder="Enter the OTP"
                   onChange={handleOnChangeUserOTP}
+                  value={enteredOtp}
                   required
                 />
-                <button
-                  style={{ marginLeft: "20%" }}
-                  className="btn btn-success button"
-                  onClick={verifyOtp}
-                >
-                  {!load2 && <span>Verify</span>}
-                  {load2 && (
-                    <Spinner animation="border" variant="success"></Spinner>
-                  )}
-                </button>
               </div>
-            )}
-          </form>
-          <br />
-        </div>
-      </header>
+
+              <button
+                className="btn btn-success btn-block"
+                type="submit"
+                disabled={load2}
+              >
+                {load2 ? (
+                  <>
+                    Verifying... <Spinner animation="border" size="sm" />
+                  </>
+                ) : (
+                  "Verify OTP"
+                )}
+              </button>
+            </>
+          )}
+        </form>
+      </div>
     </div>
   );
 }

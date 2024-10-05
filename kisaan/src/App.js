@@ -8,8 +8,8 @@ import Home from "./components/homeComponent/home";
 import AllAccounts from "./components/HomeSubComponents/AllAccountsComponent/AllAccounts";
 import Seller from "./components/HomeSubComponents/SellerComponent/Seller";
 import Buyer from "./components/HomeSubComponents/BuyerComponent/Buyer";
-import AboutUs from "./components/headerComponent/aboutus";
-import ContactUs from "./components/headerComponent/ContactUs";
+import AboutUs from "./components/common/AboutUs";
+import ContactUs from "./components/common/ContactUs";
 import Request from "./components/HomeSubComponents/RequestComponent/Request";
 
 function App() {

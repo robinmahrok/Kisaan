@@ -2,18 +2,15 @@ import React, { useState, useEffect } from "react";
 import "./home.css";
 import { Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
-import Header from "../headerComponent/header";
-import Footer from "../footerComponent/footer";
+import Header from "../headerComponent";
+import Footer from "../footerComponent";
 import { Token } from "../../utils/utils";
 
 export default function Home() {
   var history = useHistory();
   const [Name, setName] = useState("");
   const [Email, setEmail] = useState("");
-
-
   const [load, setLoad] = useState(false);
-
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -27,68 +24,60 @@ export default function Home() {
     } else {
       history.push("/");
     }
-  }, []);
-
-
+  }, [history]);
 
   const seller = (e) => {
     e.preventDefault();
     setLoad(true);
-    history.push('/seller');
+    history.push("/seller");
   };
 
   const buyer = (e) => {
     e.preventDefault();
     setLoad(true);
-    history.push('/buyer');
+    history.push("/buyer");
   };
 
   return (
-    <div className="App">
-      <Header></Header>
-      <div className="App-header">
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossOrigin="anonymous"
-        />
-        <div>
-          <form>
-            <h2>{Name}</h2>
+    <div className="app-container">
+      <Header />
+      <div className="content-container">
+        <div className="welcome-section">
+          <h2 className="welcome-text">Welcome, {Name}!</h2>
+          <p className="user-email">{Email}</p>
+        </div>
 
-            <div>
-              <br />
-              <label>Are you a seller or buyer? &nbsp;</label>
-              <button
-                style={{ marginLeft: "20%" }}
-                className="btn btn-primary"
-                onClick={seller}
-              >
-                Seller
-                {load && (
-                  <Spinner animation="border" variant="primary"></Spinner>
+        <div className="form-container">
+          <form>
+            <h4 className="form-title">Select your role:</h4>
+
+            <div className="button-group">
+              <button className="btn btn-primary action-button" onClick={seller} disabled={load}>
+                {load ? (
+                  <>
+                    Seller &nbsp;
+                    <Spinner animation="border" variant="light" size="sm" />
+                  </>
+                ) : (
+                  "Seller"
                 )}
               </button>
-              <br />
-              <br />
-              <button
-                style={{ marginLeft: "20%" }}
-                className="btn btn-primary"
-                onClick={buyer}
-              >
-                Buyer
-                {load && (
-                  <Spinner animation="border" variant="primary"></Spinner>
+
+              <button className="btn btn-secondary action-button" onClick={buyer} disabled={load}>
+                {load ? (
+                  <>
+                    Buyer &nbsp;
+                    <Spinner animation="border" variant="light" size="sm" />
+                  </>
+                ) : (
+                  "Buyer"
                 )}
               </button>
-              <br />
-              <br />
             </div>
           </form>
         </div>
       </div>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 }

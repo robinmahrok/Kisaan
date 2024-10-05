@@ -1,167 +1,60 @@
 .footer {
-  background-color: #414141;
-  width: 100%;
-  text-align: left;
-  font-family: sans-serif;
-  font-weight: bold;
-  font-size: 16px;
-  padding-top: 50px;
-  padding-bottom: 20px;
-
+  background-color: #2c3e50; /* Keeping the existing background color */
+  color: #ffffff; /* White text for better contrast */
+  padding: 20px 0; /* Padding for spacing */
 }
 
-.footer .footer-left,
-.footer .footer-center,
-.footer .footer-right {
-  display: inline-block;
-  vertical-align: top;
+.footer-container {
+  display: flex; /* Use flexbox for layout */
+  justify-content: space-between; /* Space between items */
+  align-items: center; /* Center items vertically */
+  max-width: 1200px; /* Optional: Set max width for the footer */
+  margin: 0 auto; /* Center footer on the page */
+  padding: 0 20px; /* Padding on the sides */
 }
 
-
-/* footer left*/
-
-.footer .footer-left {
-  width: 33%;
-  padding-right: 15px;
+.footer-left {
+  flex: 1; /* Allow this section to grow */
 }
 
-.footer .about {
-  line-height: 20px;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: normal;
-  margin: 0;
+.footer-title {
+  font-size: 24px; /* Title font size */
+  margin-bottom: 10px; /* Space below title */
 }
 
-.footer .about span {
-  display: block;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 20px;
+.footer-description {
+  margin-bottom: 15px; /* Space below description */
 }
 
-.footer .icons {
-  margin-top: 25px;
+.social-icons {
+  font-size: 20px; /* Size of social icons */
 }
 
-.footer .icons a {
-  margin-top: 25px;
-
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  background-color: #33383b;
-  border-radius: 2px;
-  font-size: 20px;
-  color: #ffffff;
-  text-align: center;
-  line-height: 35px;
-  margin-right: 3px;
-  margin-bottom: 5px;
+.social-icons a {
+  color: #ffffff; /* Icon color */
+  margin-right: 15px; /* Space between icons */
+  text-decoration: none; /* Remove underline */
 }
 
-
-/* footer center*/
-
-.footer .footer-center {
-  width: 30%;
+.footer-right {
+  flex: 1; /* Allow this section to grow */
+  text-align: right; /* Align text to the right */
 }
 
-.footer .footer-center i {
-  background-color: #33383b;
-  color: #ffffff;
-  font-size: 25px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 42px;
-  margin: 10px 10px;
-  vertical-align: middle;
+.footer-nav {
+  display: flex; /* Flexbox for nav links */
+  justify-content: flex-end; /* Align links to the right */
+  margin-bottom: 10px; /* Space below nav */
 }
 
-.footer .footer-center i.fa-envelope {
-  font-size: 17px;
-  line-height: 30px;
-
+.footer-link {
+  margin-right: 20px; /* Space between links */
+  color: #ffffff; /* Link color */
+  cursor: pointer; /* Pointer cursor for interactivity */
+  text-decoration: none; /* Remove underline */
 }
 
-.footer .footer-center p {
-  display: inline-block;
-  color: #ffffff;
-  vertical-align: middle;
-  margin: 0;
-}
-
-.footer .footer-center p span {
-  display: block;
-  font-weight: normal;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.footer .footer-center p a {
-  color: #0099ff;
-  text-decoration: none;
-}
-
-
-/* footer right*/
-
-.footer .footer-right {
-  width: 35%;
-}
-
-.footer h2 {
-  color: #ffffff;
-  font-size: 36px;
-  font-weight: normal;
-  margin: 0;
-}
-
-.footer h2 span {
-  color: #0099ff;
-}
-
-.footer .menu {
-  color: #ffffff;
-  margin: 20px 0 12px;
-  padding: 0;
-}
-
-.footer .menu a {
-  display: inline-block;
-  line-height: 1.8;
-  text-decoration: none;
-  color: inherit;
-}
-
-.footer .menu a:hover {
-  color: #0099ff;
-}
-
-.footer .name {
-  color: #0099ff;
-  font-size: 14px;
-  font-weight: normal;
-  margin: 0;
-}
-
-@media (max-width: 767px) {
-  .footer {
-    font-size: 14px;
-  }
-  .footer .footer-left,
-  .footer .footer-center,
-  .footer .footer-right {
-    display: block;
-    width: 100%;
-    margin-bottom: 40px;
-    text-align: center;
-  }
-  .footer .footer-center i {
-    margin-left: 0;
-  }
+.footer-copy {
+  text-align: right; /* Align copyright to the right */
+  font-size: 14px; /* Smaller font size for copyright */
 }

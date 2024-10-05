@@ -11,7 +11,8 @@
   
  /* General table styling */
 table {
-  width: 100%;
+  width: 99%;
+  margin: 1%;
   border-collapse: collapse;
 }
 
@@ -81,4 +82,8 @@ input, textarea {
   .btn {
     margin-top: 5px;
   }
+}
+
+.ml-2 {
+  margin-left: 0px;
 }

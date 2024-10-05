@@ -1,22 +1,117 @@
-i {
-    position: absolute;
-   size: 15px;
-  }
-  i:hover {
-    color: #00fcb6;
-    cursor: pointer;
-  }
+/* Global App Styling */
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f7f9fc;
+  padding: 1rem;
+}
 
-  .App-header-login {
-    background-color: #282c34;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(15px);
-    color: white;
-    padding-top: 30px;
-    padding-bottom: 30px;
-  
-  }
+/* Form Container */
+.App-header-login {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Form Title */
+h2 {
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+}
+
+/* Form Structure */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label Styling */
+label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+/* Input Fields Styling */
+input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 7px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+/* Focus State */
+input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Eye Icon for Password Toggle */
+.eye {
+  position: absolute;
+  right: 15px;
+  top: 55%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* Button Styling */
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+/* Button Hover State */
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Disabled Button Styling */
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Error Message Styling */
+.text-danger {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Login Text */
+p {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+/* Login Button in Paragraph */
+p button {
+  background-color: #28a745;
+  font-size: 1rem;
+}
+
+p button:hover {
+  background-color: #218838;
+}

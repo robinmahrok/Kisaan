@@ -6,23 +6,24 @@ import { baseUrl } from "../../baseUrl";
 import { Link, useHistory } from "react-router-dom";
 
 export default function Login() {
-  var history = useHistory();
+  const history = useHistory();
   const [Email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [load, setLoad] = useState(false);
+  const [error, setError] = useState("");
+
   const handleOnChangeEmail = (e) => {
-    e.preventDefault();
     setEmail(e.target.value);
   };
+
   const handleOnChangePassword = (e) => {
-    e.preventDefault();
     setPassword(e.target.value);
   };
 
   const LoginUser = (e) => {
     e.preventDefault();
     setLoad(true);
+    setError(""); // Clear previous errors
 
     axios
       .post(baseUrl + "/login", { email: Email, password: password })
@@ -31,82 +32,78 @@ export default function Login() {
         if (response.data.status) {
           localStorage.setItem("token", response.data.message);
           history.push("/home");
-        } else if (response.data.message == "Otp not verified.") {
+        } else if (response.data.message === "Otp not verified.") {
           alert("Email not Verified. Verify your email first!");
           sessionStorage.setItem("email", Email);
           history.push("/otpVerify");
         } else {
-          alert(response.data.message);
+          setError(response.data.message);
         }
       })
       .catch((err) => {
         setLoad(false);
         console.log(err);
+        setError("An error occurred. Please try again.");
       });
   };
+
   return (
-    <div className="App">
-      <div className="App-header-login">
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossOrigin="anonymous"
-        />
-        <div>
-          <form className="form">
-            <h2>Welcome Kisaan!</h2>
-            <br></br>
-            <label>Email : </label>
+    <div className="login-container">
+      <div className="login-form">
+        <h2>Welcome Kisaan!</h2>
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={LoginUser}>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
             <input
-              style={{ borderRadius: "7px" }}
-              type="text"
-              placeholder="Email"
-              name="Email"
+              type="email"
+              className="form-control"
+              id="email"
+              placeholder="Enter your email"
               onChange={handleOnChangeEmail}
               value={Email}
               required
-            />{" "}
-            <br />
-            <label>Password : </label>
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password:</label>
             <input
               type="password"
-              style={{ borderRadius: "7px" }}
-              placeholder="Password"
+              className="form-control"
+              id="password"
+              placeholder="Enter your password"
               onChange={handleOnChangePassword}
               value={password}
-              name="password"
               required
-            />{" "}
-            <br />
-            <button
-              className="btn btn-success button"
-              onClick={LoginUser}
-            >
-              {!load && <span>Login</span>}
-              {load && <Spinner animation="border" variant="primary"></Spinner>}
-            </button>
-          </form>
-          <br />
-          <Link to="/forgotPassword">
-            <button className="btn btn-primary button">
-              Forgot Password
-            </button>
+            />
+          </div>
+
+          <button className="btn btn-success btn-block" type="submit" disabled={load}>
+            {load ? (
+              <>
+                Logging in &nbsp;
+                <Spinner animation="border" size="sm" />
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
+        </form>
+
+        <div className="additional-options">
+          <Link to="/forgotPassword" className="btn btn-link">
+            Forgot Password?
           </Link>
-          <br />
-          <br />
-          <p>
-            Not registered yet?
-            <Link to="/signUp">
-              <button
-                style={{ marginLeft: "20px" }}
-                className="btn btn-primary"
-              >
-                SignUp
-              </button>
-            </Link>
-          </p>
         </div>
+
+        <p className="signup-prompt">
+          Not registered yet?
+          <Link to="/signUp" className="btn btn-primary ml-2">
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

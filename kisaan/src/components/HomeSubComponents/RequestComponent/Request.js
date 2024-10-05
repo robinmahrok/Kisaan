@@ -1,185 +1,144 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Request.css";
-import { Table, Spinner } from "react-bootstrap";
+import { Table, Spinner, Button } from "react-bootstrap";
 import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
-import Header from "../../headerComponent/header";
-import Footer from "../../footerComponent/footer";
+import Header from "../../headerComponent";
+import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 
 export default function Request() {
-  var history = useHistory();
-
-  const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
+  const history = useHistory();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [sellerId, setSellerId] = useState("");
-  const [appOrRej, setAppOrRej] = useState("");
-  const [data2, setData2] = useState();
-  const [index, setIndex] = useState();
+  const [data2, setData2] = useState([]);
   const [prompt, setPrompt] = useState(-1);
   const [load, setLoad] = useState(false);
-  const [loadEdit, setLoadEdit] = useState(true);
-
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      var token = localStorage.getItem("token");
-      var nameEmail = Token(token);
-
-      var name = nameEmail.split(",")[0];
-      var userId = nameEmail.split(",")[1];
-      var Id = nameEmail.split(",")[3];
+      const token = localStorage.getItem("token");
+      const nameEmail = Token(token);
+      const userName = nameEmail.split(",")[0];
+      const userId = nameEmail.split(",")[1];
+      const Id = nameEmail.split(",")[3];
       setEmail(userId);
-      setName(name);
+      setName(userName);
       setSellerId(Id);
-      GetRequests();
+      getRequests();
     } else {
       history.push("/");
     }
-  }, []);
-
+  }, [history]);
 
   const handleApprove = (e, id) => {
     e.preventDefault();
-    setLoadEdit(false)
-    setIndex(id);
-    var keyValue;
+    const targetValue = e.target.value;
 
-    var targetValue = e.target.value;
-
-    data2.map((key, value) => {
-      if (value === id)
-        keyValue = key;
-    })
-    var data = {
+    const requestData = {
       token: localStorage.getItem("token"),
-      id: keyValue._id,
-      decision: targetValue
-    }
+      id: data2[id]._id,
+      decision: targetValue,
+    };
+
     axios
-      .post(baseUrl + "/ApproveOrDeny", data)
+      .post(baseUrl + "/ApproveOrDeny", requestData)
       .then((response) => {
         if (response.data.status) {
-          if (response.data.message != null) {
-            if (targetValue == "Approve")
-              setAppOrRej("Approved")
-            else
-              setAppOrRej("Rejected")
-            setLoadEdit(false);
-            alert("Data is Updated");
-            GetRequests();
-            // add load to remove buttons
-          }
-          else alert(response?.data?.message);
+          alert("Data is Updated");
+          getRequests();
         } else {
-          alert(response.data.status)
-
+          alert(response.data.message);
         }
       })
       .catch((err) => {
         console.log(err);
       });
+  };
 
-  }
-
-
-
-
-  const GetRequests = () => {
-    setLoad(true)
+  const getRequests = () => {
+    setLoad(true);
     axios
       .post(baseUrl + "/allRequests", { token: localStorage.getItem("token") })
       .then((response) => {
         setLoad(false);
         if (response.data.status) {
-          if (response.data.message.length != 0) {
-            var resp = response.data.message;
-            setData2(response.data.message);
-            setPrompt(1);
-          }
-          else setPrompt(0)
+          setData2(response.data.message);
+          setPrompt(response.data.message.length ? 1 : 0);
         } else {
           setPrompt(0);
-
         }
       })
       .catch((err) => {
         console.log(err);
-        setPrompt(0)
+        setPrompt(0);
+        setLoad(false);
       });
-
   };
 
   return (
-    <div className="App">
-      <Header></Header>
+    <div className="App-request">
+      <Header />
       <div className="App-header">
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossOrigin="anonymous"
-        />
-        <div>
-          <form>
-            <h2>My Requests &nbsp;{!load && <button className="btn btn-primary" onClick={GetRequests}>
-              <span>Refresh</span>
-            </button>}
-              {load && (
-                <Spinner animation="border" variant="primary"></Spinner>
-              )}
-              </h2>
+        <div className="request-container">
+          <h2 className="request-title">
+            My Requests 
+            <Button variant="primary" onClick={getRequests} disabled={load} className="refresh-button">
+              {load ? <Spinner animation="border" size="sm" /> : "Refresh"}
+            </Button>
+          </h2>
 
-
-            {prompt == 1 && (
-              <div>
-
-                <Table striped bordered hover variant="dark">
-                  <thead>
-                    <tr>
-                      <th>S No.</th>
-                      <th>Buyers</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data2.map((listValue, i) => (
-                      <tr key={i}>
-                        <td>{i + 1}.</td>
-                        <td>{listValue.BuyerName}</td>
-                        <td>
-                          {listValue.Status == 0 && <button className="btn btn-info" value="Approve" onClick={(e) => handleApprove(e, i)}>
+          {prompt === 1 && (
+            <Table striped bordered hover variant="dark" className="request-table">
+              <thead>
+                <tr>
+                  <th>S No.</th>
+                  <th>Buyers</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data2.map((listValue, i) => (
+                  <tr key={i}>
+                    <td>{i + 1}.</td>
+                    <td>{listValue.BuyerName}</td>
+                    <td>
+                      {listValue.Status === 0 && (
+                        <>
+                          <Button variant="info" value="Approve" onClick={(e) => handleApprove(e, i)} className="action-button">
                             Approve
-                          </button>} &nbsp;
-                          {
-                            listValue.Status == 1 && <button className="btn btn-success" disabled={true}>
-                              Approved
-                            </button>
-                          }
-                          {
-                            listValue.Status == -1 && <button className="btn btn-danger" disabled={true}>
-                              Rejected
-                            </button>
-                          }
-                          {listValue.Status == 0 && <button className="btn btn-danger" value="Deny" onClick={(e) => handleApprove(e, i)} >
+                          </Button>
+                          <Button variant="danger" value="Deny" onClick={(e) => handleApprove(e, i)} className="action-button">
                             Deny
-                          </button>}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            )}
-            {prompt == 0 && (
-              <div style={{ "paddingTop": "10px" }}>
-                <h6>No Requests Found</h6>
-              </div>
-            )}
-          </form>
+                          </Button>
+                        </>
+                      )}
+                      {listValue.Status === 1 && (
+                        <Button variant="success" disabled className="action-button">
+                          Approved
+                        </Button>
+                      )}
+                      {listValue.Status === -1 && (
+                        <Button variant="danger" disabled className="action-button">
+                          Rejected
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+          {prompt === 0 && (
+            <div className="no-requests">
+              <h6>No Requests Found</h6>
+            </div>
+          )}
         </div>
       </div>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 }
