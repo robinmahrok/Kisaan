@@ -1,58 +1,406 @@
-/* src/header.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 .header {
-  background-color: #2c3e50; /* Primary color */
-  
+  @apply sticky top-0 z-50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-.header-navbar {
-  padding: 10px !important; /* Increased padding for a better layout */
+.header-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  @apply flex items-center justify-between h-16;
+  position: relative;
 }
 
-.header-navbar .navbar-brand {
-  font-size: 24px; /* Increased font size for the brand */
-  font-weight: bold; /* Made the brand text bold */
-  color: #ffffff; /* White color for the brand */
-  transition: color 0.3s; /* Smooth color transition */
+/* Brand/Logo - Center on mobile, left on desktop */
+.header-brand {
+  @apply flex items-center gap-3 cursor-pointer transition-all duration-300;
 }
 
-.header-navbar .navbar-brand:hover {
-  color: #f1c40f; /* Highlight color on hover */
-}
-
-.header-navbar .nav-link {
-  font-size: 16px; /* Font size for navigation links */
-  margin-right: 20px; /* Space between links */
-  color: #ffffff; /* White color for nav links */
-  transition: color 0.3s; /* Smooth color transition */
-}
-
-.header-navbar .nav-link:hover {
-  color: #f1c40f; /* Highlight color on hover */
-}
-
-.user-dropdown {
-  margin-left: auto; /* Align the dropdown to the right */
-  padding: 5px 10px; /* Padding for the dropdown */
-  border-radius: 5px; /* Rounded corners */
-  border: 1px solid #ced4da; /* Border for the dropdown */
-  background-color: #ffffff; /* White background for the dropdown */
-  color: #333; /* Dark text color for better contrast */
-  font-size: 16px; /* Font size for dropdown text */
-  transition: border 0.3s; /* Smooth border transition */
-}
-
-.user-dropdown:hover {
-  border-color: #f1c40f; /* Change border color on hover */
-}
-
-/* Add responsive design */
-@media (max-width: 768px) {
-  .header-navbar .nav-link {
-    margin-right: 10px; /* Reduce space on smaller screens */
+/* On mobile, center the brand */
+@media (max-width: 767px) {
+  .header-brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 120px); /* Leave space for hamburger and user menu */
+    text-align: center;
   }
+  
+  .header-brand:hover {
+    transform: translateX(-50%) scale(1.05);
+  }
+}
 
-  .user-dropdown {
-    margin-top: 10px; /* Adjust margin on mobile view */
+/* On desktop, position brand normally on the left */
+@media (min-width: 768px) {
+  .header-brand {
+    position: static;
+    transform: none;
+    max-width: none;
+    text-align: left;
+  }
+  
+  .header-brand:hover {
+    @apply transform scale-105;
+  }
+}
+
+.brand-icon {
+  @apply text-2xl;
+}
+
+.brand-text {
+  @apply text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Desktop Navigation - Hidden on mobile */
+.desktop-nav {
+  @apply hidden md:flex items-center gap-2;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-item {
+  @apply px-4 py-2 rounded-lg transition-all duration-300 font-medium;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+
+}
+
+.nav-item.active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+/* User Menu - Always on right */
+.user-menu {
+  @apply relative;
+  z-index: 60;
+  min-width: 48px; /* Ensure minimum width */
+}
+
+.user-menu-trigger {
+  @apply flex items-center gap-3 px-2 py-2 rounded-lg transition-all duration-300;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.user-avatar {
+  @apply w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full;
+  @apply flex items-center justify-center text-white font-bold text-sm;
+  flex-shrink: 0;
+}
+
+.user-name {
+  @apply font-medium hidden sm:block;
+}
+
+.chevron {
+  @apply transition-transform duration-300;
+  flex-shrink: 0;
+}
+
+.chevron.open {
+  @apply transform rotate-180;
+}
+
+.user-menu-dropdown {
+  @apply absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl;
+  @apply border border-gray-200 py-2 z-50;
+  animation: slideDown 0.2s ease-out;
+}
+
+.user-menu-item {
+  @apply w-full px-4 py-3 text-left font-medium;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Mobile Menu Toggle - Always on left, hidden on desktop */
+.mobile-menu-toggle {
+  @apply p-2 rounded-lg transition-all duration-300;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 60;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+}
+
+/* Show only on mobile */
+@media (max-width: 767px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+}
+
+.hamburger {
+  @apply w-6 h-6 flex flex-col justify-center items-center;
+  position: relative;
+}
+
+.hamburger span {
+  @apply block w-6 h-0.5 bg-current transition-all duration-300;
+  position: absolute;
+  left: 0;
+  transform-origin: center;
+}
+
+.hamburger span:nth-child(1) {
+  top: 4px;
+}
+
+.hamburger span:nth-child(2) {
+  top: 10px;
+}
+
+.hamburger span:nth-child(3) {
+  top: 16px;
+}
+
+.hamburger.open span:nth-child(1) {
+  @apply transform rotate-45;
+  top: 10px;
+}
+
+.hamburger.open span:nth-child(2) {
+  @apply opacity-0;
+}
+
+.hamburger.open span:nth-child(3) {
+  @apply transform -rotate-45;
+  top: 10px;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  @apply md:hidden fixed inset-x-0 top-16 bg-white border-t border-gray-200;
+  @apply transform transition-all duration-300 ease-in-out z-40;
+  transform: translateY(-100%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.mobile-nav.open {
+  @apply transform translate-y-0;
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-nav-content {
+  @apply py-4;
+}
+
+.mobile-nav-item {
+  @apply w-full px-6 py-4 text-left font-medium;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.mobile-nav-item.active {
+  @apply text-blue-600 bg-blue-50;
+  border-left-color: #2563eb;
+}
+
+.mobile-nav-item:hover {
+  border-left-color: #3b82f6;
+}
+
+.mobile-user-section {
+  @apply border-t border-gray-200 mt-4 pt-4;
+}
+
+.mobile-user-info {
+  @apply flex items-center gap-4 px-6 py-3;
+}
+
+.mobile-user-actions {
+  @apply mt-2;
+}
+
+.mobile-user-action {
+  @apply w-full px-6 py-3 text-left font-medium;
+  @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+  @apply md:hidden fixed inset-0 bg-black bg-opacity-50 z-30;
+  @apply top-16;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-container {
+    @apply px-4 h-14;
+  }
+  
+  .brand-text {
+    @apply text-xl;
+  }
+  
+  .brand-icon {
+    @apply text-xl;
+  }
+  
+  .user-avatar {
+    @apply w-7 h-7 text-xs;
+  }
+  
+  .mobile-menu-toggle {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .header-brand {
+    max-width: calc(100% - 100px); /* Adjust for smaller screens */
+  }
+  
+  .mobile-nav {
+    top: 3.5rem; /* 14 * 0.25rem = 3.5rem */
+  }
+  
+  .mobile-overlay {
+    top: 3.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    @apply px-2 h-12;
+  }
+  
+  .brand-text {
+    @apply text-lg;
+  }
+  
+  .brand-icon {
+    @apply text-lg;
+  }
+  
+  .user-avatar {
+    @apply w-6 h-6 text-xs;
+  }
+  
+  .mobile-menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header-brand {
+    max-width: calc(100% - 88px); /* Further adjust for very small screens */
+    gap: 0.5rem; /* Reduce gap between icon and text */
+  }
+  
+  .user-menu-trigger {
+    @apply px-1;
+    gap: 0.5rem;
+  }
+  
+  .mobile-nav-item {
+    @apply px-4 py-3;
+  }
+  
+  .mobile-user-info {
+    @apply px-4;
+  }
+  
+  .mobile-user-action {
+    @apply px-4;
+  }
+  
+  .mobile-nav {
+    top: 3rem; /* 12 * 0.25rem = 3rem */
+  }
+  
+  .mobile-overlay {
+    top: 3rem;
+  }
+}
+
+/* Focus states for accessibility */
+.nav-item:focus,
+.user-menu-trigger:focus,
+.mobile-menu-toggle:focus,
+.mobile-nav-item:focus,
+.mobile-user-action:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* Prevent body scroll when mobile menu is open */
+body.mobile-menu-open {
+  overflow: hidden;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Ensure user menu dropdown appears above mobile nav */
+.user-menu-dropdown {
+  z-index: 60;
+}
+
+/* Better visual feedback for mobile interactions */
+@media (hover: none) {
+  .mobile-nav-item:active,
+  .mobile-user-action:active {
+    @apply bg-blue-100;
   }
 }

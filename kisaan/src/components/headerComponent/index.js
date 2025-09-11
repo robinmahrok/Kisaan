@@ -1,57 +1,269 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import "./header.css";
 import { useHistory } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Token } from "../../utils/utils";
-import { Navbar, Nav } from 'react-bootstrap';
 
-export default function Header() {
-  let history = useHistory();
+// Constants for better maintainability
+const NAVIGATION_ITEMS = [
+  { path: "/home", label: "Home" },
+  { path: "/allAccounts", label: "My Items" },
+  { path: "/request", label: "Requests" },
+  { path: "/aboutUs", label: "About Us" },
+  { path: "/ContactUs", label: "Contact Us" }
+];
 
-  const [name, setName] = useState("");
-
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      const token = localStorage.getItem("token");
-      const nameEmail = Token(token);
-
-      const userName = nameEmail.split(",")[0];
-      setName(userName);
-    } else {
+// Custom hook for user authentication
+const useUserAuth = () => {
+  const history = useHistory();
+  
+  const getUserFromToken = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
       history.push("/");
+      return null;
+    }
+    
+    try {
+      const nameEmail = Token(token);
+      const [name] = nameEmail.split(",");
+      return { name };
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      history.push("/");
+      return null;
     }
   }, [history]);
+  
+  return { getUserFromToken };
+};
 
-  const handleNavigation = (path) => {
+// Custom hook for navigation
+const useNavigation = () => {
+  const history = useHistory();
+  
+  const navigateTo = useCallback((path) => {
     history.push(path);
-  };
-
-  const handleLogout = () => {
+  }, [history]);
+  
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     history.push("/");
-  };
+  }, [history]);
+  
+  return { navigateTo, handleLogout };
+};
+
+export default function Header() {
+  const [user, setUser] = useState({ name: "" });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState("");
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  // Refs for click outside detection
+  const userMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  
+  const { getUserFromToken } = useUserAuth();
+  const { navigateTo, handleLogout } = useNavigation();
+
+  useEffect(() => {
+    const userData = getUserFromToken();
+    if (userData) {
+      setUser(userData);
+    }
+  }, [getUserFromToken]);
+
+  useEffect(() => {
+    // Set active item based on current path
+    const currentPath = window.location.pathname;
+    setActiveItem(currentPath);
+  }, []);
+
+  // Handle clicking outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close user menu if clicking outside
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+      
+      // Close mobile menu if clicking outside (but not on the toggle button)
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        const mobileToggle = document.querySelector('.mobile-menu-toggle');
+        if (mobileToggle && !mobileToggle.contains(event.target)) {
+          setIsMenuOpen(false);
+        }
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
+
+  // Handle escape key to close dropdowns
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, [isMenuOpen]);
+
+  const handleNavigation = useCallback((path) => {
+    setActiveItem(path);
+    setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
+    navigateTo(path);
+  }, [navigateTo]);
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+    // Close user menu when opening mobile menu
+    if (!isMenuOpen) {
+      setIsUserMenuOpen(false);
+    }
+  }, [isMenuOpen]);
+
+  const toggleUserMenu = useCallback(() => {
+    setIsUserMenuOpen(prev => !prev);
+    // Close mobile menu when opening user menu
+    if (!isUserMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [isUserMenuOpen]);
+
+  const userMenuItems = useMemo(() => [
+    { label: "Profile", action: () => navigateTo("/profile") },
+    { label: "Settings", action: () => navigateTo("/settings") },
+    { label: "Log Out", action: handleLogout }
+  ], [navigateTo, handleLogout]);
 
   return (
-    <div className="header">
-      <Navbar expand="sm" variant="dark" className="header-navbar">
-        <Navbar.Brand>Kisaan</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mr-auto">
-            <Nav.Link onClick={() => handleNavigation("/home")}>Home</Nav.Link>
-            <Nav.Link onClick={() => handleNavigation("/allAccounts")}>My Items</Nav.Link>
-            <Nav.Link onClick={() => handleNavigation("/request")}>Requests</Nav.Link>
-            <Nav.Link onClick={() => handleNavigation("/aboutUs")}>About Us</Nav.Link>
-            <Nav.Link onClick={() => handleNavigation("/ContactUs")}>Contact Us</Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-        <div className="nav-item">
-          <select className="user-dropdown" onChange={(e) => e.target.value === "Logout" && handleLogout()} required>
-            <option value="" hidden>{name}</option>
-            <option value="Logout">Log Out</option>
-          </select>
+    <header className="header">
+      <div className="header-container">
+        {/* Mobile Menu Toggle - Left Side */}
+        <button 
+          className="mobile-menu-toggle" 
+          onClick={toggleMenu}
+          aria-expanded={isMenuOpen}
+          aria-label="Toggle mobile menu"
+        >
+          <div className={`hamburger ${isMenuOpen ? 'open' : ''}`}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+
+        {/* Logo/Brand - Center */}
+        <div className="header-brand" onClick={() => handleNavigation("/home")}>
+          <div className="brand-icon">🌾</div>
+          <h1 className="brand-text">Kisaan</h1>
         </div>
-      </Navbar>
-    </div>
+
+        {/* Desktop Navigation - Hidden on mobile, shown on desktop */}
+        <nav className="desktop-nav">
+          {NAVIGATION_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              className={`nav-item ${activeItem === item.path ? 'active' : ''}`}
+              onClick={() => handleNavigation(item.path)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* User Menu - Right Side */}
+        <div className="user-menu" ref={userMenuRef}>
+          <button
+            className="user-menu-trigger"
+            onClick={toggleUserMenu}
+            aria-expanded={isUserMenuOpen}
+            aria-haspopup="true"
+          >
+            <div className="user-avatar">
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <span className="user-name">{user.name}</span>
+            <svg 
+              className={`chevron ${isUserMenuOpen ? 'open' : ''}`}
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {isUserMenuOpen && !isMenuOpen && (
+            <div className="user-menu-dropdown">
+              {userMenuItems.map((item, index) => (
+                <button
+                  key={index}
+                  className="user-menu-item"
+                  onClick={() => {
+                    item.action();
+                    setIsUserMenuOpen(false);
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className={`mobile-nav ${isMenuOpen ? 'open' : ''}`} ref={mobileMenuRef}>
+        <div className="mobile-nav-content">
+          {NAVIGATION_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              className={`mobile-nav-item ${activeItem === item.path ? 'active' : ''}`}
+              onClick={() => handleNavigation(item.path)}
+            >
+              {item.label}
+            </button>
+          ))}
+          
+            
+          
+        </div>
+      </div>
+
+      {/* Overlay for mobile menu */}
+      {isMenuOpen && <div className="mobile-overlay" onClick={() => setIsMenuOpen(false)} />}
+    </header>
   );
 }

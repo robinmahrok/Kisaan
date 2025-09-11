@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "./home.css";
 import { Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
@@ -6,77 +6,183 @@ import Header from "../headerComponent";
 import Footer from "../footerComponent";
 import { Token } from "../../utils/utils";
 
-export default function Home() {
-  var history = useHistory();
-  const [Name, setName] = useState("");
-  const [Email, setEmail] = useState("");
-  const [load, setLoad] = useState(false);
+// Constants for better maintainability
+const ROLE_TYPES = {
+  SELLER: 'seller',
+  BUYER: 'buyer'
+};
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      var token = localStorage.getItem("token");
-      var nameEmail = Token(token);
+const NAVIGATION_STATES = {
+  IDLE: 'idle',
+  LOADING: 'loading'
+};
 
-      var name = nameEmail.split(",")[0];
-      var userId = nameEmail.split(",")[1];
-      setEmail(userId);
-      setName(name);
-    } else {
+// Custom hook for user authentication
+const useUserAuth = () => {
+  const history = useHistory();
+  
+  const getUserFromToken = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
       history.push("/");
+      return null;
+    }
+    
+    try {
+      const nameEmail = Token(token);
+      const [name, userId] = nameEmail.split(",");
+      return { name, userId };
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      history.push("/");
+      return null;
     }
   }, [history]);
+  
+  return { getUserFromToken };
+};
 
-  const seller = (e) => {
-    e.preventDefault();
-    setLoad(true);
-    history.push("/seller");
-  };
+// Custom hook for role navigation
+const useRoleNavigation = () => {
+  const history = useHistory();
+  const [navigationState, setNavigationState] = useState(NAVIGATION_STATES.IDLE);
+  
+  const navigateToRole = useCallback((role) => {
+    setNavigationState(NAVIGATION_STATES.LOADING);
+    
+    // Add a small delay for better UX
+    setTimeout(() => {
+      history.push(`/${role}`);
+    }, 500);
+  }, [history]);
+  
+  const isLoading = navigationState === NAVIGATION_STATES.LOADING;
+  
+  return { navigateToRole, isLoading };
+};
 
-  const buyer = (e) => {
+export default function Home() {
+  const [user, setUser] = useState({ name: "", email: "" });
+  const { getUserFromToken } = useUserAuth();
+  const { navigateToRole, isLoading } = useRoleNavigation();
+
+  useEffect(() => {
+    const userData = getUserFromToken();
+    if (userData) {
+      setUser({
+        name: userData.name,
+        email: userData.userId
+      });
+    }
+  }, [getUserFromToken]);
+
+  const handleRoleSelection = useCallback((e, role) => {
     e.preventDefault();
-    setLoad(true);
-    history.push("/buyer");
-  };
+    navigateToRole(role);
+  }, [navigateToRole]);
+
+  const roleButtons = useMemo(() => [
+    {
+      type: ROLE_TYPES.SELLER,
+      label: 'Seller',
+      description: 'Sell your agricultural products',
+      icon: '🌾',
+      bgColor: 'bg-green-600 hover:bg-green-700',
+      textColor: 'text-white'
+    },
+    {
+      type: ROLE_TYPES.BUYER,
+      label: 'Buyer',
+      description: 'Buy fresh agricultural products',
+      icon: '🛒',
+      bgColor: 'bg-blue-600 hover:bg-blue-700',
+      textColor: 'text-white'
+    }
+  ], []);
 
   return (
-    <div className="app-container">
+    <div className="home-container">
       <Header />
-      <div className="content-container">
+      
+      <main className="home-content">
+        {/* Welcome Section */}
         <div className="welcome-section">
-          <h2 className="welcome-text">Welcome, {Name}!</h2>
-          <p className="user-email">{Email}</p>
-        </div>
-
-        <div className="form-container">
-          <form>
-            <h4 className="form-title">Select your role:</h4>
-
-            <div className="button-group">
-              <button className="btn btn-primary action-button" onClick={seller} disabled={load}>
-                {load ? (
-                  <>
-                    Seller &nbsp;
-                    <Spinner animation="border" variant="light" size="sm" />
-                  </>
-                ) : (
-                  "Seller"
-                )}
-              </button>
-
-              <button className="btn btn-secondary action-button" onClick={buyer} disabled={load}>
-                {load ? (
-                  <>
-                    Buyer &nbsp;
-                    <Spinner animation="border" variant="light" size="sm" />
-                  </>
-                ) : (
-                  "Buyer"
-                )}
-              </button>
+          <div className="welcome-card">
+            <div className="welcome-header">
+              <div className="avatar">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="welcome-text">
+                <h1 className="welcome-title">
+                  Welcome back, <span className="name-highlight">{user.name}</span>!
+                </h1>
+                <p className="welcome-subtitle">{user.email}</p>
+              </div>
             </div>
-          </form>
+            
+            <div className="welcome-description">
+              <p>Choose your role to continue with Kisaan - connecting farmers and buyers for a better agricultural marketplace.</p>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* Role Selection Section */}
+        <div className="role-selection-section">
+          <div className="role-selection-container">
+            <h2 className="section-title">Select Your Role</h2>
+            <p className="section-subtitle">Choose how you'd like to participate in our marketplace</p>
+            
+            <div className="role-buttons-container">
+              {roleButtons.map((role) => (
+                <button
+                  key={role.type}
+                  className={`role-button ${role.bgColor} ${role.textColor} ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  onClick={(e) => handleRoleSelection(e, role.type)}
+                  disabled={isLoading}
+                >
+                  <div className="role-button-content">
+                    <div className="role-icon">{role.icon}</div>
+                    <div className="role-info">
+                      <h3 className="role-label">
+                        {isLoading ? (
+                          <>
+                            {role.label}
+                            <Spinner 
+                              animation="border" 
+                              size="sm" 
+                              className="ml-2 inline-block"
+                            />
+                          </>
+                        ) : (
+                          role.label
+                        )}
+                      </h3>
+                      <p className="role-description">{role.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="role-arrow">
+                    <svg 
+                      className="w-5 h-5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M9 5l7 7-7 7" 
+                      />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+      
       <Footer />
     </div>
   );

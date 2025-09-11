@@ -1,134 +1,517 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { mobileValidator } from "../../utils/utils";
+import { mobileValidator, emailValidator } from "../../utils/utils";
 import "./signup.css";
 import { useHistory } from "react-router";
 
-export default function SignUp() {
-  let history = useHistory();
+// Constants for better maintainability
+const SIGNUP_STATES = {
+  IDLE: 'idle',
+  LOADING: 'loading',
+  SUCCESS: 'success',
+  ERROR: 'error'
+};
 
-  const [name, setName] = useState("");
-  const [contact, setContact] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const eye = <FontAwesomeIcon icon={faEye} />;
-  const eyeSlash = <FontAwesomeIcon icon={faEyeSlash} />;
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, seterror] = useState("");
-  const [load, setLoad] = useState(false);
+const ERROR_MESSAGES = {
+  INVALID_EMAIL: 'Please enter a valid email address',
+  INVALID_MOBILE: 'Please enter a valid 10-digit contact number',
+  EMPTY_NAME: 'Name is required',
+  EMPTY_EMAIL: 'Email is required',
+  EMPTY_CONTACT: 'Contact number is required',
+  EMPTY_PASSWORD: 'Password is required',
+  EMPTY_CONFIRM_PASSWORD: 'Please confirm your password',
+  PASSWORD_TOO_SHORT: 'Password must be at least 6 characters long',
+  PASSWORD_MISMATCH: 'Password and confirm password should be equal',
+  NETWORK_ERROR: 'Network error. Please check your connection and try again.',
+  GENERIC_ERROR: 'An error occurred. Please try again.'
+};
 
-  const handleOnChangeName = (e) => setName(e.target.value);
-  const handleOnChangeEmail = (e) => setEmail(e.target.value);
-  const handleOnChangeContactNumber = (e) => setContact(e.target.value);
-  const handleOnChangePassword = (e) => setPassword(e.target.value);
-  
-  const handleOnChangeConfirmPassword = (e) => {
-    const value = e.target.value;
-    setConfirmPassword(value);
-    seterror(value !== password ? "Password and confirm password should be equal" : "");
-  };
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const loginUser = () => history.push("/");
-  
-  const SignUpUser = (e) => {
-    e.preventDefault();
-    setLoad(true);
-
-    const userObj = { name, email, contact, password };
-
-    if (mobileValidator(contact)) {
-      axios.post(`${baseUrl}/signup`, userObj)
-        .then((response) => {
-          setLoad(false);
-          if (response.data.status) {
-            sessionStorage.setItem("email", email);
-            alert("Data Saved!");
-            history.push("/otpVerify");
-          } else {
-            alert(response.data.message);
-          }
-        })
-        .catch((err) => {
-          setLoad(false);
-          console.log(err);
-        });
-    } else {
-      setLoad(false);
-      alert("Please enter a valid contact number!");
+// Custom hook for form validation
+const useFormValidation = () => {
+  const validateForm = useCallback((formData) => {
+    const { name, email, contact, password, confirmPassword } = formData;
+    const errors = {};
+    
+    // Name validation
+    if (!name.trim()) {
+      errors.name = ERROR_MESSAGES.EMPTY_NAME;
+    } else if (name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters long';
     }
+    
+    // Email validation
+    if (!email.trim()) {
+      errors.email = ERROR_MESSAGES.EMPTY_EMAIL;
+    } else if (!emailValidator(email)) {
+      errors.email = ERROR_MESSAGES.INVALID_EMAIL;
+    }
+    
+    // Contact validation
+    if (!contact.trim()) {
+      errors.contact = ERROR_MESSAGES.EMPTY_CONTACT;
+    } else if (!mobileValidator(contact)) {
+      errors.contact = ERROR_MESSAGES.INVALID_MOBILE;
+    }
+    
+    // Password validation
+    if (!password.trim()) {
+      errors.password = ERROR_MESSAGES.EMPTY_PASSWORD;
+    } else if (password.length < 6) {
+      errors.password = ERROR_MESSAGES.PASSWORD_TOO_SHORT;
+    }
+    
+    // Confirm password validation
+    if (!confirmPassword.trim()) {
+      errors.confirmPassword = ERROR_MESSAGES.EMPTY_CONFIRM_PASSWORD;
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = ERROR_MESSAGES.PASSWORD_MISMATCH;
+    }
+    
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  }, []);
+  
+  return { validateForm };
+};
+
+// Custom hook for signup API call
+const useSignupApi = () => {
+  const [signupState, setSignupState] = useState(SIGNUP_STATES.IDLE);
+  const [apiError, setApiError] = useState('');
+  
+  const signup = useCallback(async (userData) => {
+    setSignupState(SIGNUP_STATES.LOADING);
+    setApiError('');
+    
+    try {
+      const response = await axios.post(`${baseUrl}/signup`, userData);
+      
+      setSignupState(SIGNUP_STATES.SUCCESS);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      setSignupState(SIGNUP_STATES.ERROR);
+      
+      if (error.response?.data?.message) {
+        setApiError(error.response.data.message);
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        setApiError(ERROR_MESSAGES.NETWORK_ERROR);
+      } else {
+        setApiError(ERROR_MESSAGES.GENERIC_ERROR);
+      }
+      
+      return {
+        success: false,
+        error: error.response?.data?.message || ERROR_MESSAGES.GENERIC_ERROR
+      };
+    }
+  }, []);
+  
+  const resetSignupState = useCallback(() => {
+    setSignupState(SIGNUP_STATES.IDLE);
+    setApiError('');
+  }, []);
+  
+  return {
+    signupState,
+    apiError,
+    signup,
+    resetSignupState,
+    isLoading: signupState === SIGNUP_STATES.LOADING
   };
+};
+
+export default function SignUp() {
+  const history = useHistory();
+  const { validateForm } = useFormValidation();
+  const { signupState, apiError, signup, resetSignupState, isLoading } = useSignupApi();
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    contact: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [validationErrors, setValidationErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Refs for form elements
+  const nameRef = useRef(null);
+  const emailRef = useRef(null);
+  const contactRef = useRef(null);
+  const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
+  
+  // Focus name input on component mount
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
+  
+  // Clear API errors when form data changes
+  useEffect(() => {
+    if (apiError) {
+      resetSignupState();
+    }
+  }, [formData, apiError, resetSignupState]);
+  
+  // Memoized validation results
+  const validationResult = useMemo(() => {
+    return validateForm(formData);
+  }, [formData, validateForm]);
+  
+  // Handle input changes
+  const handleInputChange = useCallback((field) => (e) => {
+    const value = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+    
+    // Real-time password confirmation validation
+    if (field === 'confirmPassword' || field === 'password') {
+      const password = field === 'password' ? value : formData.password;
+      const confirmPassword = field === 'confirmPassword' ? value : formData.confirmPassword;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        setValidationErrors(prev => ({
+          ...prev,
+          confirmPassword: ERROR_MESSAGES.PASSWORD_MISMATCH
+        }));
+      } else if (confirmPassword && password === confirmPassword) {
+        setValidationErrors(prev => ({
+          ...prev,
+          confirmPassword: ''
+        }));
+      }
+    }
+  }, [formData, validationErrors]);
+  
+  // Handle input blur for validation
+  const handleInputBlur = useCallback((field) => () => {
+    setTouched(prev => ({
+      ...prev,
+      [field]: true
+    }));
+    
+    // Show validation errors only after field is touched
+    if (touched[field] || Object.keys(touched).length > 0) {
+      const { errors } = validateForm(formData);
+      setValidationErrors(errors);
+    }
+  }, [formData, validateForm, touched]);
+  
+  // Handle password visibility toggle
+  const handleTogglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+  
+  // Handle form submission
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    // Mark all fields as touched
+    setTouched({
+      name: true,
+      email: true,
+      contact: true,
+      password: true,
+      confirmPassword: true
+    });
+    
+    // Validate form
+    const { isValid, errors } = validationResult;
+    setValidationErrors(errors);
+    
+    if (!isValid) {
+      // Focus first field with error
+      const fieldOrder = ['name', 'email', 'contact', 'password', 'confirmPassword'];
+      const firstErrorField = fieldOrder.find(field => errors[field]);
+      
+      if (firstErrorField) {
+        const fieldRefs = {
+          name: nameRef,
+          email: emailRef,
+          contact: contactRef,
+          password: passwordRef,
+          confirmPassword: confirmPasswordRef
+        };
+        fieldRefs[firstErrorField].current?.focus();
+      }
+      return;
+    }
+    
+    // Prepare user data
+    const userData = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      contact: formData.contact.trim(),
+      password: formData.password
+    };
+    
+    // Attempt signup
+    const result = await signup(userData);
+    
+    if (result.success) {
+      const { data } = result;
+      
+      if (data.status) {
+        // Signup successful
+        sessionStorage.setItem("email", formData.email);
+        alert("Account created successfully! Please verify your email.");
+        history.push("/otpVerify");
+      } else {
+        // Signup failed with specific message
+        setValidationErrors({ general: data.message });
+      }
+    }
+  }, [formData, validationResult, signup, history]);
+  
+  // Handle login redirect
+  const handleLoginRedirect = useCallback(() => {
+    history.push("/");
+  }, [history]);
+  
+  // Handle Enter key press for better UX
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleSubmit(e);
+    }
+  }, [handleSubmit, isLoading]);
+  
+  // Get error message to display
+  const displayError = apiError || validationErrors.general;
+  const hasFieldErrors = Object.keys(validationErrors).some(key => key !== 'general' && validationErrors[key]);
+  
+  // Icons for password visibility
+  const eyeIcon = <FontAwesomeIcon icon={faEye} />;
+  const eyeSlashIcon = <FontAwesomeIcon icon={faEyeSlash} />;
 
   return (
     <div className="App">
       <header className="App-header-login">
         <div>
-          <form className="form" onSubmit={SignUpUser}>
+          <form className="form" onSubmit={handleSubmit} noValidate>
             <h2>Create Account</h2>
-            <label htmlFor="name">Name:</label>
-            <input
-              type="text"
-              id="name"
-              onChange={handleOnChangeName}
-              value={name}
-              required
-            />
             
-            <label htmlFor="contact">Contact No.:</label>
-            <input
-              type="tel"
-              id="contact"
-              onChange={handleOnChangeContactNumber}
-              value={contact}
-              required
-            />
+            {displayError && (
+              <div className="error-message" role="alert" aria-live="polite">
+                {displayError}
+              </div>
+            )}
             
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              onChange={handleOnChangeEmail}
-              value={email}
-              required
-            />
-            
-            <label htmlFor="password">Password:</label>
-            <div style={{ position: "relative" }}>
+            <div className="form-group">
+              <label htmlFor="name">
+                Name: <span className="required">*</span>
+              </label>
               <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                onChange={handleOnChangePassword}
-                value={password}
+                ref={nameRef}
+                type="text"
+                className={validationErrors.name ? 'error' : ''}
+                id="name"
+                name="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={handleInputChange('name')}
+                onBlur={handleInputBlur('name')}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
                 required
+                aria-describedby={validationErrors.name ? "name-error" : undefined}
+                aria-invalid={!!validationErrors.name}
               />
-              <i className="eye" onClick={handleClickShowPassword}>
-                {showPassword ? eyeSlash : eye}
-              </i>
+              {validationErrors.name && (
+                <div id="name-error" className="field-error" role="alert">
+                  {validationErrors.name}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="email">
+                Email: <span className="required">*</span>
+              </label>
+              <input
+                ref={emailRef}
+                type="email"
+                className={validationErrors.email ? 'error' : ''}
+                id="email"
+                name="email"
+                placeholder="Enter your email address"
+                value={formData.email}
+                onChange={handleInputChange('email')}
+                onBlur={handleInputBlur('email')}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+                required
+                aria-describedby={validationErrors.email ? "email-error" : undefined}
+                aria-invalid={!!validationErrors.email}
+              />
+              {validationErrors.email && (
+                <div id="email-error" className="field-error" role="alert">
+                  {validationErrors.email}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="contact">
+                Contact No.: <span className="required">*</span>
+              </label>
+              <input
+                ref={contactRef}
+                type="tel"
+                className={validationErrors.contact ? 'error' : ''}
+                id="contact"
+                name="contact"
+                placeholder="Enter 10-digit contact number"
+                value={formData.contact}
+                onChange={handleInputChange('contact')}
+                onBlur={handleInputBlur('contact')}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+                maxLength="10"
+                required
+                aria-describedby={validationErrors.contact ? "contact-error" : undefined}
+                aria-invalid={!!validationErrors.contact}
+              />
+              {validationErrors.contact && (
+                <div id="contact-error" className="field-error" role="alert">
+                  {validationErrors.contact}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="password">
+                Password: <span className="required">*</span>
+              </label>
+              <div className="password-field">
+                <input
+                  ref={passwordRef}
+                  type={showPassword ? "text" : "password"}
+                  className={validationErrors.password ? 'error' : ''}
+                  id="password"
+                  name="password"
+                  placeholder="Enter password (min 6 characters)"
+                  value={formData.password}
+                  onChange={handleInputChange('password')}
+                  onBlur={handleInputBlur('password')}
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                  required
+                  aria-describedby={validationErrors.password ? "password-error" : undefined}
+                  aria-invalid={!!validationErrors.password}
+                />
+                <i 
+                  className="eye" 
+                  onClick={handleTogglePasswordVisibility}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleTogglePasswordVisibility();
+                    }
+                  }}
+                >
+                  {showPassword ? eyeSlashIcon : eyeIcon}
+                </i>
+              </div>
+              {validationErrors.password && (
+                <div id="password-error" className="field-error" role="alert">
+                  {validationErrors.password}
+                </div>
+              )}
             </div>
 
-            <label htmlFor="confirmPassword">Confirm Password:</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="confirmPassword"
-              onChange={handleOnChangeConfirmPassword}
-              value={confirmPassword}
-              required
-            />
-            <div className="text-danger">{error}</div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">
+                Confirm Password: <span className="required">*</span>
+              </label>
+              <input
+                ref={confirmPasswordRef}
+                type={showPassword ? "text" : "password"}
+                className={validationErrors.confirmPassword ? 'error' : ''}
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange('confirmPassword')}
+                onBlur={handleInputBlur('confirmPassword')}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+                required
+                aria-describedby={validationErrors.confirmPassword ? "confirm-password-error" : undefined}
+                aria-invalid={!!validationErrors.confirmPassword}
+              />
+              {validationErrors.confirmPassword && (
+                <div id="confirm-password-error" className="field-error" role="alert">
+                  {validationErrors.confirmPassword}
+                </div>
+              )}
+            </div>
             
-            <button type="submit" disabled={load}>
-              {load ? <Spinner animation="border" variant="light" /> : "Create Account"}
+            <button 
+              type="submit" 
+              disabled={isLoading || hasFieldErrors}
+              className="submit-button"
+              aria-describedby="signup-button-status"
+            >
+              {isLoading ? (
+                <>
+                  <span>Creating Account</span>
+                  <span aria-hidden="true">&nbsp;</span>
+                  <Spinner 
+                    animation="border" 
+                    variant="light" 
+                    size="sm"
+                    role="status"
+                    aria-label="Loading"
+                  />
+                </>
+              ) : (
+                "Create Account"
+              )}
             </button>
+            
+            {isLoading && (
+              <div id="signup-button-status" className="sr-only" aria-live="polite">
+                Creating account, please wait...
+              </div>
+            )}
           </form>
 
-          <p>
+          <p className="login-prompt">
             Already have an account? &nbsp;
-            <button onClick={loginUser}>Login</button>
+            <button 
+              type="button"
+              className="login-button"
+              onClick={handleLoginRedirect}
+              disabled={isLoading}
+              tabIndex={isLoading ? -1 : 0}
+            >
+              Login
+            </button>
           </p>
         </div>
       </header>
