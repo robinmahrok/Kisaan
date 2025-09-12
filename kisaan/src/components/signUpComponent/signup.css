@@ -211,6 +211,7 @@ button:disabled {
   background: linear-gradient(135deg, #667eea, #764ba2);
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
+  color: white;
   margin-left: 0.5rem;
   width: auto;
   display: inline-block;

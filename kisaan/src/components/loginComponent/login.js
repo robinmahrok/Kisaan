@@ -1,8 +1,10 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { Link, useHistory } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { emailValidator } from "../../utils/utils";
 
 // Constants for better maintainability
@@ -110,7 +112,7 @@ export default function Login() {
     password: ''
   });
   const [validationErrors, setValidationErrors] = useState({});
-  const [touched, setTouched] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   
   // Refs for form elements
   const emailRef = useRef(null);
@@ -128,11 +130,6 @@ export default function Login() {
     }
   }, [formData, apiError, resetLoginState]);
   
-  // Memoized validation results
-  const validationResult = useMemo(() => {
-    return validateForm(formData.email, formData.password);
-  }, [formData.email, formData.password, validateForm]);
-  
   // Handle input changes
   const handleInputChange = useCallback((field) => (e) => {
     const value = e.target.value;
@@ -141,41 +138,34 @@ export default function Login() {
       [field]: value
     }));
     
-    // Clear validation error for this field when user starts typing
+    // Clear validation errors when user starts typing
     if (validationErrors[field]) {
       setValidationErrors(prev => ({
         ...prev,
         [field]: ''
       }));
     }
+    
+    // Clear general errors
+    if (validationErrors.general) {
+      setValidationErrors(prev => ({
+        ...prev,
+        general: ''
+      }));
+    }
   }, [validationErrors]);
   
-  // Handle input blur for validation
-  const handleInputBlur = useCallback((field) => () => {
-    setTouched(prev => ({
-      ...prev,
-      [field]: true
-    }));
-    
-    // Show validation errors only after field is touched
-    if (touched[field] || Object.keys(touched).length > 0) {
-      const { errors } = validateForm(formData.email, formData.password);
-      setValidationErrors(errors);
-    }
-  }, [formData.email, formData.password, validateForm, touched]);
+  // Handle password visibility toggle
+  const handleTogglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
   
   // Handle form submission
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
-    // Mark all fields as touched
-    setTouched({
-      email: true,
-      password: true
-    });
-    
-    // Validate form
-    const { isValid, errors } = validationResult;
+    // Validate form only on submit
+    const { isValid, errors } = validateForm(formData.email, formData.password);
     setValidationErrors(errors);
     
     if (!isValid) {
@@ -208,7 +198,7 @@ export default function Login() {
         setValidationErrors({ general: data.message });
       }
     }
-  }, [formData, validationResult, login, history]);
+  }, [formData, validateForm, login, history]);
   
   // Handle Enter key press for better UX
   const handleKeyPress = useCallback((e) => {
@@ -219,7 +209,10 @@ export default function Login() {
   
   // Get error message to display
   const displayError = apiError || validationErrors.general;
-  const hasFieldErrors = Object.keys(validationErrors).some(key => key !== 'general' && validationErrors[key]);
+  
+  // Icons for password visibility
+  const eyeIcon = <FontAwesomeIcon icon={faEye} />;
+  const eyeSlashIcon = <FontAwesomeIcon icon={faEyeSlash} />;
   
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 p-4">
@@ -251,7 +244,6 @@ export default function Login() {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleInputChange('email')}
-              onBlur={handleInputBlur('email')}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
               required
@@ -269,26 +261,44 @@ export default function Login() {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password: <span aria-hidden="true" className="text-red-500">*</span>
             </label>
-            <input
-              ref={passwordRef}
-              type="password"
-              className={`w-full px-3 sm:px-4 py-3 sm:py-3.5 rounded-lg border-2 transition-all duration-300 bg-gray-50 focus:outline-none focus:bg-white text-base ${
-                validationErrors.password 
-                  ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-100 animate-shake' 
-                  : 'border-gray-200 focus:border-indigo-500 focus:ring-indigo-100'
-              } focus:ring-4 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-70`}
-              id="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleInputChange('password')}
-              onBlur={handleInputBlur('password')}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-              required
-              aria-describedby={validationErrors.password ? "password-error" : undefined}
-              aria-invalid={!!validationErrors.password}
-            />
+            <div className="relative">
+              <input
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                className={`w-full px-3 sm:px-4 py-3 sm:py-3.5 pr-12 rounded-lg border-2 transition-all duration-300 bg-gray-50 focus:outline-none focus:bg-white text-base ${
+                  validationErrors.password 
+                    ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-100 animate-shake' 
+                    : 'border-gray-200 focus:border-indigo-500 focus:ring-indigo-100'
+                } focus:ring-4 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-70`}
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange('password')}
+                onKeyPress={handleKeyPress}
+                disabled={isLoading}
+                required
+                aria-describedby={validationErrors.password ? "password-error" : undefined}
+                aria-invalid={!!validationErrors.password}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center justify-center w-12 text-gray-400 hover:text-indigo-500 focus:outline-none focus:text-indigo-500 transition-colors duration-200 rounded-r-lg"
+                onClick={handleTogglePasswordVisibility}
+                tabIndex={0}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleTogglePasswordVisibility();
+                  }
+                }}
+              >
+                <span className="text-lg">
+                  {showPassword ? eyeSlashIcon : eyeIcon}
+                </span>
+              </button>
+            </div>
             {validationErrors.password && (
               <div id="password-error" className="text-red-600 text-sm mt-1" role="alert">
                 {validationErrors.password}
@@ -298,12 +308,12 @@ export default function Login() {
 
           <button 
             className={`w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-lg font-medium text-white text-base transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-green-300 ${
-              isLoading || hasFieldErrors
+              isLoading
                 ? 'bg-gray-400 cursor-not-allowed opacity-70'
                 : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0'
             } mt-6 sm:mt-8`}
             type="submit" 
-            disabled={isLoading || hasFieldErrors}
+            disabled={isLoading}
             aria-describedby="login-button-status"
           >
             {isLoading ? (
@@ -352,21 +362,6 @@ export default function Login() {
           </Link>
         </div>
       </div>
-      
-      {/* Screen reader only content */}
-      <style jsx>{`
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-      `}</style>
     </div>
   );
 }

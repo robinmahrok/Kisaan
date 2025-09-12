@@ -45,10 +45,10 @@ const useUserAuth = () => {
 // Custom hook for role navigation
 const useRoleNavigation = () => {
   const history = useHistory();
-  const [navigationState, setNavigationState] = useState(NAVIGATION_STATES.IDLE);
+  const [loadingRole, setLoadingRole] = useState(null);
   
   const navigateToRole = useCallback((role) => {
-    setNavigationState(NAVIGATION_STATES.LOADING);
+    setLoadingRole(role);
     
     // Add a small delay for better UX
     setTimeout(() => {
@@ -56,15 +56,19 @@ const useRoleNavigation = () => {
     }, 500);
   }, [history]);
   
-  const isLoading = navigationState === NAVIGATION_STATES.LOADING;
+  const isRoleLoading = useCallback((role) => {
+    return loadingRole === role;
+  }, [loadingRole]);
   
-  return { navigateToRole, isLoading };
+  const isAnyLoading = loadingRole !== null;
+  
+  return { navigateToRole, isRoleLoading, isAnyLoading };
 };
 
 export default function Home() {
   const [user, setUser] = useState({ name: "", email: "" });
   const { getUserFromToken } = useUserAuth();
-  const { navigateToRole, isLoading } = useRoleNavigation();
+  const { navigateToRole, isRoleLoading, isAnyLoading } = useRoleNavigation();
 
   useEffect(() => {
     const userData = getUserFromToken();
@@ -133,51 +137,55 @@ export default function Home() {
             <p className="section-subtitle">Choose how you'd like to participate in our marketplace</p>
             
             <div className="role-buttons-container">
-              {roleButtons.map((role) => (
-                <button
-                  key={role.type}
-                  className={`role-button ${role.bgColor} ${role.textColor} ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
-                  onClick={(e) => handleRoleSelection(e, role.type)}
-                  disabled={isLoading}
-                >
-                  <div className="role-button-content">
-                    <div className="role-icon">{role.icon}</div>
-                    <div className="role-info">
-                      <h3 className="role-label">
-                        {isLoading ? (
-                          <>
-                            {role.label}
-                            <Spinner 
-                              animation="border" 
-                              size="sm" 
-                              className="ml-2 inline-block"
-                            />
-                          </>
-                        ) : (
-                          role.label
-                        )}
-                      </h3>
-                      <p className="role-description">{role.description}</p>
+              {roleButtons.map((role) => {
+                const isCurrentRoleLoading = isRoleLoading(role.type);
+                
+                return (
+                  <button
+                    key={role.type}
+                    className={`role-button ${role.bgColor} ${role.textColor} ${isCurrentRoleLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    onClick={(e) => handleRoleSelection(e, role.type)}
+                    disabled={isCurrentRoleLoading}
+                  >
+                    <div className="role-button-content">
+                      <div className="role-icon">{role.icon}</div>
+                      <div className="role-info">
+                        <h3 className="role-label">
+                          {isCurrentRoleLoading ? (
+                            <>
+                              {role.label}
+                              <Spinner 
+                                animation="border" 
+                                size="sm" 
+                                className="ml-2 inline-block"
+                              />
+                            </>
+                          ) : (
+                            role.label
+                          )}
+                        </h3>
+                        <p className="role-description">{role.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="role-arrow">
-                    <svg 
-                      className="w-5 h-5" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M9 5l7 7-7 7" 
-                      />
-                    </svg>
-                  </div>
-                </button>
-              ))}
+                    
+                    <div className="role-arrow">
+                      <svg 
+                        className="w-5 h-5" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M9 5l7 7-7 7" 
+                        />
+                      </svg>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

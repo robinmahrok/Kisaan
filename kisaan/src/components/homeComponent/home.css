@@ -116,7 +116,7 @@
 }
 
 .role-description {
-  @apply text-sm opacity-90;
+  @apply text-sm opacity-90 text-left;
 }
 
 .role-arrow {

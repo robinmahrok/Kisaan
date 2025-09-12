@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import axios from "axios";
 import { Spinner } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
@@ -143,7 +143,6 @@ export default function SignUp() {
     confirmPassword: ''
   });
   const [validationErrors, setValidationErrors] = useState({});
-  const [touched, setTouched] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   
   // Refs for form elements
@@ -165,11 +164,6 @@ export default function SignUp() {
     }
   }, [formData, apiError, resetSignupState]);
   
-  // Memoized validation results
-  const validationResult = useMemo(() => {
-    return validateForm(formData);
-  }, [formData, validateForm]);
-  
   // Handle input changes
   const handleInputChange = useCallback((field) => (e) => {
     const value = e.target.value;
@@ -178,7 +172,7 @@ export default function SignUp() {
       [field]: value
     }));
     
-    // Clear validation error for this field when user starts typing
+    // Clear validation errors when user starts typing
     if (validationErrors[field]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -186,38 +180,14 @@ export default function SignUp() {
       }));
     }
     
-    // Real-time password confirmation validation
-    if (field === 'confirmPassword' || field === 'password') {
-      const password = field === 'password' ? value : formData.password;
-      const confirmPassword = field === 'confirmPassword' ? value : formData.confirmPassword;
-      
-      if (confirmPassword && password !== confirmPassword) {
-        setValidationErrors(prev => ({
-          ...prev,
-          confirmPassword: ERROR_MESSAGES.PASSWORD_MISMATCH
-        }));
-      } else if (confirmPassword && password === confirmPassword) {
-        setValidationErrors(prev => ({
-          ...prev,
-          confirmPassword: ''
-        }));
-      }
+    // Clear general errors
+    if (validationErrors.general) {
+      setValidationErrors(prev => ({
+        ...prev,
+        general: ''
+      }));
     }
-  }, [formData, validationErrors]);
-  
-  // Handle input blur for validation
-  const handleInputBlur = useCallback((field) => () => {
-    setTouched(prev => ({
-      ...prev,
-      [field]: true
-    }));
-    
-    // Show validation errors only after field is touched
-    if (touched[field] || Object.keys(touched).length > 0) {
-      const { errors } = validateForm(formData);
-      setValidationErrors(errors);
-    }
-  }, [formData, validateForm, touched]);
+  }, [validationErrors]);
   
   // Handle password visibility toggle
   const handleTogglePasswordVisibility = useCallback(() => {
@@ -228,17 +198,8 @@ export default function SignUp() {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
-    // Mark all fields as touched
-    setTouched({
-      name: true,
-      email: true,
-      contact: true,
-      password: true,
-      confirmPassword: true
-    });
-    
-    // Validate form
-    const { isValid, errors } = validationResult;
+    // Validate form only on submit
+    const { isValid, errors } = validateForm(formData);
     setValidationErrors(errors);
     
     if (!isValid) {
@@ -283,7 +244,7 @@ export default function SignUp() {
         setValidationErrors({ general: data.message });
       }
     }
-  }, [formData, validationResult, signup, history]);
+  }, [formData, validateForm, signup, history]);
   
   // Handle login redirect
   const handleLoginRedirect = useCallback(() => {
@@ -299,7 +260,6 @@ export default function SignUp() {
   
   // Get error message to display
   const displayError = apiError || validationErrors.general;
-  const hasFieldErrors = Object.keys(validationErrors).some(key => key !== 'general' && validationErrors[key]);
   
   // Icons for password visibility
   const eyeIcon = <FontAwesomeIcon icon={faEye} />;
@@ -331,7 +291,6 @@ export default function SignUp() {
                 placeholder="Enter your full name"
                 value={formData.name}
                 onChange={handleInputChange('name')}
-                onBlur={handleInputBlur('name')}
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
                 required
@@ -358,7 +317,6 @@ export default function SignUp() {
                 placeholder="Enter your email address"
                 value={formData.email}
                 onChange={handleInputChange('email')}
-                onBlur={handleInputBlur('email')}
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
                 required
@@ -385,7 +343,6 @@ export default function SignUp() {
                 placeholder="Enter 10-digit contact number"
                 value={formData.contact}
                 onChange={handleInputChange('contact')}
-                onBlur={handleInputBlur('contact')}
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
                 maxLength="10"
@@ -414,7 +371,6 @@ export default function SignUp() {
                   placeholder="Enter password (min 6 characters)"
                   value={formData.password}
                   onChange={handleInputChange('password')}
-                  onBlur={handleInputBlur('password')}
                   onKeyPress={handleKeyPress}
                   disabled={isLoading}
                   required
@@ -457,7 +413,6 @@ export default function SignUp() {
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange('confirmPassword')}
-                onBlur={handleInputBlur('confirmPassword')}
                 onKeyPress={handleKeyPress}
                 disabled={isLoading}
                 required
@@ -473,22 +428,25 @@ export default function SignUp() {
             
             <button 
               type="submit" 
-              disabled={isLoading || hasFieldErrors}
-              className="submit-button"
+              disabled={isLoading}
+              className={`w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-lg font-medium text-white text-base transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-green-300 ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0'
+              } mt-6 sm:mt-8`}
               aria-describedby="signup-button-status"
             >
               {isLoading ? (
-                <>
+                <div className="flex items-center justify-center">
                   <span>Creating Account</span>
-                  <span aria-hidden="true">&nbsp;</span>
                   <Spinner 
                     animation="border" 
-                    variant="light" 
                     size="sm"
                     role="status"
                     aria-label="Loading"
+                    className="ml-2"
                   />
-                </>
+                </div>
               ) : (
                 "Create Account"
               )}
