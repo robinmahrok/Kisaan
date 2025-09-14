@@ -16,7 +16,7 @@ app.use(
     origin: [
       "http://localhost:3001",
       "http://localhost:3005",
-      "https://kisaanapp.netlify.app/",
+      "https://kisaanapp.netlify.app",
     ],
     credentials: true,
   })

@@ -67,7 +67,7 @@ const config = {
       : [
           "http://localhost:3000",
           "http://localhost:3005",
-          "https://kisaanapp.netlify.app/",
+          "https://kisaanapp.netlify.app",
         ],
     SESSION_SECRET: process.env.SESSION_SECRET || "ssshhhhh",
   },
