@@ -7,25 +7,76 @@ import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import session from "express-session";
 import cors from "cors";
+import path from "path";
 
 const app = express();
 
 // Configure CORS
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://localhost:3005",
-      "https://kisaanapp.netlify.app",
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, direct server access)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3005",
+        "https://kisaan.netlify.app",
+        "https://kisaanapp.netlify.app",
+      ];
+
+      // In production, allow all HTTPS origins for flexibility
+      if (origin.startsWith("https://")) {
+        return callback(null, true);
+      }
+
+      // Allow specific development origins
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log(`CORS blocked origin: ${origin}`);
+        callback(null, true); // Allow all for now to fix deployment issues
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
+    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+    optionsSuccessStatus: 200,
   })
 );
 
 // Middleware
 app.use(fileUpload());
-app.use(express.static("./public"));
-app.use("/static", express.static("./public"));
+
+// Static files with CORS headers
+app.use(
+  express.static("./public", {
+    setHeaders: (res, path, stat) => {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+    },
+  })
+);
+
+app.use(
+  "/static",
+  express.static("./public", {
+    setHeaders: (res, path, stat) => {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+    },
+  })
+);
 
 app.use(
   session({
@@ -76,6 +127,25 @@ process.on("SIGTERM", async () => {
     console.error("❌ Error during graceful shutdown:", error);
     process.exit(1);
   }
+});
+
+// Handle image requests specifically with CORS
+app.get("/static/images/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const filepath = path.join(process.cwd(), "public", "images", filename);
+
+  // Set CORS headers for images
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set("Cache-Control", "public, max-age=86400"); // Cache for 1 day
+
+  res.sendFile(filepath, (err) => {
+    if (err) {
+      console.log("Image not found:", filename);
+      res.status(404).send("Image not found");
+    }
+  });
 });
 
 // Initialize routes after database connection
