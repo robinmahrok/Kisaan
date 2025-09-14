@@ -1,21 +1,21 @@
 // let express = require("express");
-const userInfo = require("../models/userInfo");
-var { mailer } = require("../controllers/mailer");
-var utils = require("../controllers/utils");
-const { models } = require("mongoose");
+import { userInfo } from "../repositories/index.js";
+import { mailer } from "../controllers/mailer.js";
+import utils from "../controllers/utils.js";
+// const { models } = require("mongoose");
 // router = express.Router();
-var globalEmail = "";
+let globalEmail = "";
 
-module.exports = function (router) {
-  var error = "";
+export default function (router) {
+  let error = "";
   router.get("/", (req, res) => {
     res.status(200).send({ message: "Working" })
   });
 
   //signup api
-  router.post("/signup", (req, res) => {
+  router.post("/signup", async (req, res) => {
     req.session.email1 = req.body.email;
-    var name = req.body.name,
+    let name = req.body.name,
       email = req.body.email,
       contact = req.body.contact,
       password = req.body.password;
@@ -56,29 +56,29 @@ module.exports = function (router) {
         password1
       );
     }
-    var hashedpass = "";
+    let hashedpass = "";
 
-    userInfo.getUserByEmail(email, (err, user) => {
-      if (err || !user) {
+    try {
+      const user = await userInfo.getUserByEmail(email);
+      if (!user) {
         // checking email and password criteria
         if (!!emailCheck(email)) {
           if (!!passwordCheck(password)) {
-            utils.generateHash(password, function (err, hash) {
+            utils.generateHash(password, async function (err, hash) {
               if (!err && hash) {
                 hashedpass = hash;
 
-                userInfo.create({
-                  Name: name,
-                  Email: email,
-                  Contact: contact,
-                  Password: hashedpass,
-                  OtpVerify: "Pending",
-                  Otp: 0,
+                await userInfo.create({
+                  name: name,
+                  email: email,
+                  contact: contact,
+                  password: hashedpass,
+                  otpVerify: "Pending",
+                  otp: 0,
                 });
-                if (userInfo.create())
-                  res
-                    .status(200)
-                    .send({ status: true, message: "User Created" });
+                res
+                  .status(200)
+                  .send({ status: true, message: "User Created" });
               } else {
                 res
                   .status(200)
@@ -91,40 +91,39 @@ module.exports = function (router) {
               message:
                 "Password should contains atleast 6 characters consists of uppercase,lowercase,number and character",
             });
-            //res.render('register-err-success',{success:0,message:"Password should contains atleast 6 characters consists of uppercase,lowercase,number and character"});
           }
         } else {
           res
             .status(200)
             .send({ status: false, message: "Email does not met criteria" });
-          //res.render('register-err-success',{success:0,message:"You have entered an invalid email address! Only college mail Id is allowed"});
         }
       } else {
         res.status(200).send({ status: false, message: "User Already Exist" });
       }
-    });
+    } catch (error) {
+      res.status(500).send({ status: false, message: "Database error" });
+    }
   });
   //signup api end
 
-  const sendOTP = (recipient, otpVal, callback) => {
-    mailer(
-      {
-        email: recipient,
-        otpVal,
-      },
-      (result) => {
-        if (result && result.status == 1000) {
-          console.log("Otp Sent!");
-        } else {
-          callback("Unable to send OTP through email", null);
-        }
-      }
-    );
+  const sendOTP = async (recipient, otpVal, callback) => {
+    try {
+      const mailOptions = {
+        to: recipient,
+        subject: "OTP verification",
+        html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + otpVal + "</b>",
+      };
+      
+      await mailer(mailOptions);
+      callback(null, { status: 1000 });
+    } catch (error) {
+      callback("Unable to send OTP through email", null);
+    }
   };
 
   //send and update otp in database api
-  router.post("/sendOtp", (req, res) => {
-    var email = req.body.email;
+  router.post("/sendOtp", async (req, res) => {
+    let email = req.body.email;
 
     if (
       req.body.email == null ||
@@ -135,15 +134,16 @@ module.exports = function (router) {
         .status(200)
         .send({ status: false, message: "Email is missing, Please enter." });
     } else {
-      userInfo.getUserByEmail(email, (err, user) => {
-        if (err || !user) {
+      try {
+        const user = await userInfo.getUserByEmail(email);
+        if (!user) {
           res.status(200).send({ status: false, message: "User not found!" });
         } else {
           function genOTP(min, max) {
             return Math.floor(min + Math.random() * max);
           }
 
-          var otpVal = genOTP(100000, 900000);
+          let otpVal = genOTP(100000, 900000);
           sendOTP(email, otpVal, (err) => {
             if (err) {
               res.status(400).send({
@@ -152,102 +152,91 @@ module.exports = function (router) {
               });
             }
           });
-          userInfo.updateOTP(email, otpVal, (err, updatedUser) => {
-            if (err) {
-              res.status(400).send({
-                status: false,
-                message: err,
-              });
-            } else {
+          
+          try {
+            await userInfo.updateOTP(email, otpVal);
+            res.status(200).send({
+              status: true,
+            });
+          } catch (error) {
+            res.status(400).send({
+              status: false,
+              message: error.message,
+            });
+          }
+        }
+      } catch (error) {
+        res.status(500).send({ status: false, message: "Database error" });
+      }
+    }
+  });
+
+  router.post("/verifyOtp", async (req, res) => {
+    let email = req.body.email;
+
+    try {
+      const data = await userInfo.find({ email: email, otp: req.body.otp });
+      if (data.length == 0) {
+        res.status(200).send({ status: false, message: "Invalid OTP or Email" });
+      } else {
+        try {
+          await userInfo.updateOne(
+            { email: email },
+            { otpVerify: "verified", isActive: true }
+          );
+          res
+            .status(200)
+            .send({ status: true, message: "OTP Verified Successfully!!" });
+        } catch (error) {
+          res
+            .status(200)
+            .send({ status: false, message: "Unable to update User data" });
+        }
+      }
+    } catch (error) {
+      res.status(500).send({ status: false, message: "Database error" });
+    }
+  });
+
+  // change password api
+  router.post("/changePassword", async (req, res) => {
+    let userpass = req.body.password;
+    let email = req.body.email;
+
+    // checking password criteria
+    if (!!utils.passwordCheck(userpass)) {
+      utils.generateHash(userpass, async function (err, hash) {
+        if (!err && hash) {
+          hashedpass = hash;
+
+          // Update password with hash value
+          try {
+            const passwordUpdate = await userInfo.updateOne(
+              { email: email },
+              { password: hashedpass }
+            );
+            if (passwordUpdate) {
               res.status(200).send({
                 status: true,
+                message: "Password Updated Successfully",
               });
             }
-          });
+          } catch (error) {
+            res.status(200).send({
+              status: false,
+              message: "Unable to update User data",
+            });
+          }
+        } else {
+          res.status(200).send({ status: false, message: "Password doesn't met requirement" });
         }
       });
     }
   });
 
-  router.post("/verifyOtp", (req, res) => {
-    var email = req.body.email;
-
-    userInfo.find({ Email: email, Otp: req.body.otp }).then((data) => {
-      if (data.length == 0) {
-        res.status(200).send({ status: false, message: "Invalid Email" });
-        // res.redirect('/otphtml');
-      } else {
-        res.status(200).send({ status: true, message: "OTP Verified" });
-      }
-    });
-  });
-
-  //verify OTP api
-  router.post("/otpVerify", (req, res) => {
-    var email = req.body.email;
-
-    userInfo.find({ Email: email }).then((data) => {
-      if (data.length == 0) {
-        res.status(200).send({ status: false, message: "Invalid Email" });
-        // res.redirect('/otphtml');
-      } else {
-        //update verified in otpVerify
-        userInfo.updateOne(
-          { Email: globalEmail },
-          { OtpVerify: "Verified" },
-          function (err, otpVerified) {
-            if (err)
-              res
-                .status(200)
-                .send({ status: false, message: "Unable to update User data" });
-            //res.redirect('/');
-            else
-              res
-                .status(200)
-                .send({ status: true, message: "OTP Verified Successfully!!" });
-          }
-        );
-      }
-    });
-  });
-
-  // change password api
-  router.post("/changePassword", (req, res) => {
-    var userpass = req.body.password;
-    var email = req.body.email;
-
-    // checking password criteria
-    if (!!utils.passwordCheck(userpass)) {
-      utils.generateHash(userpass, function (err, hash) {
-        if (!err && hash) {
-          hashedpass = hash;
-
-          // Update password with hash value
-          userInfo.updateOne(
-            { Email: email },
-            { Password: hashedpass },
-            function (err, passwordUpdate) {
-              if (err)
-                res.status(200).send({
-                  status: false,
-                  message: "Unable to update User data",
-                });
-              else if (passwordUpdate.length != 0) {
-                res.status(200).send({
-                  status: true,
-                  message: "Password Updated Successfully",
-                });
-              }
-            }
-          );
-        } else res.status(200).send({ status: false, message: "Password doesn't met requirement" });
-      });
-    }
-  });
-
   // login api starts
-  router.post("/login", (req, res) => {
-    var email = req.body.email,
+  router.post("/login", async (req, res) => {
+    let email = req.body.email,
       password = req.body.password;
 
     if (
@@ -262,66 +251,69 @@ module.exports = function (router) {
     }
 
     globalEmail = email;
-    var hashedpass = "";
 
-    userInfo.find({ Email: email }).then((data) => {
-      if (data.length == 0) {
+    try {
+      // Use the static method for better performance and consistency
+      const data = await userInfo.getUserByEmail(email);      
+      if (!data) {
         res.status(200).send({ status: false, message: "User Not Found" });
       } else {
-        var dbpass = data[0].Password;
-        var otpver = data[0].OtpVerify;
-        var name = data[0].Name;
-        var contact = data[0].Contact;
-        var id = data[0]._id;
-
+        let dbpass = data.password;
+        let otpver = data.otpVerify;
+        let name = data.name;
+        let contact = data.contact;
+        let id = data._id;
         utils.validatePassword(password, dbpass, function (err, data) {
+
           if (!err && data) {
-            if (otpver == "Verified") {
-              var nameEmail = name + "," + email + "," + contact + "," + id;
+            if (otpver == "verified") {
+              let nameEmail = name + "," + email + "," + contact + "," + id;
               const token = utils.generateAccessToken(nameEmail);
               res.status(200).send({ status: true, message: token });
             } else {
               res
                 .status(200)
                 .send({ status: false, message: "Otp not verified." });
-              // res.redirect('/otprevalid');
             }
           } else {
             res.status(200).send({ status: false, message: "Wrong Creds!" });
           }
         });
       }
-    });
+    } catch (error) {
+      res.status(500).send({ status: false, message: "Database error" });
+    }
   });
   //login api ends
 
   // getDetails api starts
-  router.post("/getDetails", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/getDetails", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var email = auth.email.split(",")[1];
+      let email = auth.email.split(",")[1];
 
-      userInfo.find({ Email: email }).then((data) => {
+      try {
+        const data = await userInfo.find({ email: email });
         if (data.length == 0) {
           res.status(200).send({ status: false, message: "User Not Found" });
         } else {
-          var result = {
-            id: data[0]._id,
-            name: data[0].Name,
-            email: data[0].Email,
-            FatherName: data[0].FatherName,
-            Contact: data[0].Contact,
-            Country: data[0].Country,
-            State: data[0].State,
-            City: data[0].City,
-            Address: data[0].Address,
-            ZipCode: data[0].ZipCode,
+          let result = {
+            id: data[0].id || data[0]._id,
+            name: data[0].name,
+            email: data[0].email,
+            contact: data[0].contact,
+            role: data[0].role,
+            // Add any other fields that exist in your original logic
           };
           res.status(200).send({ status: true, message: result });
         }
-      });
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
+      } catch (error) {
+        res.status(500).send({ status: false, message: "Database error" });
+      }
+    } else {
+      res.status(200).send({ status: false, message: "Invalid Token" });
+    }
   });
   //getDetails api ends
 

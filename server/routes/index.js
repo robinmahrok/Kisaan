@@ -1,9 +1,9 @@
-"use strict";
-const login_routes = require("./loginRoutes");
-const seed_routes = require("./seedRoutes");
+import loginRoutes from "./loginRoutes.js";
+import seedRoutes from "./seedRoutes.js";
 
 const routes = (app) => {
-  login_routes(app);
-  seed_routes(app);
+  loginRoutes(app);
+  seedRoutes(app);
 };
-module.exports = routes;
+
+export default routes;

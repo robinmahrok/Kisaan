@@ -1,9 +1,13 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+import config from "../config/config.js";
+import path from 'path';
+import dotenv from 'dotenv';
+
 const EMAIL_USERNAME = "";
 const COMMON_NAME = "Robin Singh";
-const { credentials, token } = require("../config/config");
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
+const { credentials, token } = config;
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const mailSettings = {
   host: "smtp.gmail.com",
@@ -16,14 +20,32 @@ const mailSettings = {
     pass: process.env?.EMAIL_PASSWORD  
   }  
 };
+
 let transporter = nodemailer.createTransport(mailSettings);
 
-const mailer = (data, cb) => {
+const mailer = async (mailOptions) => {
+  try {
+    // Use provided mailOptions or create default OTP email
+    const finalMailOptions = {
+      from: `"Kisaan" <${mailSettings.auth.user}>`,
+      ...mailOptions
+    };
+
+    const info = await transporter.sendMail(finalMailOptions);
+    return { status: 'success', messageId: info.messageId };
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    throw new Error(`Failed to send email: ${error.message}`);
+  }
+};
+
+// Legacy function for backward compatibility
+const legacyMailer = (data, cb) => {
   let mailOptions = {
-    from: '"Kisaan" <' + mailSettings.auth.user + ">",
+    from: `"Kisaan" <${mailSettings.auth.user}>`,
     to: data.email,
     subject: "OTP verification",
-    html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + data.otpVal + "</b>", // html body
+    html: `<h1>Hello</h1><p>Your OTP is : </p><b>${data.otpVal}</b>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -36,5 +58,4 @@ const mailer = (data, cb) => {
   });
 };
 
-module.exports = { mailer };
-//module.exports=mailer2;
+export { mailer, legacyMailer };

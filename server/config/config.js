@@ -1,6 +1,11 @@
 // All the app configuration values should be added here.
+import dotenv from 'dotenv';
+import path from 'path';
 
-module.exports = {
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+const config = {
   // OAuth credentails common for mailer functionality
   credentials: {
     web: {
@@ -27,8 +32,44 @@ module.exports = {
     expiry_date: 1597339801516,
   },
 
-  dbURL: `mongodb+srv://robinsingh:Robin%401998@cluster0.q7iqp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+  // Database configuration
+  dbURL: process.env.MONGODB_URI || `mongodb+srv://robinsingh:Robin%401998@cluster0.q7iqp.mongodb.net/farmers?retryWrites=true&w=majority&appName=Cluster0`,
 
-  TOKEN_SECRET: `Letsdosomefunwithtoken1998`,
+  // JWT configuration
+  TOKEN_SECRET: process.env.JWT_SECRET || `Letsdosomefunwithtoken1998`,
+  REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_SECRET || `RefreshTokenSecretForKisaan2024!@#`,
+  
+  // Token expiry settings
+  ACCESS_TOKEN_EXPIRY: process.env.JWT_ACCESS_EXPIRY || '15m',
+  REFRESH_TOKEN_EXPIRY: process.env.JWT_REFRESH_EXPIRY || '7d',
+  
+  // Rate limiting configuration
+  RATE_LIMIT: {
+    AUTH: {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 10 // 10 requests per window
+    },
+    OTP: {
+      windowMs: 5 * 60 * 1000, // 5 minutes
+      max: 3 // 3 requests per window
+    }
+  },
+  
+  // Application settings
+  APP: {
+    PORT: process.env.PORT || 3005,
+    NODE_ENV: process.env.NODE_ENV || 'development',
+    CORS_ORIGINS: process.env.CORS_ORIGINS ? 
+      process.env.CORS_ORIGINS.split(',').map(origin => origin.trim()) : 
+      [
+        'http://localhost:3000',
+        'http://localhost:3005', 
+        'https://kisaan.netlify.app'
+      ],
+    SESSION_SECRET: process.env.SESSION_SECRET || 'ssshhhhh'
+  },
+
   excludedRoutes: [`/loginRoutes`],
 };
+
+export default config;

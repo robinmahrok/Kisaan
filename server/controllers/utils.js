@@ -1,7 +1,8 @@
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
+import config from "../config/config.js";
+import jwt from "jsonwebtoken";
+
 const saltRounds = 10;
-var config = require("../config/config");
-var jwt = require("jsonwebtoken");
 
 const convertObjectToString = (id) => {
   if (typeof id === "object") {
@@ -10,7 +11,7 @@ const convertObjectToString = (id) => {
   return id;
 };
 
-module.exports = {
+const utils = {
   getFileExtension: (filename) => {
     return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
   },
@@ -102,3 +103,5 @@ module.exports = {
     return moment(dateString, "DD-MM-YYYY").toDate(); // 1st argument - string, 2nd argument - format
   },
 };
+
+export default utils;

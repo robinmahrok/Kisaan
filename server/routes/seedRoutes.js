@@ -1,24 +1,34 @@
 // let express = require("express");
-const BankInfo = require("../models/bank");
-const SeedInfo = require("../models/seed");
-const userInfo = require("../models/userInfo");
-const SellerInfo = require("../models/seller");
-var utils = require("../controllers/utils");
-const { models } = require("mongoose");
-const express = require("express");
-const { RequestInfo } = require("../models");
+import {
+  bank as BankInfo,
+  seed as SeedInfo,
+  userInfo,
+  seller as SellerInfo,
+  request as RequestInfo,
+} from "../repositories/index.js";
+import utils from "../controllers/utils.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { ObjectId } from "mongodb";
 
-module.exports = function (router) {
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// const { models } = require("mongoose");
+// const express = require("express");
+
+export default function (router) {
   router.post("/createAccount", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var Email = auth.email.split(",")[1],
+      let Email = auth.email.split(",")[1],
         UserId = req.body.userData.id,
         Name = auth.email.split(",")[0],
         Bank = req.body.bankDetails.bankName,
         AccountType = req.body.bankDetails.accountType;
-      var AccountNumber = 0;
+      let AccountNumber = 0;
       BankInfo.countDocuments(
         { UserId: UserId, Bank: Bank, AccountType: AccountType },
         function (err, c) {
@@ -60,42 +70,53 @@ module.exports = function (router) {
   });
 
   router.post("/products", (req, res) => {
-    var token = req.body.token;
+    let token = req.body.token;
 
-    var auth = utils.authenticateToken(token);
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      // SeedInfo.create({
-      //   Products:{
-      //       "Potato":[{
-      //        0:"Pukhraj",
-      //        1:"Chipsona",
-      //        2:"Chandramukhi"
-      //        }],
-      //       "Paddy":[{
-      //        0:"Pusa-834",
-      //        1:"Ratnagiri-3"
-      //       }],
-      //       "Wheat":[{
-      //        0:"VL-832",
-      //        1:"PBW-343",
-      //        3:"VL-804",
-      //        4:"HS-365",
-      //        5:"HS-240"
-      //       }]
-      //   }
-      //  });
-      SeedInfo.find({}, function (err, data) {
-        if (err) throw err;
+      try {
+        // Read crop varieties from JSON file
+        const cropVarietiesPath = path.join(
+          __dirname,
+          "../config/crop_varieties.json"
+        );
 
-        if (err || data == null)
-          res
-            .status(200)
-            .send({ status: false, message: "Something went wrong" });
-        else {
-          res.status(200).send({ status: true, message: data[0].Products });
-        }
+        const cropVarieties = JSON.parse(
+          fs.readFileSync(cropVarietiesPath, "utf8")
+        );
+
+        // Transform the data to match the expected format
+        const productsData = {};
+
+        Object.keys(cropVarieties).forEach((productName) => {
+          const varieties = cropVarieties[productName];
+
+          // Create varieties object with indexed keys
+          const varietiesObj = {};
+          varieties.forEach((variety, index) => {
+            varietiesObj[index] = variety;
+          });
+
+          productsData[productName] = [varietiesObj];
+        });
+
+        res.status(200).send({
+          status: true,
+          message: productsData,
+        });
+      } catch (error) {
+        console.error("Error reading crop varieties:", error);
+        res.status(200).send({
+          status: false,
+          message: "Something went wrong",
+        });
+      }
+    } else {
+      res.status(200).send({
+        status: false,
+        message: "Invalid Token",
       });
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
+    }
   });
 
   router.post("/uploadFile", (req, res) => {
@@ -110,12 +131,13 @@ module.exports = function (router) {
     );
   });
 
-  router.post("/addSellerData", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/addSellerData", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
+
     if (auth != false) {
-      var email = auth.email.split(",")[1];
-      var name = req.body.Name,
+      let email = auth.email.split(",")[1];
+      let name = req.body.Name,
         contact = req.body.Contact,
         product = req.body.Product,
         variety = req.body.Variety,
@@ -125,214 +147,373 @@ module.exports = function (router) {
         state = req.body.State,
         city = req.body.City,
         zip = req.body.Pin,
-        sellerId = req.body.SellerId;
+        sellerId = req.body.SellerId,
+        harvestDate = req.body.HarvestDate;
 
-      SellerInfo.create(
-        {
-          SellerId: sellerId,
-          Email: email,
-          Name: name,
-          Contact: contact,
-          Product: product,
-          Variety: variety,
-          Address: address,
-          Quantity: quantity,
-          Price: price,
-          State: state,
-          City: city,
-          Pin: zip,
+      // Create seller data matching the new schema
+      const sellerData = {
+        sellerId: sellerId,
+        name: name,
+        email: email,
+        contact: contact,
+        product: product,
+        variety: variety,
+        address: {
+          street: address,
+          city: city,
+          state: state,
+          pinCode: zip,
         },
-        function (err, value) {
-          if (err)
-            res
-              .status(200)
-              .send({ status: false, message: "Can not insert value" });
-          else {
-            SellerInfo.find({})
-              .sort({ _id: -1 })
-              .limit(10)
-              .exec(function (err, docs) {
-                if (!err) {
-                  res.status(200).send({ status: true, message: docs[0]._id });
-                } else res.status(200).send({ status: false, message: err });
-              });
-          }
+        quantity: {
+          value: parseFloat(quantity) || 0,
+          unit: "kg", // Default unit, can be made configurable later
+        },
+        price: {
+          value: parseFloat(price) || 0,
+          unit: "kg", // Default unit, can be made configurable later
+        },
+        harvestDate: harvestDate ? new Date(harvestDate) : new Date(), // Parse the date or use current date as fallback
+        isAvailable: true,
+      };
+
+      try {
+        const value = await SellerInfo.create(sellerData);
+        // Return the created document ID directly
+        res.status(200).send({
+          status: true,
+          message: value._id || value.id,
+        });
+      } catch (err) {
+        console.error("❌ Error creating seller data:", err);
+        console.error("Error details:", err.message);
+        if (err.errors) {
+          console.error("Validation errors:", err.errors);
         }
-      );
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
-
-  router.post("/getItemsList", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
-    if (auth != false) {
-      var email = auth.email.split(",")[1];
-      SellerInfo.find({})
-        .sort({ _id: -1 })
-        .exec(function (err, docs) {
-          if (!err) {
-            let items = []
-            for(let i=0;i<docs.length;i++){
-              if(docs[i].Email != email){
-                items.push(docs[i]);
-              }
-            }
-            res.status(200).send({ status: true, message: items });
-          } else res.status(200).send({ status: false, message: err });
+        res.status(200).send({
+          status: false,
+          message: err.message || "Cannot insert value",
         });
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
+      }
+    } else {
+      console.log("❌ Authentication failed - Invalid Token");
+      res.status(200).send({ status: false, message: "Invalid Token" });
+    }
   });
 
-  router.post("/allItems", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/getItemsList", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var email = auth.email.split(",")[1];
-      SellerInfo.find({ Email: email }, { Name: 0, Email: 0 })
-        .sort({ _id: -1 })
-        .exec(function (err, data) {
-          if (!err) {
-            res.status(200).send({ status: true, message: data });
-          } else res.status(200).send({ status: false, message: "No Items found" });
+      let email = auth.email.split(",")[1];
+
+      // Extract search and filter parameters
+      const {
+        search = "",
+        state = "",
+        city = "",
+        product = "",
+        minPrice = 0,
+        maxPrice = Number.MAX_SAFE_INTEGER,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = req.body;
+
+      try {
+        // Build the query filter - exclude current user's items
+        let query = {
+          email: { $ne: email }, // Use lowercase 'email' field from new schema
+          isAvailable: true, // Only show available items
+        };
+
+        // Add search filter (search in product name and variety)
+        if (search && search.trim()) {
+          const searchRegex = new RegExp(search.trim(), "i");
+          query.$or = [{ product: searchRegex }, { variety: searchRegex }];
+        }
+
+        // Add location filters
+        if (state && state.trim()) {
+          query["address.state"] = new RegExp(state.trim(), "i");
+        }
+
+        if (city && city.trim()) {
+          query["address.city"] = new RegExp(city.trim(), "i");
+        }
+
+        // Add product type filter
+        if (product && product.trim()) {
+          query.product = new RegExp(product.trim(), "i");
+        }
+
+        // Add price range filter
+        if (minPrice > 0 || maxPrice < Number.MAX_SAFE_INTEGER) {
+          query["price.value"] = {
+            $gte: Number(minPrice),
+            $lte: Number(maxPrice),
+          };
+        }
+
+        // Build sort options
+        const sortOptions = {};
+        const sortField =
+          sortBy === "price"
+            ? "price.value"
+            : sortBy === "quantity"
+            ? "quantity.value"
+            : sortBy === "harvestDate"
+            ? "harvestDate"
+            : "createdAt";
+        sortOptions[sortField] = sortOrder === "asc" ? 1 : -1;
+
+        const data = await SellerInfo.find(query, { sort: sortOptions });
+
+        res.status(200).send({
+          status: true,
+          message: data,
+          totalCount: data.length,
+          filters: {
+            search,
+            state,
+            city,
+            product,
+            minPrice,
+            maxPrice,
+            sortBy,
+            sortOrder,
+          },
         });
+      } catch (error) {
+        console.error("Error in getItemsList:", error);
+        res.status(200).send({ status: false, message: error.message });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
 
-  router.post("/editItems", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/allItems", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var email = auth.email.split(",")[1];
-      var id = req.body.id,
+      let email = auth.email.split(",")[1];
+      try {
+        // Use the correct field names from the new schema
+        const data = await SellerInfo.find(
+          { email: email }, // Use lowercase 'email' field
+          {
+            projection: { name: 0, email: 0 }, // Use lowercase field names
+            sort: { _id: -1 },
+          }
+        );
+        res.status(200).send({ status: true, message: data });
+      } catch (error) {
+        console.error("Error in allItems:", error);
+        res.status(200).send({ status: false, message: "No Items found" });
+      }
+    } else res.status(200).send({ status: false, message: "Invalid Token" });
+  });
+
+  router.post("/editItems", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
+    if (auth != false) {
+      let email = auth.email.split(",")[1];
+      let id = req.body.id,
         price = req.body.price,
         quantity = req.body.quantity,
         contact = req.body.contact,
         address = req.body.address;
 
-      SellerInfo.findOneAndUpdate(
-        { Email: email, _id: id },
-        {
-          Price: price,
-          Quantity: quantity,
-          Contact: contact,
-          Address: address,
-        },
-        function (err, data) {
-          if (err)
-            res.status(200).send({ status: false, message: "No data found" });
-          else {
-            res.status(200).send({ status: true, message: "data is updated" });
-          }
-        }
-      );
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+      try {
+        // Prepare update object
+        let updateData = {
+          "price.value": parseFloat(price) || 0, // Update nested price.value
+          "quantity.value": parseFloat(quantity) || 0, // Update nested quantity.value
+          contact: contact, // Use lowercase 'contact' field
+        };
 
-  router.post("/deleteItems", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
-    if (auth != false) {
-      var email = auth.email.split(",")[1];
-      var id = req.body.id;
-      SellerInfo.deleteOne({ Email: email, _id: id }, function (err, data) {
-        if (err)
-          res.status(200).send({ status: false, message: "No Accounts found" });
-        else {
+        // Handle address - support both old string format and new object format
+        if (typeof address === "object" && address !== null) {
+          // New format: address is an object with street, city, state, pinCode
+          if (address.street) updateData["address.street"] = address.street;
+          if (address.city) updateData["address.city"] = address.city;
+          if (address.state) updateData["address.state"] = address.state;
+          if (address.pinCode) updateData["address.pinCode"] = address.pinCode;
+        } else if (typeof address === "string") {
+          // Old format: address is a string (backward compatibility)
+          updateData["address.street"] = address;
+        }
+
+        // Convert ID to ObjectId if it's a string
+        const objectId = ObjectId.isValid(id) ? new ObjectId(id) : id;
+
+        // First, let's check if the document exists
+        const existingItem = await SellerInfo.findOne({
+          email: email,
+          _id: objectId,
+        });
+
+        if (!existingItem) {
+          res.status(200).send({
+            status: false,
+            message: "Item not found with provided email and ID",
+          });
+          return;
+        }
+
+        const updatedItem = await SellerInfo.updateOne(
+          { email: email, _id: objectId }, // Filter criteria with proper ObjectId
+          updateData // Update data (repository handles $set automatically)
+        );
+
+        if (!updatedItem) {
           res
             .status(200)
-            .send({ status: true, message: "Data Deleted Successfully" });
+            .send({ status: false, message: "No data found or update failed" });
+        } else {
+          res.status(200).send({ status: true, message: "Data is updated" });
         }
-      });
+      } catch (err) {
+        console.error("Error updating item:", err);
+        console.error("Error stack:", err.stack);
+        res
+          .status(200)
+          .send({ status: false, message: "Failed to update data" });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
 
-  router.post("/addRequest", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/deleteItems", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var sellerId = req.body.sellerId;
-      var buyerId = req.body.buyerId;
-      var sellerName = req.body.sellerName;
-      var buyerName = req.body.buyerName;
+      let email = auth.email.split(",")[1];
+      let id = req.body.id;
 
-      RequestInfo.create(
-        {
-          SellerId: sellerId,
-          BuyerId: buyerId,
-          SellerName: sellerName,
-          BuyerName: buyerName,
-        },
-        function (err, value) {
-          if (err) {
-            res
-              .status(200)
-              .send({ status: false, message: "Can not send Request" });
-          } else {
-            res.status(200).send({ status: true, message: "Request Sent" });
-          }
+      try {
+        // Use the correct field names from the new schema
+        const deletedItem = await SellerInfo.deleteOne({
+          email: email, // Use lowercase 'email' field
+          _id: id,
+        });
+
+        if (deletedItem.deletedCount === 0) {
+          res
+            .status(200)
+            .send({ status: false, message: "No item found to delete" });
+        } else {
+          res
+            .status(200)
+            .send({ status: true, message: "Data deleted successfully" });
         }
-      );
+      } catch (err) {
+        console.error("Error deleting item:", err);
+        res
+          .status(200)
+          .send({ status: false, message: "Failed to delete data" });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
 
-  router.post("/getRequestData", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/addRequest", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var sellerId = req.body.sellerId;
-      var buyerId = req.body.buyerId;
-      RequestInfo.find({ SellerId: sellerId, BuyerId: buyerId }).exec(function (
-        err,
-        docs
-      ) {
-        if (err || docs == "") {
+      let sellerId = req.body.sellerId;
+      let buyerId = req.body.buyerId;
+      let sellerName = req.body.sellerName;
+      let buyerName = req.body.buyerName;
+      let buyerEmail = req.body.buyerEmail;
+      let buyerContact = req.body.buyerContact;
+
+      try {
+        await RequestInfo.create({
+          sellerId: sellerId,
+          buyerId: buyerId,
+          sellerName: sellerName,
+          buyerName: buyerName,
+          buyerEmail: buyerEmail,
+          buyerContact: buyerContact,
+          status: "pending",
+        });
+        res.status(200).send({ status: true, message: "Request Sent" });
+      } catch (err) {
+        console.error("Error creating request:", err);
+        res
+          .status(200)
+          .send({ status: false, message: "Can not send Request" });
+      }
+    } else res.status(200).send({ status: false, message: "Invalid Token" });
+  });
+
+  router.post("/getRequestData", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
+    if (auth != false) {
+      let sellerId = req.body.sellerId;
+      let buyerId = req.body.buyerId;
+      try {
+        const docs = await RequestInfo.find({
+          sellerId: sellerId,
+          buyerId: buyerId,
+        });
+        if (!docs || docs.length === 0) {
           res.status(200).send({ status: false, message: "No Data" });
         } else {
-          res.status(200).send({ status: true, message: docs[0].Status });
+          res
+            .status(200)
+            .send({ status: true, message: docs[0].status || "pending" });
         }
-      });
+      } catch (err) {
+        console.error("Error fetching request data:", err);
+        res.status(200).send({ status: false, message: "No Data" });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
 
-  router.post("/allRequests", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/allRequests", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var id = auth.email.split(",")[3];
-      RequestInfo.find({ SellerId: id })
-        .sort({ _id: -1 })
-        .exec(function (err, data) {
-          if (!err) {
-            res.status(200).send({ status: true, message: data });
-          } else res.status(200).send({ status: false, message: "No Requests found" });
-        });
+      let id = auth.email.split(",")[3];
+      try {
+        const data = await RequestInfo.find(
+          { sellerId: id },
+          { sort: { _id: -1 } }
+        );
+        res.status(200).send({ status: true, message: data });
+      } catch (error) {
+        console.error("Error fetching requests:", error);
+        res.status(200).send({ status: false, message: "No Requests found" });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
 
-  router.post("/ApproveOrDeny", (req, res) => {
-    var token = req.body.token;
-    var auth = utils.authenticateToken(token);
+  router.post("/ApproveOrDeny", async (req, res) => {
+    let token = req.body.token;
+    let auth = utils.authenticateToken(token);
     if (auth != false) {
-      var email = auth.email.split(",")[1];
-      var id = req.body.id,
+      let email = auth.email.split(",")[1];
+      let id = req.body.id,
         status = req.body.decision;
-      var value;
+      let value;
 
+      if (status == "Approve") value = "accepted";
+      else if (status == "Deny") value = "rejected";
+      else value = "pending";
 
-      if (status == "Approve") value = 1;
-      else if (status == "Deny") value = -1;
-      else value = 0;
-      RequestInfo.findOneAndUpdate(
-        { _id: id },
-        { Status: value },
-        function (err, data) {
-          if (err)
-            res.status(200).send({ status: false, message: "No data found" });
-          else {
-            res.status(200).send({ status: true, message: "data is updated" });
-          }
+      try {
+        const updatedRequest = await RequestInfo.updateOne(
+          { _id: id },
+          { status: value }
+        );
+        if (!updatedRequest) {
+          res.status(200).send({ status: false, message: "No data found" });
+        } else {
+          res.status(200).send({ status: true, message: "data is updated" });
         }
-      );
+      } catch (err) {
+        console.error("Error updating request status:", err);
+        res.status(200).send({ status: false, message: "No data found" });
+      }
     } else res.status(200).send({ status: false, message: "Invalid Token" });
   });
-};
+}
