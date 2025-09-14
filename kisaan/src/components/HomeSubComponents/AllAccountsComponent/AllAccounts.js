@@ -1,254 +1,678 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import "./AllAccounts.css"; // Ensure you have the updated CSS file
-import { Table, Spinner, Button, Form, Alert } from "react-bootstrap";
+import "./AllAccounts.css";
+import {
+  Spinner,
+  Alert,
+  Button,
+  Container,
+  Badge,
+  Card,
+} from "react-bootstrap";
+import { Autocomplete } from "@material-ui/lab";
+import { TextField } from "@material-ui/core";
 import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
+import statesofIndia from "../../../utils/states";
 
 export default function AllAccounts() {
-  var history = useHistory();
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [contact, setContact] = useState("");
-  const [address, setAddress] = useState("");
+  const history = useHistory();
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    email: "",
+    contact: "",
+    sellerId: "",
+  });
+  const [formData, setFormData] = useState({
+    price: "",
+    quantity: "",
+    contact: "",
+    street: "",
+    city: "",
+    state: "",
+    pinCode: "",
+  });
   const [data2, setData2] = useState([]);
-  const [index, setIndex] = useState(-1);
-  const [prompt, setPrompt] = useState(-1);
-  const [load, setLoad] = useState(false);
-  const [loadEdit, setLoadEdit] = useState({});
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      var token = localStorage.getItem("token");
-      var nameEmail = Token(token);
-      if (nameEmail) {
-        GetItems();
-      } else {
-        history.push("/");
-      }
-    } else {
-      history.push("/");
+  // Memoized state options
+  const stateOptions = useMemo(
+    () => statesofIndia.map((state) => state.name),
+    []
+  );
+
+  // Helper function to get user info from token
+  const getUserInfo = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+
+    try {
+      const nameEmail = Token(token);
+      if (!nameEmail) return null;
+
+      const parts = nameEmail.split(",");
+      return {
+        name: parts[0] || "",
+        email: parts[1] || "",
+        contact: parts[2] || "",
+        sellerId: parts[3] || "",
+      };
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      return null;
     }
   }, []);
 
-  const handleOnChange = (setter) => (e) => {
-    setter(e.target.value);
-  };
-
-  const handleEdit = (e, id) => {
-    e.preventDefault();
-    const edit = { ...loadEdit, [id]: false };
-    setLoadEdit(edit);
-    setIndex(id);
-    const keyValue = data2[id];
-    if (keyValue) {
-      setAddress(keyValue.Address);
-      setQuantity(keyValue.Quantity);
-      setPrice(keyValue.Price);
-      setContact(keyValue.Contact);
-    }
-  };
-
-  const handleDelete = (e, id) => {
-    e.preventDefault();
-    const confirmBox = window.confirm("Do you really want to delete this field?");
-    if (confirmBox) {
-      const keyValue = data2[id];
-      const data = {
-        token: localStorage.getItem("token"),
-        id: keyValue._id,
-      };
-      axios
-        .post(baseUrl + "/deleteItems", data)
-        .then((response) => {
-          if (response.data.status) {
-            alert("Data is Deleted");
-            GetItems();
-          } else {
-            alert(response.data.message);
-          }
-        })
-        .catch((err) => console.log(err));
-    }
-  };
-
-  const handleSave = (e, id) => {
-    e.preventDefault();
-    const keyValue = data2[id];
-    if (contact.length !== 10) {
-      setError("Contact number must be 10 digits");
+  // Initialize component
+  useEffect(() => {
+    const user = getUserInfo();
+    if (!user) {
+      history.push("/");
       return;
     }
 
-    const data = {
-      token: localStorage.getItem("token"),
-      id: keyValue._id,
-      price: price,
-      quantity: quantity,
-      contact: contact,
-      address: address,
-    };
-    axios
-      .post(baseUrl + "/editItems", data)
-      .then((response) => {
-        if (response.data.status) {
-          alert("Data is Updated");
-          GetItems();
-        } else {
-          alert(response.data.message);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
+    setUserInfo(user);
+    fetchItems();
+  }, [history, getUserInfo]);
 
-  const GetItems = () => {
-    setLoad(true);
-    axios
-      .post(baseUrl + "/allItems", { token: localStorage.getItem("token") })
-      .then((response) => {
-        setLoad(false);
-        if (response.data.status) {
-          if (response.data.message.length !== 0) {
-            const edit = {};
-            response.data.message.forEach((_, i) => {
-              edit[i] = true;
-            });
-            setLoadEdit(edit);
-            setData2(response.data.message);
-            setPrompt(1);
-          } else {
-            setPrompt(0);
-          }
-        } else {
-          setPrompt(0);
+  // Auto-hide success message
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Fetch items from server
+  const fetchItems = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(`${baseUrl}/allItems`, { token });
+
+      if (response.data.status) {
+        const items = response.data.message || [];
+        setData2(items);
+
+        // Initialize action loading states
+        const loadingStates = {};
+        items.forEach((_, index) => {
+          loadingStates[index] = false;
+        });
+        setActionLoading(loadingStates);
+      } else {
+        setError(response.data.message || "Failed to fetch items");
+        setData2([]);
+      }
+    } catch (err) {
+      console.error("Error fetching items:", err);
+      setError(
+        err.response?.data?.message || err.message || "Failed to fetch items"
+      );
+      setData2([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Handle input changes
+  const handleInputChange = useCallback(
+    (field) => (e) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
+
+      // Clear error when user starts typing
+      if (error) setError("");
+    },
+    [error]
+  );
+
+  // Handle edit button click
+  const handleEdit = useCallback(
+    (index) => {
+      setEditingIndex(index);
+      const item = data2[index];
+      if (item) {
+        setFormData({
+          price: item.price?.value || item.Price || "",
+          quantity: item.quantity?.value || item.Quantity || "",
+          contact: item.contact || item.Contact || "",
+          street: item.address?.street || item.Address || "",
+          city: item.address?.city || "",
+          state: item.address?.state || "",
+          pinCode: item.address?.pinCode || "",
+        });
+      }
+      setError("");
+    },
+    [data2]
+  );
+
+  // Handle save button click
+  const handleSave = useCallback(
+    async (index) => {
+      try {
+        // Validation
+        if (formData.contact.length !== 10) {
+          setError("Contact number must be exactly 10 digits");
+          return;
         }
-      })
-      .catch((err) => {
-        setLoad(false);
-        console.log(err);
-      });
-  };
+
+        if (
+          !formData.price ||
+          !formData.quantity ||
+          !formData.street ||
+          !formData.city ||
+          !formData.state ||
+          !formData.pinCode
+        ) {
+          setError("All fields are required");
+          return;
+        }
+
+        if (
+          formData.pinCode.length !== 6 ||
+          !/^\d{6}$/.test(formData.pinCode)
+        ) {
+          setError("Pin code must be exactly 6 digits");
+          return;
+        }
+
+        setActionLoading((prev) => ({ ...prev, [index]: true }));
+        setError("");
+        setSuccessMessage("");
+
+        const item = data2[index];
+        const requestData = {
+          token: localStorage.getItem("token"),
+          id: item._id,
+          price: formData.price,
+          quantity: formData.quantity,
+          contact: formData.contact,
+          address: {
+            street: formData.street,
+            city: formData.city,
+            state: formData.state,
+            pinCode: formData.pinCode,
+          },
+        };
+
+        const response = await axios.post(`${baseUrl}/editItems`, requestData);
+
+        if (response.data.status) {
+          setSuccessMessage("Item updated successfully!");
+          setEditingIndex(-1);
+          setFormData({
+            price: "",
+            quantity: "",
+            contact: "",
+            street: "",
+            city: "",
+            state: "",
+            pinCode: "",
+          });
+          await fetchItems();
+        } else {
+          setError(response.data.message || "Failed to update item");
+        }
+      } catch (err) {
+        console.error("Error updating item:", err);
+        setError(
+          err.response?.data?.message || err.message || "Failed to update item"
+        );
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [index]: false }));
+      }
+    },
+    [formData, data2, fetchItems]
+  );
+
+  // Handle delete button click
+  const handleDelete = useCallback(
+    async (index) => {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this item? This action cannot be undone."
+      );
+      if (!confirmDelete) return;
+
+      try {
+        setActionLoading((prev) => ({ ...prev, [index]: true }));
+        setError("");
+        setSuccessMessage("");
+
+        const item = data2[index];
+        const requestData = {
+          token: localStorage.getItem("token"),
+          id: item._id,
+        };
+
+        const response = await axios.post(
+          `${baseUrl}/deleteItems`,
+          requestData
+        );
+
+        if (response.data.status) {
+          setSuccessMessage("Item deleted successfully!");
+          await fetchItems();
+        } else {
+          setError(response.data.message || "Failed to delete item");
+        }
+      } catch (err) {
+        console.error("Error deleting item:", err);
+        setError(
+          err.response?.data?.message || err.message || "Failed to delete item"
+        );
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [index]: false }));
+      }
+    },
+    [data2, fetchItems]
+  );
+
+  // Handle cancel edit
+  const handleCancelEdit = useCallback(() => {
+    setEditingIndex(-1);
+    setFormData({
+      price: "",
+      quantity: "",
+      contact: "",
+      street: "",
+      city: "",
+      state: "",
+      pinCode: "",
+    });
+    setError("");
+  }, []);
+
+  // Autocomplete component factory
+  const createAutocomplete = useCallback(
+    (
+      id,
+      options,
+      value,
+      onChange,
+      placeholder,
+      disabled = false,
+      noOptionsText = "No options found"
+    ) => (
+      <Autocomplete
+        id={id}
+        options={options}
+        value={value || null}
+        disabled={disabled}
+        onChange={(event, newValue) => onChange(newValue || "")}
+        renderInput={(params) => (
+          <div className="autocomplete-wrapper">
+            <TextField
+              {...params}
+              placeholder={placeholder}
+              variant="outlined"
+              className="mui-autocomplete"
+              required
+              disabled={disabled}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <div className="custom-endAdornment">
+                    {value && (
+                      <button
+                        type="button"
+                        className="custom-clear-btn"
+                        onClick={() => onChange("")}
+                        aria-label="Clear selection"
+                        disabled={disabled}
+                      >
+                        ✕
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="custom-dropdown-btn"
+                      aria-label="Toggle dropdown"
+                      disabled={disabled}
+                    >
+                      ▼
+                    </button>
+                  </div>
+                ),
+              }}
+            />
+          </div>
+        )}
+        noOptionsText={noOptionsText}
+        clearOnEscape
+        openOnFocus
+        selectOnFocus
+        handleHomeEndKeys
+        disableClearable
+      />
+    ),
+    []
+  );
+
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="App-items">
+        <Header />
+        <Container className="loading-container">
+          <div className="loading-content">
+            <Spinner animation="border" variant="primary" />
+            <h5 className="loading-text">Loading your items...</h5>
+          </div>
+        </Container>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="App-items">
       <Header />
       <div className="App-header">
-        <div>
-          <h2 className="mb-4">
-            My Items
-            {!load && (
-              <Button variant="primary" onClick={GetItems} className="refresh-button">
-                Refresh
+        <Container>
+          <div className="header-section">
+            <h2 className="page-title">My Products</h2>
+            <div className="header-actions">
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={fetchItems}
+                disabled={loading}
+                className="refresh-button"
+              >
+                {loading ? <Spinner animation="border" size="sm" /> : "Refresh"}
               </Button>
-            )}
-            {load && <Spinner animation="border" variant="primary" />}
-          </h2>
+            </div>
+          </div>
 
-          {error && <Alert variant="danger">{error}</Alert>}
-
-          {prompt === 1 && (
-            <Table striped bordered hover variant="dark">
-              <thead>
-                <tr>
-                  <th>S No.</th>
-                  <th>Product</th>
-                  <th>Variety</th>
-                  <th>Price (per Kg.)</th>
-                  <th>Quantity (in Kgs.)</th>
-                  <th>Contact Number</th>
-                  <th>Address</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data2.map((listValue, i) => (
-                  <tr key={i}>
-                    <td>{i + 1}.</td>
-                    <td>
-                      <Form.Control
-                        type="text"
-                        value={listValue.Product}
-                        disabled
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="text"
-                        value={listValue.Variety}
-                        disabled
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="number"
-                        value={listValue.Price}
-                        onChange={handleOnChange(setPrice)}
-                        disabled={i !== index || loadEdit[i]}
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="number"
-                        value={listValue.Quantity}
-                        onChange={handleOnChange(setQuantity)}
-                        disabled={i !== index || loadEdit[i]}
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="text"
-                        value={listValue.Contact}
-                        onChange={handleOnChange(setContact)}
-                        disabled={i !== index || loadEdit[i]}
-                      />
-                    </td>
-                    <td>
-                      <Form.Control
-                        as="textarea"
-                        value={listValue.Address}
-                        onChange={handleOnChange(setAddress)}
-                        disabled={i !== index || loadEdit[i]}
-                      />
-                    </td>
-                    <td>
-                      {loadEdit[i] ? (
-                        <Button
-                          variant="info"
-                          onClick={(e) => handleEdit(e, i)}
-                        >
-                          Edit
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="success"
-                          onClick={(e) => handleSave(e, i)}
-                        >
-                          Save
-                        </Button>
-                      )}
-                      <Button
-                        variant="danger"
-                        onClick={(e) => handleDelete(e, i)}
-                        className="ml-2"
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+          {/* Success Alert */}
+          {successMessage && (
+            <Alert
+              variant="success"
+              dismissible
+              onClose={() => setSuccessMessage("")}
+              className="alert-message"
+            >
+              <strong>✅ Success:</strong> {successMessage}
+            </Alert>
           )}
-          {prompt === 0 && (
-            <div style={{ paddingTop: "10px" }}>
-              <h6>No Items Found</h6>
+
+          {/* Error Alert */}
+          {error && (
+            <Alert
+              variant="danger"
+              dismissible
+              onClose={() => setError("")}
+              className="alert-message"
+            >
+              <strong>⚠️ Error:</strong> {error}
+            </Alert>
+          )}
+
+          {/* Items Display */}
+          {data2.length > 0 ? (
+            <div className="items-grid">
+              {data2.map((item, index) => (
+                <Card key={item._id || index} className="item-card">
+                  <div className="item-image-container">
+                    <img
+                      src={`${baseUrl}/static/images/${item._id}.jpg`}
+                      alt={item.product || item.Product}
+                      className="item-image"
+                      onError={(e) => {
+                        e.target.src = "/logo192.png";
+                      }}
+                    />
+                    <Badge variant="success" className="availability-badge">
+                      Available
+                    </Badge>
+                  </div>
+
+                  <Card.Body className="item-content">
+                    <div className="item-header">
+                      <h3 className="item-title">
+                        {item.product || item.Product}
+                      </h3>
+                      <Badge variant="info" className="variety-badge">
+                        {item.variety || item.Variety}
+                      </Badge>
+                    </div>
+
+                    <div className="item-details">
+                      {editingIndex === index ? (
+                        // Edit Mode
+                        <div className="edit-form">
+                          <div className="form-group">
+                            <label className="form-label">Price (₹/Kg)</label>
+                            <input
+                              type="number"
+                              className="form-control modern-input"
+                              value={formData.price}
+                              onChange={handleInputChange("price")}
+                              placeholder="Enter price"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Quantity (Kg)</label>
+                            <input
+                              type="number"
+                              className="form-control modern-input"
+                              value={formData.quantity}
+                              onChange={handleInputChange("quantity")}
+                              placeholder="Enter quantity"
+                              min="0"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Contact Number</label>
+                            <input
+                              type="tel"
+                              className="form-control modern-input"
+                              value={formData.contact}
+                              onChange={handleInputChange("contact")}
+                              placeholder="Enter 10-digit contact number"
+                              maxLength="10"
+                              pattern="[0-9]{10}"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Street Address</label>
+                            <input
+                              type="text"
+                              className="form-control modern-input"
+                              value={formData.street}
+                              onChange={handleInputChange("street")}
+                              placeholder="Enter street address"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">City</label>
+                            <input
+                              type="text"
+                              className="form-control modern-input"
+                              value={formData.city}
+                              onChange={handleInputChange("city")}
+                              placeholder="Enter city"
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">State</label>
+                            {createAutocomplete(
+                              "state-autocomplete",
+                              stateOptions,
+                              formData.state,
+                              (value) =>
+                                handleInputChange("state")({
+                                  target: { value },
+                                }),
+                              "Search and select state...",
+                              false,
+                              "No states found"
+                            )}
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Pin Code</label>
+                            <input
+                              type="text"
+                              className="form-control modern-input"
+                              value={formData.pinCode}
+                              onChange={handleInputChange("pinCode")}
+                              placeholder="Enter 6-digit pin code"
+                              maxLength="6"
+                              pattern="[0-9]{6}"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        // View Mode
+                        <div className="item-info">
+                          <div className="detail-row">
+                            <span className="detail-label">Price:</span>
+                            <span className="detail-value price">
+                              ₹{item.price?.value || item.Price}/
+                              {item.price?.unit || "Kg"}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Quantity:</span>
+                            <span className="detail-value">
+                              {item.quantity?.value || item.Quantity}{" "}
+                              {item.quantity?.unit || "Kg"}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Contact:</span>
+                            <span className="detail-value">
+                              {item.contact || item.Contact}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Address:</span>
+                            <span className="detail-value address-text">
+                              {item.address?.street || item.Address}
+                              {item.address?.city && `, ${item.address.city}`}
+                              {item.address?.state && `, ${item.address.state}`}
+                            </span>
+                          </div>
+                          {item.address?.pinCode && (
+                            <div className="detail-row">
+                              <span className="detail-label">Pin Code:</span>
+                              <span className="detail-value">
+                                {item.address.pinCode}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="item-actions">
+                      {editingIndex === index ? (
+                        <div className="edit-actions">
+                          <Button
+                            variant="success"
+                            onClick={() => handleSave(index)}
+                            disabled={actionLoading[index]}
+                            className="save-button"
+                          >
+                            {actionLoading[index] ? (
+                              <>
+                                <Spinner
+                                  animation="border"
+                                  size="sm"
+                                  className="button-spinner"
+                                />
+                                Saving...
+                              </>
+                            ) : (
+                              "Save Changes"
+                            )}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={handleCancelEdit}
+                            disabled={actionLoading[index]}
+                            className="cancel-button"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="view-actions">
+                          <Button
+                            variant="primary"
+                            onClick={() => handleEdit(index)}
+                            disabled={actionLoading[index]}
+                            className="edit-button"
+                          >
+                            Edit Details
+                          </Button>
+                          <Button
+                            variant="danger"
+                            onClick={() => handleDelete(index)}
+                            disabled={actionLoading[index]}
+                            className="delete-button"
+                          >
+                            {actionLoading[index] ? (
+                              <>
+                                <Spinner
+                                  animation="border"
+                                  size="sm"
+                                  className="button-spinner"
+                                />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="no-items">
+              <Alert variant="info" className="no-items-alert">
+                <h5>📦 No Products Found</h5>
+                <p className="mb-0">
+                  You haven't added any products yet. Start by adding your first
+                  product to reach potential buyers!
+                </p>
+                <Button
+                  variant="outline-info"
+                  onClick={() => history.push("/seller")}
+                  className="mt-3 add-product-button"
+                >
+                  Add Your First Product
+                </Button>
+              </Alert>
             </div>
           )}
-        </div>
+        </Container>
       </div>
       <Footer />
     </div>

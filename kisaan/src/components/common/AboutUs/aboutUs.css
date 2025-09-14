@@ -1,26 +1,330 @@
-.about-us {
-    display: flex;
+.App-about {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.App-header {
+  flex: 1;
+  padding: 2rem 0;
+  min-height: max-content;
+}
+
+/* Container Styling */
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-weight: 700;
+  margin: 0;
+  font-size: 2.5rem;
+  flex: 1;
+}
+
+.platform-badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: none;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* About Content */
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Card Styling */
+.about-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.about-card .card-body {
+  padding: 2rem;
+}
+
+.card-icon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.section-description {
+  color: #495057;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+/* Mission Card */
+.mission-card {
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  border: 1px solid #dee2e6;
+}
+
+/* Vision Card */
+.vision-card {
+  background: linear-gradient(135deg, #fff3e0, #fce4ec);
+  border: 1px solid #dee2e6;
+}
+
+/* Features Grid */
+.features-grid {
+  margin: 2rem 0;
+}
+
+.feature-col {
+  margin-bottom: 1.5rem;
+}
+
+.feature-card {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card .card-body {
+  padding: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.feature-description {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+/* Impact Card */
+.impact-card {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border: 1px solid #dee2e6;
+}
+
+.impact-stats {
+  margin-top: 1.5rem;
+}
+
+.stat-col {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Team Card */
+.team-card {
+  background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+  border: 1px solid #dee2e6;
+}
+
+.commitment-points {
+  margin-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.commitment-point {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.commitment-point:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(5px);
+}
+
+.point-icon {
+  color: #28a745;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.commitment-point span:last-child {
+  color: #495057;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .App-header {
+    padding: 1rem 0;
+  }
+  
+  .container {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+  
+  .header-section {
     flex-direction: column;
-    min-height: 100vh; /* Ensure it takes up full height */
+    gap: 1rem;
+    text-align: center;
   }
   
-  .about-content {
-    flex: 1; /* Allow this section to grow */
-    max-width: 800px; /* Optional: limit the width */
-    margin: 0 auto; /* Center the content */
-    padding: 40px; /* Padding for spacing */
-    text-align: center; /* Center the text */
-    color: #333; /* Dark text for readability */
+  .page-title {
+    font-size: 2rem;
   }
   
-  .about-title {
-    font-size: 36px; /* Larger font size for the title */
-    margin-bottom: 20px; /* Space below title */
+  .platform-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
   }
   
-  .about-description {
-    font-size: 18px; /* Standard font size for descriptions */
-    line-height: 1.5; /* Improve readability with line height */
-    margin-bottom: 20px; /* Space below paragraphs */
+  .about-card .card-body {
+    padding: 1.5rem;
   }
+  
+  .card-icon {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .section-description {
+    font-size: 1rem;
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+  }
+  
+  .feature-title {
+    font-size: 1.1rem;
+  }
+  
+  .feature-description {
+    font-size: 0.9rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .commitment-points {
+    grid-template-columns: 1fr;
+  }
+  
+  .commitment-point {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .about-card .card-body {
+    padding: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .feature-card .card-body {
+    padding: 1rem;
+  }
+  
+  .stat-number {
+    font-size: 1.8rem;
+  }
+}
   
