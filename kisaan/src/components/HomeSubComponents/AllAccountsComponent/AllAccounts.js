@@ -17,9 +17,11 @@ import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
+import { useTranslate } from "../../../hooks/useTranslate";
 
 export default function AllAccounts() {
   const history = useHistory();
+  const { t } = useTranslate();
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -371,7 +373,7 @@ export default function AllAccounts() {
         <Container className="loading-container">
           <div className="loading-content">
             <Spinner animation="border" variant="primary" />
-            <h5 className="loading-text">Loading your items...</h5>
+            <h5 className="loading-text">{t("Loading your items...")}</h5>
           </div>
         </Container>
         <Footer />
@@ -385,7 +387,7 @@ export default function AllAccounts() {
       <div className="App-header">
         <Container>
           <div className="header-section">
-            <h2 className="page-title">My Products</h2>
+            <h2 className="page-title">{t("My Products")}</h2>
             <div className="header-actions">
               <Button
                 variant="outline-primary"
@@ -394,7 +396,11 @@ export default function AllAccounts() {
                 disabled={loading}
                 className="refresh-button"
               >
-                {loading ? <Spinner animation="border" size="sm" /> : "Refresh"}
+                {loading ? (
+                  <Spinner animation="border" size="sm" />
+                ) : (
+                  t("Refresh")
+                )}
               </Button>
             </div>
           </div>
@@ -407,7 +413,7 @@ export default function AllAccounts() {
               onClose={() => setSuccessMessage("")}
               className="alert-message"
             >
-              <strong>✅ Success:</strong> {successMessage}
+              <strong>✅{t("Success:")}</strong> {t(`${successMessage}`)}
             </Alert>
           )}
 
@@ -419,7 +425,7 @@ export default function AllAccounts() {
               onClose={() => setError("")}
               className="alert-message"
             >
-              <strong>⚠️ Error:</strong> {error}
+              <strong>⚠️{t("Error:")}</strong> {t(`${error}`)}
             </Alert>
           )}
 
@@ -438,7 +444,7 @@ export default function AllAccounts() {
                       }}
                     />
                     <Badge variant="success" className="availability-badge">
-                      Available
+                      {t("Available")}
                     </Badge>
                   </div>
 
@@ -457,66 +463,74 @@ export default function AllAccounts() {
                         // Edit Mode
                         <div className="edit-form">
                           <div className="form-group">
-                            <label className="form-label">Price (₹/Kg)</label>
+                            <label className="form-label">
+                              {t("Price (₹/Kg)")}
+                            </label>
                             <input
                               type="number"
                               className="form-control modern-input"
                               value={formData.price}
                               onChange={handleInputChange("price")}
-                              placeholder="Enter price"
+                              placeholder={t("Enter price")}
                               min="0"
                               step="0.01"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label className="form-label">Quantity (Kg)</label>
+                            <label className="form-label">
+                              {t("Quantity (Kg)")}
+                            </label>
                             <input
                               type="number"
                               className="form-control modern-input"
                               value={formData.quantity}
                               onChange={handleInputChange("quantity")}
-                              placeholder="Enter quantity"
+                              placeholder={t("Enter quantity")}
                               min="0"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label className="form-label">Contact Number</label>
+                            <label className="form-label">
+                              {t("Contact Number")}
+                            </label>
                             <input
                               type="tel"
                               className="form-control modern-input"
                               value={formData.contact}
                               onChange={handleInputChange("contact")}
-                              placeholder="Enter 10-digit contact number"
+                              placeholder={t("Enter 10-digit contact number")}
                               maxLength="10"
                               pattern="[0-9]{10}"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label className="form-label">Street Address</label>
+                            <label className="form-label">
+                              {t("Street Address")}
+                            </label>
                             <input
                               type="text"
                               className="form-control modern-input"
                               value={formData.street}
                               onChange={handleInputChange("street")}
-                              placeholder="Enter street address"
+                              placeholder={t("Enter street address")}
                             />
                           </div>
 
                           <div className="form-group">
-                            <label className="form-label">City</label>
+                            <label className="form-label">{t("City")}</label>
                             <input
                               type="text"
                               className="form-control modern-input"
                               value={formData.city}
                               onChange={handleInputChange("city")}
-                              placeholder="Enter city"
+                              placeholder={t("Enter city")}
                             />
                           </div>
                           <div className="form-group">
-                            <label className="form-label">State</label>
+                            <label className="form-label">{t("State")}</label>
                             {createAutocomplete(
                               "state-autocomplete",
                               stateOptions,
@@ -525,20 +539,22 @@ export default function AllAccounts() {
                                 handleInputChange("state")({
                                   target: { value },
                                 }),
-                              "Search and select state...",
+                              t("Search and select state..."),
                               false,
                               "No states found"
                             )}
                           </div>
 
                           <div className="form-group">
-                            <label className="form-label">Pin Code</label>
+                            <label className="form-label">
+                              {t("Pin Code")}
+                            </label>
                             <input
                               type="text"
                               className="form-control modern-input"
                               value={formData.pinCode}
                               onChange={handleInputChange("pinCode")}
-                              placeholder="Enter 6-digit pin code"
+                              placeholder={t("Enter 6-digit pin code")}
                               maxLength="6"
                               pattern="[0-9]{6}"
                             />
@@ -548,27 +564,33 @@ export default function AllAccounts() {
                         // View Mode
                         <div className="item-info">
                           <div className="detail-row">
-                            <span className="detail-label">Price:</span>
+                            <span className="detail-label">{t("Price:")}</span>
                             <span className="detail-value price">
                               ₹{item.price?.value || item.Price}/
                               {item.price?.unit || "Kg"}
                             </span>
                           </div>
                           <div className="detail-row">
-                            <span className="detail-label">Quantity:</span>
+                            <span className="detail-label">
+                              {t("Quantity:")}
+                            </span>
                             <span className="detail-value">
                               {item.quantity?.value || item.Quantity}{" "}
                               {item.quantity?.unit || "Kg"}
                             </span>
                           </div>
                           <div className="detail-row">
-                            <span className="detail-label">Contact:</span>
+                            <span className="detail-label">
+                              {t("Contact:")}
+                            </span>
                             <span className="detail-value">
                               {item.contact || item.Contact}
                             </span>
                           </div>
                           <div className="detail-row">
-                            <span className="detail-label">Address:</span>
+                            <span className="detail-label">
+                              {t("Address:")}
+                            </span>
                             <span className="detail-value address-text">
                               {item.address?.street || item.Address}
                               {item.address?.city && `, ${item.address.city}`}
@@ -577,7 +599,9 @@ export default function AllAccounts() {
                           </div>
                           {item.address?.pinCode && (
                             <div className="detail-row">
-                              <span className="detail-label">Pin Code:</span>
+                              <span className="detail-label">
+                                {t("Pin Code:")}
+                              </span>
                               <span className="detail-value">
                                 {item.address.pinCode}
                               </span>
@@ -603,10 +627,10 @@ export default function AllAccounts() {
                                   size="sm"
                                   className="button-spinner"
                                 />
-                                Saving...
+                                {t("Saving...")}
                               </>
                             ) : (
-                              "Save Changes"
+                              t("Save Changes")
                             )}
                           </Button>
                           <Button
@@ -615,7 +639,7 @@ export default function AllAccounts() {
                             disabled={actionLoading[index]}
                             className="cancel-button"
                           >
-                            Cancel
+                            {t("Cancel")}
                           </Button>
                         </div>
                       ) : (
@@ -626,7 +650,7 @@ export default function AllAccounts() {
                             disabled={actionLoading[index]}
                             className="edit-button"
                           >
-                            Edit Details
+                            {t("Edit Details")}
                           </Button>
                           <Button
                             variant="danger"
@@ -641,10 +665,10 @@ export default function AllAccounts() {
                                   size="sm"
                                   className="button-spinner"
                                 />
-                                Deleting...
+                                {t("Deleting...")}
                               </>
                             ) : (
-                              "Delete"
+                              t("Delete")
                             )}
                           </Button>
                         </div>
@@ -657,17 +681,18 @@ export default function AllAccounts() {
           ) : (
             <div className="no-items">
               <Alert variant="info" className="no-items-alert">
-                <h5>📦 No Products Found</h5>
+                <h5>📦 {t("No Products Found")}</h5>
                 <p className="mb-0">
-                  You haven't added any products yet. Start by adding your first
-                  product to reach potential buyers!
+                  {t(
+                    "You haven't added any products yet. Start by adding your first product to reach potential buyers!"
+                  )}
                 </p>
                 <Button
                   variant="outline-info"
                   onClick={() => history.push("/seller")}
                   className="mt-3 add-product-button"
                 >
-                  Add Your First Product
+                  {t("Add Your First Product")}
                 </Button>
               </Alert>
             </div>

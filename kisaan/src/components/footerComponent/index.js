@@ -2,58 +2,66 @@ import React, { useCallback, useMemo } from "react";
 import "./footer.css";
 import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faFacebookF, 
-  faTwitter, 
-  faLinkedinIn, 
-  faInstagram
+import {
+  faFacebookF,
+  faTwitter,
+  faLinkedinIn,
+  faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { useTranslate } from "../../hooks/useTranslate";
+import LanguageSwitcher from "../common/LanguageSwitcher";
 
 // Constants for better maintainability
 const SOCIAL_LINKS = [
-  { 
-    icon: faFacebookF, 
-    href: "https://facebook.com/kisaan", 
-    label: "Facebook"
+  {
+    icon: faFacebookF,
+    href: "https://facebook.com/kisaan",
+    label: "Facebook",
   },
-  { 
-    icon: faTwitter, 
-    href: "https://twitter.com/kisaan", 
-    label: "Twitter"
+  {
+    icon: faTwitter,
+    href: "https://twitter.com/kisaan",
+    label: "Twitter",
   },
-  { 
-    icon: faLinkedinIn, 
-    href: "https://linkedin.com/company/kisaan", 
-    label: "LinkedIn"
+  {
+    icon: faLinkedinIn,
+    href: "https://linkedin.com/company/kisaan",
+    label: "LinkedIn",
   },
-  { 
-    icon: faInstagram, 
-    href: "https://instagram.com/kisaan", 
-    label: "Instagram"
-  }
+  {
+    icon: faInstagram,
+    href: "https://instagram.com/kisaan",
+    label: "Instagram",
+  },
 ];
-
-
 
 // Custom hook for navigation
 const useFooterNavigation = () => {
   const history = useHistory();
-  
-  const navigateTo = useCallback((path) => {
-    history.push(path);
-  }, [history]);
-  
+
+  const navigateTo = useCallback(
+    (path) => {
+      history.push(path);
+    },
+    [history]
+  );
+
   return { navigateTo };
 };
 
 export default function Footer() {
   const { navigateTo } = useFooterNavigation();
+  const { t } = useTranslate(); // Add this
+
   const currentYear = useMemo(() => new Date().getFullYear(), []);
 
-  const handleNavigation = useCallback((path) => {
-    navigateTo(path);
-  }, [navigateTo]);
+  const handleNavigation = useCallback(
+    (path) => {
+      navigateTo(path);
+    },
+    [navigateTo]
+  );
 
   return (
     <footer className="footer">
@@ -65,11 +73,12 @@ export default function Footer() {
               <span className="brand-icon">🌾</span>
               <span className="brand-name">Kisaan</span>
             </div>
-            
+
             <div className="footer-message">
-              Empowering farmers, connecting communities
+              {t("Empowering farmers, connecting communities")}
             </div>
           </div>
+          <LanguageSwitcher></LanguageSwitcher>
 
           {/* Right side - Social and copyright */}
           <div className="footer-right">
@@ -87,9 +96,11 @@ export default function Footer() {
                 </a>
               ))}
             </div>
-            
+
             <div className="copyright">
-              © {currentYear} Kisaan. Made with <FontAwesomeIcon icon={faHeart} className="heart-icon" /> for farmers.
+              © {currentYear} {t("Kisaan. Made with")}{" "}
+              <FontAwesomeIcon icon={faHeart} className="heart-icon" />{" "}
+              {t("for farmers")}.
             </div>
           </div>
         </div>

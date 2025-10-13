@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import './otpVerify.css';
+import "./otpVerify.css";
 import { Spinner, Alert } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { useHistory } from "react-router-dom";
-
+import { useTranslate } from "../../hooks/useTranslate";
 export default function OtpVerify() {
   const history = useHistory();
+  const { t } = useTranslate();
   const [email, setEmail] = useState("");
   const [send, setSend] = useState(false);
   const [enteredOtp, setEnteredOtp] = useState("");
@@ -20,7 +21,9 @@ export default function OtpVerify() {
   useEffect(() => {
     const emailFromSession = sessionStorage.getItem("email");
     if (!emailFromSession) {
-      setErrorMessage("No email found! Please start the verification process again.");
+      setErrorMessage(
+        "No email found! Please start the verification process again."
+      );
       setTimeout(() => {
         history.push("/");
       }, 3000);
@@ -49,7 +52,7 @@ export default function OtpVerify() {
     try {
       const response = await axios.post(`${baseUrl}/sendOtp`, { email });
       setLoad(false);
-      
+
       if (response.data.status) {
         setSuccessMessage("OTP sent successfully! Please check your email.");
         setSend(true);
@@ -62,15 +65,16 @@ export default function OtpVerify() {
       setLoad(false);
       console.error("Send OTP error:", err);
       setErrorMessage(
-        err.response?.data?.message || 
-        "Failed to send OTP. Please check your internet connection and try again."
+        err.response?.data?.message ||
+          "Failed to send OTP. Please check your internet connection and try again."
       );
     }
   };
 
   const handleOnChangeUserOTP = (e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
-    if (value.length <= 6) { // Limit to 6 digits
+    const value = e.target.value.replace(/\D/g, ""); // Only allow digits
+    if (value.length <= 6) {
+      // Limit to 6 digits
       setEnteredOtp(value);
       setErrorMessage(""); // Clear error when user starts typing
     }
@@ -78,13 +82,13 @@ export default function OtpVerify() {
 
   const verifyOtp = async (e) => {
     e.preventDefault();
-    
+
     // Client-side validation
     if (!enteredOtp) {
       setErrorMessage("Please enter the OTP");
       return;
     }
-    
+
     if (enteredOtp.length !== 6) {
       setErrorMessage("OTP must be 6 digits");
       return;
@@ -95,30 +99,32 @@ export default function OtpVerify() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(`${baseUrl}/verifyOtp`, { 
-        email, 
-        otp: parseInt(enteredOtp) // Ensure OTP is sent as number
+      const response = await axios.post(`${baseUrl}/verifyOtp`, {
+        email,
+        otp: parseInt(enteredOtp), // Ensure OTP is sent as number
       });
-      
+
       setLoad2(false);
-      
+
       if (response.data.status) {
         setSuccessMessage("OTP verified successfully! Redirecting...");
         sessionStorage.removeItem("email");
-        
+
         // Redirect after a short delay to show success message
         setTimeout(() => {
           history.push("/");
         }, 2000);
       } else {
-        setErrorMessage(response.data.message || "Invalid OTP. Please try again.");
+        setErrorMessage(
+          response.data.message || "Invalid OTP. Please try again."
+        );
       }
     } catch (err) {
       setLoad2(false);
       console.error("Verify OTP error:", err);
       setErrorMessage(
-        err.response?.data?.message || 
-        "Failed to verify OTP. Please check your internet connection and try again."
+        err.response?.data?.message ||
+          "Failed to verify OTP. Please check your internet connection and try again."
       );
     }
   };
@@ -133,23 +139,23 @@ export default function OtpVerify() {
   return (
     <div className="otp-container">
       <div className="otp-form">
-        <h2>OTP Verification</h2>
+        <h2>{t("OTP Verification")}</h2>
 
         {errorMessage && (
           <Alert variant="danger" className="mb-3">
-            {errorMessage}
+            {t(`${errorMessage}`)}
           </Alert>
         )}
 
         {successMessage && (
           <Alert variant="success" className="mb-3">
-            {successMessage}
+            {t(`${successMessage}`)}
           </Alert>
         )}
 
         <form onSubmit={send ? verifyOtp : sendOTP}>
           <div className="form-group">
-            <label>Email:</label>
+            <label>{t("Email")}:</label>
             <span className="email-display">{email}</span>
           </div>
 
@@ -162,10 +168,10 @@ export default function OtpVerify() {
               >
                 {load ? (
                   <>
-                    Sending... <Spinner animation="border" size="sm" />
+                    {t("Sending")}... <Spinner animation="border" size="sm" />
                   </>
                 ) : (
-                  "Send OTP"
+                  t("Send OTP")
                 )}
               </button>
             </div>
@@ -174,11 +180,11 @@ export default function OtpVerify() {
           {send && (
             <>
               <div className="form-group">
-                <label>Enter OTP:</label>
+                <label>{t("Enter OTP")}:</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter 6-digit OTP"
+                  placeholder={t("Enter 6-digit OTP")}
                   onChange={handleOnChangeUserOTP}
                   value={enteredOtp}
                   maxLength="6"
@@ -188,7 +194,7 @@ export default function OtpVerify() {
                   autoComplete="one-time-code"
                 />
                 <small className="form-text text-muted">
-                  Please enter the 6-digit OTP sent to your email
+                  {t("Please enter the 6-digit OTP sent to your email")}
                 </small>
               </div>
 
@@ -200,10 +206,11 @@ export default function OtpVerify() {
                 >
                   {load2 ? (
                     <>
-                      Verifying... <Spinner animation="border" size="sm" />
+                      {t("Verifying")}...{" "}
+                      <Spinner animation="border" size="sm" />
                     </>
                   ) : (
-                    "Verify OTP"
+                    t("Verify OTP")
                   )}
                 </button>
               </div>
@@ -211,7 +218,7 @@ export default function OtpVerify() {
               <div className="form-group text-center">
                 {!canResend && countdown > 0 ? (
                   <small className="text-muted">
-                    Resend OTP in {countdown} seconds
+                    {t("Resend OTP in")} {countdown} {t("seconds")}
                   </small>
                 ) : (
                   <button
@@ -220,7 +227,7 @@ export default function OtpVerify() {
                     onClick={resendOTP}
                     disabled={!canResend}
                   >
-                    Didn't receive OTP? Resend
+                    {t("Didn't receive OTP?")} {t("Resend")} {t("OTP")}
                   </button>
                 )}
               </div>
@@ -234,7 +241,7 @@ export default function OtpVerify() {
             className="btn btn-outline-secondary"
             onClick={() => history.push("/")}
           >
-            Back to Home
+            {t("Back to Home")}
           </button>
         </div>
       </div>

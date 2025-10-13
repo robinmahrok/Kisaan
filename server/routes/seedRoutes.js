@@ -11,6 +11,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { ObjectId } from "mongodb";
+import sharp from "sharp";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -119,16 +120,66 @@ export default function (router) {
     }
   });
 
-  router.post("/uploadFile", (req, res) => {
-    let imageFile = req.files.file;
-    imageFile.mv(
-      `./public/images/` + req.body.fileName + `.jpg`,
-      function (err) {
-        if (err) {
-          return res.status(500).send(err);
-        } else res.status(200).send({ status: true, message: "working" });
+  router.post("/uploadFile", async (req, res) => {
+    try {
+      if (!req.files || !req.files.file) {
+        return res.status(400).send({
+          status: false,
+          message: "No file uploaded",
+        });
       }
-    );
+
+      let imageFile = req.files.file;
+      let fileName = req.body.fileName;
+
+      if (!fileName) {
+        return res.status(400).send({
+          status: false,
+          message: "No filename provided",
+        });
+      }
+
+      // Define the output path
+      const outputPath = `./public/images/${fileName}.jpg`;
+
+      // Check if file is an image
+      const allowedMimeTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+      ];
+      if (!allowedMimeTypes.includes(imageFile.mimetype)) {
+        return res.status(400).send({
+          status: false,
+          message: "Only image files are allowed (JPEG, PNG, WebP, GIF)",
+        });
+      }
+
+      // Compress and save the image using Sharp
+      await sharp(imageFile.data)
+        .resize(800, 600, {
+          fit: "inside",
+          withoutEnlargement: true,
+        }) // Resize to max 800x600, maintaining aspect ratio
+        .jpeg({
+          quality: 80, // Compress to 80% quality
+          progressive: true,
+        })
+        .toFile(outputPath);
+
+      res.status(200).send({
+        status: true,
+        message: "Image uploaded and compressed successfully",
+      });
+    } catch (err) {
+      console.error("Error processing image:", err);
+      res.status(500).send({
+        status: false,
+        message: "Failed to process image: " + err.message,
+      });
+    }
   });
 
   router.post("/addSellerData", async (req, res) => {

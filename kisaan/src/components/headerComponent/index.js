@@ -8,15 +8,7 @@ import React, {
 import "./header.css";
 import { useHistory } from "react-router-dom";
 import { Token } from "../../utils/utils";
-
-// Constants for better maintainability
-const NAVIGATION_ITEMS = [
-  { path: "/home", label: "Home" },
-  { path: "/allAccounts", label: "My Items" },
-  { path: "/request", label: "Requests" },
-  { path: "/aboutUs", label: "About Us" },
-  { path: "/ContactUs", label: "Contact Us" },
-];
+import { useTranslate } from "../../hooks/useTranslate";
 
 // Custom hook for user authentication
 const useUserAuth = () => {
@@ -74,6 +66,19 @@ export default function Header() {
 
   const { getUserFromToken } = useUserAuth();
   const { navigateTo, handleLogout } = useNavigation();
+  const { t } = useTranslate();
+
+  // Navigation items with translations
+  const navigationItems = useMemo(
+    () => [
+      { path: "/home", label: t("Home") },
+      { path: "/allAccounts", label: t("My Items") },
+      { path: "/request", label: t("Requests") },
+      { path: "/aboutUs", label: t("About Us") },
+      { path: "/ContactUs", label: t("Contact Us") },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     const userData = getUserFromToken();
@@ -175,8 +180,8 @@ export default function Header() {
   }, [isUserMenuOpen]);
 
   const userMenuItems = useMemo(
-    () => [{ label: "Log Out", action: handleLogout }],
-    [navigateTo, handleLogout]
+    () => [{ label: t("Log Out"), action: handleLogout }],
+    [t, handleLogout]
   );
 
   return (
@@ -204,7 +209,7 @@ export default function Header() {
 
         {/* Desktop Navigation - Hidden on mobile, shown on desktop */}
         <nav className="desktop-nav">
-          {NAVIGATION_ITEMS.map((item) => (
+          {navigationItems.map((item) => (
             <button
               key={item.path}
               className={`nav-item ${activeItem === item.path ? "active" : ""}`}
@@ -269,7 +274,7 @@ export default function Header() {
         ref={mobileMenuRef}
       >
         <div className="mobile-nav-content">
-          {NAVIGATION_ITEMS.map((item) => (
+          {navigationItems.map((item) => (
             <button
               key={item.path}
               className={`mobile-nav-item ${

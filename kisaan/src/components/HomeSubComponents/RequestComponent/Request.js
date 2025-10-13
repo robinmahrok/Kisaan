@@ -1,32 +1,40 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Request.css";
-import { Table, Spinner, Button, Alert, Container, Badge } from "react-bootstrap";
+import {
+  Table,
+  Spinner,
+  Button,
+  Alert,
+  Container,
+  Badge,
+} from "react-bootstrap";
 import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
-
+import { useTranslate } from "../../../hooks/useTranslate";
 // Constants
 const REQUEST_STATUS = {
-  PENDING: 'pending',
-  ACCEPTED: 'accepted',
-  REJECTED: 'rejected'
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  REJECTED: "rejected",
 };
 
 const STATUS_DISPLAY = {
-  [REQUEST_STATUS.PENDING]: { variant: 'warning', text: 'Pending' },
-  [REQUEST_STATUS.ACCEPTED]: { variant: 'success', text: 'Approved' },
-  [REQUEST_STATUS.REJECTED]: { variant: 'danger', text: 'Rejected' }
+  [REQUEST_STATUS.PENDING]: { variant: "warning", text: "Pending" },
+  [REQUEST_STATUS.ACCEPTED]: { variant: "success", text: "Approved" },
+  [REQUEST_STATUS.REJECTED]: { variant: "danger", text: "Rejected" },
 };
 
 export default function Request() {
   const history = useHistory();
+  const { t } = useTranslate();
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
-    sellerId: ""
+    sellerId: "",
   });
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,17 +46,17 @@ export default function Request() {
   const getUserInfo = useCallback(() => {
     const token = localStorage.getItem("token");
     if (!token) return null;
-    
+
     try {
       const nameEmail = Token(token);
       if (!nameEmail) return null;
-      
+
       const parts = nameEmail.split(",");
       return {
         name: parts[0] || "",
         email: parts[1] || "",
         contact: parts[2] || "",
-        sellerId: parts[3] || ""
+        sellerId: parts[3] || "",
       };
     } catch (error) {
       console.error("Error parsing token:", error);
@@ -63,7 +71,7 @@ export default function Request() {
       history.push("/");
       return;
     }
-    
+
     setUserInfo(user);
     fetchRequests();
   }, [history, getUserInfo]);
@@ -73,14 +81,14 @@ export default function Request() {
     try {
       setLoading(true);
       setError("");
-      
+
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No authentication token found");
       }
 
       const response = await axios.post(`${baseUrl}/allRequests`, { token });
-      
+
       if (response.data.status) {
         setRequests(response.data.message || []);
       } else {
@@ -89,7 +97,9 @@ export default function Request() {
       }
     } catch (err) {
       console.error("Error fetching requests:", err);
-      setError(err.response?.data?.message || err.message || "Failed to fetch requests");
+      setError(
+        err.response?.data?.message || err.message || "Failed to fetch requests"
+      );
       setRequests([]);
     } finally {
       setLoading(false);
@@ -97,39 +107,51 @@ export default function Request() {
   }, []);
 
   // Handle approve/deny actions
-  const handleRequestAction = useCallback(async (requestId, action) => {
-    try {
-      setActionLoading(prev => ({ ...prev, [requestId]: true }));
-      setError("");
-      setSuccessMessage("");
-      
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
+  const handleRequestAction = useCallback(
+    async (requestId, action) => {
+      try {
+        setActionLoading((prev) => ({ ...prev, [requestId]: true }));
+        setError("");
+        setSuccessMessage("");
 
-      const requestData = {
-        token,
-        id: requestId,
-        decision: action
-      };
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
 
-      const response = await axios.post(`${baseUrl}/ApproveOrDeny`, requestData);
-      
-      if (response.data.status) {
-        setSuccessMessage(`Request ${action.toLowerCase()}d successfully`);
-        // Refresh requests to show updated status
-        await fetchRequests();
-      } else {
-        setError(response.data.message || `Failed to ${action.toLowerCase()} request`);
+        const requestData = {
+          token,
+          id: requestId,
+          decision: action,
+        };
+
+        const response = await axios.post(
+          `${baseUrl}/ApproveOrDeny`,
+          requestData
+        );
+
+        if (response.data.status) {
+          setSuccessMessage(`Request ${action.toLowerCase()}d successfully`);
+          // Refresh requests to show updated status
+          await fetchRequests();
+        } else {
+          setError(
+            response.data.message || `Failed to ${action.toLowerCase()} request`
+          );
+        }
+      } catch (err) {
+        console.error(`Error ${action.toLowerCase()}ing request:`, err);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            `Failed to ${action.toLowerCase()} request`
+        );
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [requestId]: false }));
       }
-    } catch (err) {
-      console.error(`Error ${action.toLowerCase()}ing request:`, err);
-      setError(err.response?.data?.message || err.message || `Failed to ${action.toLowerCase()} request`);
-    } finally {
-      setActionLoading(prev => ({ ...prev, [requestId]: false }));
-    }
-  }, [fetchRequests]);
+    },
+    [fetchRequests]
+  );
 
   // Auto-hide success message
   useEffect(() => {
@@ -144,7 +166,10 @@ export default function Request() {
     return (
       <div className="App-request">
         <Header />
-        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: "400px" }}>
+        <Container
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: "400px" }}
+        >
           <div className="text-center">
             <Spinner animation="border" variant="primary" />
             <p className="mt-3">Loading requests...</p>
@@ -161,57 +186,79 @@ export default function Request() {
       <div className="App-header">
         <Container className="request-container">
           <div className="request-title">
-            <h2>My Requests</h2>
-            <Button 
-              variant="outline-primary" 
+            <h2>{t("My Requests")}</h2>
+            <Button
+              variant="outline-primary"
               size="sm"
-              onClick={fetchRequests} 
+              onClick={fetchRequests}
               disabled={loading}
               className="refresh-button"
             >
               {loading ? (
                 <Spinner animation="border" size="sm" />
               ) : (
-                "Refresh"
+                t("Refresh")
               )}
             </Button>
           </div>
 
           {/* Error Alert */}
           {error && (
-            <Alert variant="danger" dismissible onClose={() => setError("")} className="mt-3">
-              {error}
+            <Alert
+              variant="danger"
+              dismissible
+              onClose={() => setError("")}
+              className="mt-3"
+            >
+              {t(error)}
             </Alert>
           )}
 
           {/* Success Alert */}
           {successMessage && (
-            <Alert variant="success" dismissible onClose={() => setSuccessMessage("")} className="mt-3">
-              {successMessage}
+            <Alert
+              variant="success"
+              dismissible
+              onClose={() => setSuccessMessage("")}
+              className="mt-3"
+            >
+              {t(successMessage)}
             </Alert>
           )}
 
           {/* Requests Table */}
           {requests.length > 0 ? (
-            <Table striped bordered hover variant="dark" className="request-table mt-4">
+            <Table
+              striped
+              bordered
+              hover
+              variant="dark"
+              className="request-table mt-4"
+            >
               <thead>
                 <tr>
-                  <th>S No.</th>
-                  <th>Buyer Name</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{t("S No.")}</th>
+                  <th>{t("Buyer Name")}</th>
+                  <th>{t("Status")}</th>
+                  <th>{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {requests.map((request, index) => {
                   const status = request.status || REQUEST_STATUS.PENDING;
-                  const statusConfig = STATUS_DISPLAY[status] || STATUS_DISPLAY[REQUEST_STATUS.PENDING];
+                  const statusConfig =
+                    STATUS_DISPLAY[status] ||
+                    STATUS_DISPLAY[REQUEST_STATUS.PENDING];
                   const isActionLoading = actionLoading[request._id];
-                  
+
                   return (
                     <tr key={request._id || index}>
                       <td>{index + 1}</td>
-                      <td>{request.buyerName || request.BuyerName || "Unknown Buyer"}</td>
+                      <td>
+                        {request.buyerName ||
+                          request.BuyerName ||
+                          t("Unknown Buyer")}
+                      </td>
                       <td>
                         <Badge variant={statusConfig.variant}>
                           {statusConfig.text}
@@ -223,27 +270,31 @@ export default function Request() {
                             <Button
                               variant="success"
                               size="sm"
-                              onClick={() => handleRequestAction(request._id, "Approve")}
+                              onClick={() =>
+                                handleRequestAction(request._id, "Approve")
+                              }
                               disabled={isActionLoading}
                               className="action-button"
                             >
                               {isActionLoading ? (
                                 <Spinner animation="border" size="sm" />
                               ) : (
-                                "Approve"
+                                t("Approve")
                               )}
                             </Button>
                             <Button
                               variant="danger"
                               size="sm"
-                              onClick={() => handleRequestAction(request._id, "Deny")}
+                              onClick={() =>
+                                handleRequestAction(request._id, "Deny")
+                              }
                               disabled={isActionLoading}
                               className="action-button"
                             >
                               {isActionLoading ? (
                                 <Spinner animation="border" size="sm" />
                               ) : (
-                                "Deny"
+                                t("Deny")
                               )}
                             </Button>
                           </div>
@@ -261,8 +312,10 @@ export default function Request() {
           ) : (
             <div className="no-requests mt-4">
               <Alert variant="info" className="text-center">
-                <h5>No Requests Found</h5>
-                <p className="mb-0">You don't have any buyer requests at the moment.</p>
+                <h5>{t("No Requests Found")}</h5>
+                <p className="mb-0">
+                  {t("You don't have any buyer requests at the moment.")}
+                </p>
               </Alert>
             </div>
           )}

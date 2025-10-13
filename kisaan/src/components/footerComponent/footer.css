@@ -12,10 +12,10 @@
 }
 
 .footer-content {
-  @apply flex flex-col md:flex-row items-center justify-between gap-4;
+  @apply flex flex-col lg:flex-row items-center justify-between gap-4;
 }
 
-/* Left side - Brand and links */
+/* Left side - Brand and message */
 .footer-left {
   @apply flex flex-col md:flex-row items-center gap-6;
 }
@@ -34,6 +34,12 @@
 
 .footer-message {
   @apply text-gray-300 text-sm italic;
+}
+
+/* Center - Language Switcher */
+.footer-center {
+  @apply flex items-center justify-center;
+  order: 3;
 }
 
 /* Right side - Social and copyright */
@@ -58,8 +64,28 @@
   @apply text-red-500 animate-pulse;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
+/* Desktop layout - 3 columns */
+@media (min-width: 1024px) {
+  .footer-content {
+    @apply grid grid-cols-3 gap-8;
+  }
+  
+  .footer-left {
+    @apply justify-start;
+  }
+  
+  .footer-center {
+    @apply justify-center;
+    order: 0;
+  }
+  
+  .footer-right {
+    @apply justify-end;
+  }
+}
+
+/* Tablet layout */
+@media (max-width: 1023px) and (min-width: 768px) {
   .footer-content {
     @apply flex-col gap-6 text-center;
   }
@@ -68,8 +94,33 @@
     @apply flex-col gap-3;
   }
   
+  .footer-center {
+    order: 2;
+  }
+  
   .footer-right {
     @apply flex-col gap-3;
+    order: 3;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 767px) {
+  .footer-content {
+    @apply flex-col gap-6 text-center;
+  }
+  
+  .footer-left {
+    @apply flex-col gap-3;
+  }
+  
+  .footer-center {
+    order: 2;
+  }
+  
+  .footer-right {
+    @apply flex-col gap-3;
+    order: 3;
   }
 }
 

@@ -1,0 +1,250 @@
+.language-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+/* Trigger button - Adapts to context (header vs footer) */
+.language-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  border: 1px solid;
+  background: transparent;
+}
+
+/* Header context (light background) - default */
+.header .language-trigger {
+  color: #374151;
+  border-color: #e5e7eb;
+  background: white;
+}
+
+.header .language-trigger:hover {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #dbeafe;
+}
+
+/* Footer context (dark background) */
+.footer .language-trigger {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.footer .language-trigger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.language-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.language-name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chevron {
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.language-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  min-width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+/* Footer dropdown opens upward */
+.footer .language-dropdown {
+  top: auto;
+  bottom: calc(100% + 8px);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Language option in dropdown */
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.language-option:first-child {
+  border-radius: 12px 12px 0 0;
+}
+
+.language-option:last-child {
+  border-radius: 0 0 12px 12px;
+}
+
+.language-option:hover {
+  background-color: #f3f4f6;
+}
+
+.language-option.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.language-option.active:hover {
+  background-color: #dcedc8;
+}
+
+/* Scrollbar styling for dropdown */
+.language-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.language-dropdown::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 12px;
+}
+
+.language-dropdown::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 12px;
+}
+
+.language-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Tablet responsive */
+@media (max-width: 1024px) {
+  .language-trigger {
+    padding: 7px 10px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .language-dropdown {
+    min-width: 180px;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .language-trigger {
+    padding: 6px 8px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .language-flag {
+    font-size: 20px;
+  }
+
+  /* Adjust dropdown position */
+  .language-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 160px;
+  }
+  
+  /* In footer on mobile, center dropdown and keep it opening upward */
+  .footer .language-dropdown {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(100% + 8px);
+    top: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .language-trigger {
+    padding: 5px 7px;
+    font-size: 12px;
+  }
+
+  .language-flag {
+    font-size: 18px;
+  }
+
+  .language-dropdown {
+    min-width: 150px;
+    max-height: 300px;
+  }
+
+  .language-option {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 8px;
+  }
+}
+
+/* Focus states for accessibility */
+.language-trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+.language-option:focus {
+  outline: none;
+  background-color: #f3f4f6;
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .language-trigger:active {
+    transform: scale(0.98);
+  }
+  
+  .language-option:active {
+    background-color: #e5e7eb;
+  }
+}

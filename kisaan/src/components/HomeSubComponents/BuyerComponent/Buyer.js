@@ -8,6 +8,7 @@ import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import { Spinner, Alert, Button, Container, Badge } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
+import { useTranslate } from "../../../hooks/useTranslate";
 
 // Constants
 const REQUEST_STATUS = {
@@ -35,6 +36,7 @@ const SORT_OPTIONS = [
 
 export default function Buyer() {
   const history = useHistory();
+  const { t } = useTranslate();
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -380,7 +382,7 @@ export default function Buyer() {
       <div className="App-header">
         <Container>
           <div className="header-section">
-            <h2 className="page-title">Available Products</h2>
+            <h2 className="page-title">{t("Available Products")}</h2>
             <div className="header-actions">
               <Button
                 variant="outline-primary"
@@ -392,7 +394,7 @@ export default function Buyer() {
                 {searchLoading ? (
                   <Spinner animation="border" size="sm" />
                 ) : (
-                  "Refresh"
+                  t("Refresh")
                 )}
               </Button>
             </div>
@@ -407,7 +409,7 @@ export default function Buyer() {
                 <div className="search-input-group">
                   <input
                     type="text"
-                    placeholder="Search products, varieties..."
+                    placeholder={t("Search products, varieties...")}
                     value={filters.search}
                     onChange={(e) =>
                       handleFilterChange("search", e.target.value)
@@ -423,7 +425,7 @@ export default function Buyer() {
                     {searchLoading ? (
                       <Spinner animation="border" size="sm" />
                     ) : (
-                      "Search"
+                      t("Search")
                     )}
                   </Button>
                 </div>
@@ -449,7 +451,7 @@ export default function Buyer() {
                     onClick={() => setShowFilters(!showFilters)}
                     className="filter-toggle-button"
                   >
-                    {showFilters ? "Hide Filters" : "+Show Filters"}
+                    {showFilters ? t("Hide Filters") : t("+Show Filters")}
                   </Button>
                 </div>
               </div>
@@ -457,10 +459,10 @@ export default function Buyer() {
               {showFilters && (
                 <div className="filters-grid">
                   <div className="filter-group">
-                    <label>Product Type</label>
+                    <label>{t("Product Type")}</label>
                     <input
                       type="text"
-                      placeholder="e.g., Rice, Wheat, Tomato"
+                      placeholder={t("e.g., Rice, Wheat, Tomato")}
                       value={filters.product}
                       onChange={(e) =>
                         handleFilterChange("product", e.target.value)
@@ -470,10 +472,10 @@ export default function Buyer() {
                   </div>
 
                   <div className="filter-group">
-                    <label>State</label>
+                    <label>{t("State")}</label>
                     <input
                       type="text"
-                      placeholder="e.g., Punjab, Maharashtra"
+                      placeholder={t("e.g., Punjab, Maharashtra")}
                       value={filters.state}
                       onChange={(e) =>
                         handleFilterChange("state", e.target.value)
@@ -483,10 +485,10 @@ export default function Buyer() {
                   </div>
 
                   <div className="filter-group">
-                    <label>City</label>
+                    <label>{t("City")}</label>
                     <input
                       type="text"
-                      placeholder="e.g., Mumbai, Delhi"
+                      placeholder={t("e.g., Mumbai, Delhi")}
                       value={filters.city}
                       onChange={(e) =>
                         handleFilterChange("city", e.target.value)
@@ -496,10 +498,10 @@ export default function Buyer() {
                   </div>
 
                   <div className="filter-group">
-                    <label>Min Price (₹)</label>
+                    <label>{t("Min Price (₹)")}</label>
                     <input
                       type="number"
-                      placeholder="0"
+                      placeholder={t("0")}
                       value={filters.minPrice}
                       onChange={(e) =>
                         handleFilterChange("minPrice", e.target.value)
@@ -510,10 +512,10 @@ export default function Buyer() {
                   </div>
 
                   <div className="filter-group">
-                    <label>Max Price (₹)</label>
+                    <label>{t("Max Price (₹)")}</label>
                     <input
                       type="number"
-                      placeholder="No limit"
+                      placeholder={t("No limit")}
                       value={filters.maxPrice}
                       onChange={(e) =>
                         handleFilterChange("maxPrice", e.target.value)
@@ -530,7 +532,7 @@ export default function Buyer() {
                       onClick={clearFilters}
                       className="clear-filters-button"
                     >
-                      Clear All
+                      {t("Clear All")}
                     </Button>
                   </div>
                 </div>
@@ -542,7 +544,8 @@ export default function Buyer() {
           {!nullItems && (
             <div className="results-summary">
               <span className="results-count">
-                Showing {currentPageData.length} of {totalCount} products
+                {t("Showing")} {currentPageData.length} {t("of")} {totalCount}{" "}
+                {t("products")}
               </span>
               {(filters.search ||
                 filters.state ||
@@ -550,7 +553,7 @@ export default function Buyer() {
                 filters.product ||
                 filters.minPrice ||
                 filters.maxPrice) && (
-                <span className="active-filters">• Filters applied</span>
+                <span className="active-filters">• {t("Filters applied")}</span>
               )}
             </div>
           )}
@@ -589,7 +592,7 @@ export default function Buyer() {
 
           {nullItems && !loading && !searchLoading ? (
             <Alert variant="info" className="no-products-alert">
-              <h5>No Products Found</h5>
+              <h5>{t("No Products Found")}</h5>
               <p>
                 {filters.search ||
                 filters.state ||
@@ -597,8 +600,12 @@ export default function Buyer() {
                 filters.product ||
                 filters.minPrice ||
                 filters.maxPrice
-                  ? "No products match your search criteria. Try adjusting your filters."
-                  : "There are no products available at the moment. Please check back later."}
+                  ? t(
+                      "No products match your search criteria. Try adjusting your filters."
+                    )
+                  : t(
+                      "There are no products available at the moment. Please check back later."
+                    )}
               </p>
               {(filters.search ||
                 filters.state ||
@@ -611,7 +618,7 @@ export default function Buyer() {
                   onClick={clearFilters}
                   className="mt-2"
                 >
-                  Clear Filters
+                  {t("Clear Filters")}
                 </Button>
               )}
             </Alert>
@@ -630,7 +637,7 @@ export default function Buyer() {
                         }}
                       />
                       <Badge variant="success" className="availability-badge">
-                        Available
+                        {t("Available")}
                       </Badge>
                     </div>
 
@@ -641,26 +648,28 @@ export default function Buyer() {
 
                       <div className="product-details">
                         <div className="detail-row">
-                          <span className="detail-label">Variety:</span>
+                          <span className="detail-label">{t("Variety:")}</span>
                           <span className="detail-value">
                             {itemDetail.variety}
                           </span>
                         </div>
                         <div className="detail-row">
-                          <span className="detail-label">Quantity:</span>
+                          <span className="detail-label">{t("Quantity:")}</span>
                           <span className="detail-value">
                             {itemDetail.quantity?.value}{" "}
                             {itemDetail.quantity?.unit}
                           </span>
                         </div>
                         <div className="detail-row">
-                          <span className="detail-label">Price:</span>
+                          <span className="detail-label">{t("Price:")}</span>
                           <span className="detail-value price">
                             ₹{itemDetail.price?.value}/{itemDetail.price?.unit}
                           </span>
                         </div>
                         <div className="detail-row">
-                          <span className="detail-label">Harvest Date:</span>
+                          <span className="detail-label">
+                            {t("Harvest Date:")}
+                          </span>
                           <span className="detail-value">
                             {new Date(
                               itemDetail.harvestDate
@@ -668,7 +677,7 @@ export default function Buyer() {
                           </span>
                         </div>
                         <div className="detail-row">
-                          <span className="detail-label">Location:</span>
+                          <span className="detail-label">{t("Location:")}</span>
                           <span className="detail-value">
                             {itemDetail.address?.city},{" "}
                             {itemDetail.address?.state}
@@ -682,7 +691,7 @@ export default function Buyer() {
                           onClick={(e) => viewDetails(e, itemDetail._id)}
                           className="view-details-button"
                         >
-                          View Seller Details
+                          {t("View Seller Details")}
                         </Button>
                       </div>
                     </div>
@@ -693,8 +702,8 @@ export default function Buyer() {
               {pageCount > 1 && (
                 <div className="pagination-container">
                   <ReactPaginate
-                    previousLabel={"← Previous"}
-                    nextLabel={"Next →"}
+                    previousLabel={t("← Previous")}
+                    nextLabel={t("Next →")}
                     pageCount={pageCount}
                     onPageChange={handlePageClick}
                     containerClassName={"pagination"}
@@ -715,7 +724,7 @@ export default function Buyer() {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h4 className="modal-title">Seller Details</h4>
+              <h4 className="modal-title">{t("Seller Details")}</h4>
               <button
                 className="modal-close"
                 onClick={() => setShowModal(false)}
@@ -729,7 +738,9 @@ export default function Buyer() {
                 <div className="seller-modal-content">
                   <div className="modal-grid">
                     <div className="modal-section">
-                      <h6 className="section-title">Product Information</h6>
+                      <h6 className="section-title">
+                        {t("Product Information")}
+                      </h6>
                       <div className="info-section">
                         <p>
                           <strong>Product:</strong> {sellerData.product}
@@ -756,27 +767,31 @@ export default function Buyer() {
                     </div>
 
                     <div className="modal-section">
-                      <h6 className="section-title">Seller Information</h6>
+                      <h6 className="section-title">
+                        {t("Seller Information")}{" "}
+                      </h6>
                       <div className="info-section">
                         <p>
-                          <strong>Name:</strong> {sellerData.name}
+                          <strong>{t("Name:")}</strong> {sellerData.name}
                         </p>
                         <p>
-                          <strong>Email:</strong> {sellerData.email}
+                          <strong>{t("Email:")}</strong> {sellerData.email}
                         </p>
                         <p>
-                          <strong>Contact:</strong> {sellerData.contact}
+                          <strong>{t("Contact:")}</strong> {sellerData.contact}
                         </p>
                       </div>
 
-                      <h6 className="section-title">Pickup Address</h6>
+                      <h6 className="section-title">{t("Pickup Address")}</h6>
                       <div className="info-section address-section">
                         <p>{sellerData.address?.street}</p>
                         <p>
                           {sellerData.address?.city},{" "}
                           {sellerData.address?.state}
                         </p>
-                        <p>PIN: {sellerData.address?.pinCode}</p>
+                        <p>
+                          {t("PIN:")} {sellerData.address?.pinCode}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -798,7 +813,7 @@ export default function Buyer() {
                       size="sm"
                       className="button-spinner"
                     />
-                    Processing...
+                    {t("Processing...")}
                   </>
                 ) : (
                   followSeller
@@ -809,7 +824,7 @@ export default function Buyer() {
                 onClick={() => setShowModal(false)}
                 className="close-button"
               >
-                Close
+                {t("Close")}
               </Button>
             </div>
           </div>

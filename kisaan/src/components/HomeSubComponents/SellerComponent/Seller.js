@@ -10,6 +10,7 @@ import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
+import { useTranslate } from "../../../hooks/useTranslate";
 
 // Constants
 const INITIAL_FORM_DATA = {
@@ -109,7 +110,7 @@ const sanitizers = {
 
 export default function Seller() {
   const history = useHistory();
-
+  const { t } = useTranslate();
   // Form data state
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
@@ -420,23 +421,24 @@ export default function Seller() {
           {/* Header Section */}
           <div className="seller-header">
             <div className="seller-icon">🌾</div>
-            <h1 className="seller-title">Add Your Product</h1>
+            <h1 className="seller-title">{t("Add Your Product")}</h1>
             <p className="seller-subtitle">
-              Share your agricultural products with buyers across the
-              marketplace
+              {t(
+                "Share your agricultural products with buyers across the marketplace"
+              )}
             </p>
           </div>
 
           {/* Alerts */}
           {errorMessage && (
             <Alert variant="danger" className="modern-alert alert-error">
-              <strong>⚠️ Error:</strong> {errorMessage}
+              <strong>⚠️ Error:</strong> {t(`${errorMessage}`)}
             </Alert>
           )}
 
           {successMessage && (
             <Alert variant="success" className="modern-alert alert-success">
-              <strong>✅ Success:</strong> {successMessage}
+              <strong>✅ Success:</strong> {t(`${successMessage}`)}
             </Alert>
           )}
 
@@ -445,19 +447,19 @@ export default function Seller() {
             <form onSubmit={handleSubmit} className="seller-form">
               {/* Product Selection */}
               <div className="form-section">
-                <h3 className="section-title">📦 Product Information</h3>
+                <h3 className="section-title">{t("📦 Product Information")}</h3>
 
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">
-                      Product Type <span className="required">*</span>
+                      {t("Product Type")} <span className="required">*</span>
                     </label>
                     {createAutocomplete(
                       "product-autocomplete",
                       productListState,
                       formData.product,
                       handleProductChange,
-                      "Search and choose your product...",
+                      t("Search and choose your product..."),
                       false,
                       "No products found"
                     )}
@@ -465,7 +467,7 @@ export default function Seller() {
 
                   <div className="form-group">
                     <label className="form-label">
-                      Variety <span className="required">*</span>
+                      {t("Variety")} <span className="required">*</span>
                     </label>
                     {createAutocomplete(
                       "variety-autocomplete",
@@ -477,17 +479,17 @@ export default function Seller() {
                           setShowOther(false);
                         }
                       },
-                      "Search and select variety...",
+                      t("Search and select variety..."),
                       !formData.product,
                       !formData.product
-                        ? "Select a product first"
-                        : "No varieties found"
+                        ? t("Select a product first")
+                        : t("No varieties found")
                     )}
                     {showOther && (
                       <input
                         type="text"
                         className="form-control modern-input mt-2"
-                        placeholder="Enter custom variety"
+                        placeholder={t("Enter custom variety")}
                         onChange={handleInputChange("variety")}
                         value={
                           formData.variety === "Other" ? "" : formData.variety
@@ -501,48 +503,52 @@ export default function Seller() {
 
               {/* Quantity & Price */}
               <div className="form-section">
-                <h3 className="section-title">💰 Pricing & Quantity</h3>
+                <h3 className="section-title">{t("💰 Pricing & Quantity")}</h3>
 
                 <div className="form-row">
                   <div className="form-group">
                     <label htmlFor="quantity" className="form-label">
-                      Quantity (Kg) <span className="required">*</span>
+                      {t("Quantity (Kg)")} <span className="required">*</span>
                     </label>
                     <input
                       type="text"
                       id="quantity"
                       className="form-control modern-input"
-                      placeholder="Enter quantity in kg"
+                      placeholder={t("Enter quantity in kg")}
                       onChange={handleInputChange("quantity")}
                       value={formData.quantity}
                       inputMode="numeric"
                       pattern="[1-9][0-9]*"
-                      title="Enter a valid quantity (positive numbers only)"
+                      title={t(
+                        "Enter a valid quantity (positive numbers only)"
+                      )}
                       required
                     />
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="price" className="form-label">
-                      Price (₹/Kg) <span className="required">*</span>
+                      {t("Price (₹/Kg)")} <span className="required">*</span>
                     </label>
                     <input
                       type="text"
                       id="price"
                       className="form-control modern-input"
-                      placeholder="Enter price in ₹/kg (e.g., 25.50)"
+                      placeholder={t("Enter price in ₹/kg (e.g., 25.50)")}
                       onChange={handleInputChange("price")}
                       value={formData.price}
                       inputMode="decimal"
                       pattern="[0-9]+(\.[0-9]{1,2})?"
-                      title="Enter a valid price (numbers and decimals only)"
+                      title={t(
+                        "Enter a valid price (numbers and decimals only)"
+                      )}
                       required
                     />
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="harvestDate" className="form-label">
-                      Harvest Date <span className="required">*</span>
+                      {t("Harvest Date")} <span className="required">*</span>
                     </label>
                     <input
                       type="date"
@@ -558,11 +564,13 @@ export default function Seller() {
                           .toISOString()
                           .split("T")[0]
                       }
-                      title="Select the date when the crop was harvested"
+                      title={t("Select the date when the crop was harvested")}
                       required
                     />
                     <small className="date-hint">
-                      Select when this crop was harvested (within the last year)
+                      {t(
+                        "Select when this crop was harvested (within the last year)"
+                      )}
                     </small>
                   </div>
                 </div>
@@ -570,12 +578,12 @@ export default function Seller() {
 
               {/* Location */}
               <div className="form-section">
-                <h3 className="section-title">📍 Pickup Location</h3>
+                <h3 className="section-title">{t("📍 Pickup Location")}</h3>
 
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">
-                      State <span className="required">*</span>
+                      {t("State")} <span className="required">*</span>
                     </label>
                     {createAutocomplete(
                       "state-autocomplete",
@@ -583,21 +591,21 @@ export default function Seller() {
                       formData.state,
                       (value) =>
                         handleInputChange("state")({ target: { value } }),
-                      "Search and select state...",
+                      t("Search and select state..."),
                       false,
-                      "No states found"
+                      t("No states found")
                     )}
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="city" className="form-label">
-                      City <span className="required">*</span>
+                      {t("City")} <span className="required">*</span>
                     </label>
                     <input
                       type="text"
                       id="city"
                       className="form-control modern-input"
-                      placeholder="Enter city name"
+                      placeholder={t("Enter city name")}
                       onChange={handleInputChange("city")}
                       value={formData.city}
                       required
@@ -606,28 +614,30 @@ export default function Seller() {
 
                   <div className="form-group">
                     <label htmlFor="zipcode" className="form-label">
-                      Pin Code <span className="required">*</span>
+                      {t("Pin Code")} <span className="required">*</span>
                     </label>
                     <input
                       type="text"
                       id="zipcode"
                       className="form-control modern-input"
-                      placeholder="Enter 6-digit pin code"
+                      placeholder={t("Enter 6-digit pin code")}
                       onChange={handleInputChange("zipcode")}
                       value={formData.zipcode}
                       pattern="[1-9][0-9]{5}"
                       maxLength="6"
                       inputMode="numeric"
-                      title="Enter a valid 6-digit Indian pincode (first digit cannot be 0)"
+                      title={t(
+                        "Enter a valid 6-digit Indian pincode (first digit cannot be 0)"
+                      )}
                       required
                     />
                     {formData.zipcode &&
                       formData.zipcode.length > 0 &&
                       formData.zipcode.length < 6 && (
                         <small className="pincode-hint">
-                          {6 - formData.zipcode.length} more digit
+                          {6 - formData.zipcode.length} {t("more digit")}
                           {6 - formData.zipcode.length !== 1 ? "s" : ""}{" "}
-                          required
+                          {t("required")}
                         </small>
                       )}
                   </div>
@@ -635,13 +645,15 @@ export default function Seller() {
 
                 <div className="form-group">
                   <label htmlFor="address" className="form-label">
-                    Detailed Address <span className="required">*</span>
+                    {t("Detailed Address")} <span className="required">*</span>
                   </label>
                   <textarea
                     id="address"
                     className="form-control modern-textarea"
                     rows="3"
-                    placeholder="Enter complete pickup address with landmarks"
+                    placeholder={t(
+                      "Enter complete pickup address with landmarks"
+                    )}
                     onChange={handleInputChange("address")}
                     value={formData.address}
                     required
@@ -651,11 +663,12 @@ export default function Seller() {
 
               {/* Image Upload */}
               <div className="form-section">
-                <h3 className="section-title">📸 Product Image</h3>
+                <h3 className="section-title">{t("📸 Product Image")}</h3>
 
                 <div className="form-group">
                   <label htmlFor="image" className="form-label">
-                    Upload Product Photo <span className="required">*</span>
+                    {t("Upload Product Photo")}{" "}
+                    <span className="required">*</span>
                   </label>
                   <div className="file-upload-wrapper">
                     <input
@@ -671,10 +684,10 @@ export default function Seller() {
                         <div className="upload-icon">📷</div>
                         <div className="upload-text">
                           <span className="upload-main">
-                            Choose product image
+                            {t("Choose product image")}
                           </span>
                           <span className="upload-sub">
-                            PNG, JPG up to 10MB
+                            {t("PNG, JPG up to 10MB")}
                           </span>
                         </div>
                       </div>
@@ -697,11 +710,11 @@ export default function Seller() {
                   {load ? (
                     <div className="btn-loading">
                       <Spinner animation="border" size="sm" />
-                      <span>Adding Product...</span>
+                      <span>{t("Adding Product...")}</span>
                     </div>
                   ) : (
                     <div className="btn-content">
-                      <span>Add Product</span>
+                      <span>{t("Add Product")} </span>
                     </div>
                   )}
                 </button>
