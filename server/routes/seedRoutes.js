@@ -2,7 +2,6 @@
 import {
   bank as BankInfo,
   seed as SeedInfo,
-  userInfo,
   seller as SellerInfo,
   request as RequestInfo,
 } from "../repositories/index.js";
@@ -20,56 +19,6 @@ const __dirname = path.dirname(__filename);
 // const express = require("express");
 
 export default function (router) {
-  router.post("/createAccount", (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let Email = auth.email.split(",")[1],
-        UserId = req.body.userData.id,
-        Name = auth.email.split(",")[0],
-        Bank = req.body.bankDetails.bankName,
-        AccountType = req.body.bankDetails.accountType;
-      let AccountNumber = 0;
-      BankInfo.countDocuments(
-        { UserId: UserId, Bank: Bank, AccountType: AccountType },
-        function (err, c) {
-          if (c > 0)
-            res
-              .status(200)
-              .send({ status: false, message: "Account Already Created." });
-          else {
-            BankInfo.countDocuments({}, function (err, c) {
-              AccountNumber = c + 1;
-              BankInfo.create(
-                {
-                  Name: Name,
-                  UserId: UserId,
-                  Email: Email,
-                  Bank: Bank,
-                  AccountType: AccountType,
-                  AccountNumber: AccountNumber,
-                },
-                function (err, data) {
-                  if (!err) {
-                    res
-                      .status(200)
-                      .send({ status: true, message: data.AccountNumber });
-                  } else
-                    res.status(200).send({
-                      status: false,
-                      message: "Can not Create Account",
-                    });
-                }
-              );
-            });
-          }
-        }
-      );
-    } else {
-      res.status(200).send({ status: false, message: "Invalid Token" });
-    }
-  });
-
   router.post("/products", (req, res) => {
     let token = req.body.token;
 

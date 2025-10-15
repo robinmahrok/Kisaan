@@ -7,9 +7,8 @@ import utils from "../controllers/utils.js";
 let globalEmail = "";
 
 export default function (router) {
-  let error = "";
   router.get("/", (req, res) => {
-    res.status(200).send({ message: "Working" })
+    res.status(200).send({ message: "Working" });
   });
 
   //signup api
@@ -36,10 +35,14 @@ export default function (router) {
       res
         .status(200)
         .send({ status: false, message: "email/password not found" });
-    } else if (req.body.contact == null ||
+    } else if (
+      req.body.contact == null ||
       typeof req.body.contact == undefined ||
-      req.body.contact.length == 0) {
-      res.status(200).send({ status: false, message: "undefined User Details" });
+      req.body.contact.length == 0
+    ) {
+      res
+        .status(200)
+        .send({ status: false, message: "undefined User Details" });
     }
 
     globalEmail = req.session.email1;
@@ -76,9 +79,7 @@ export default function (router) {
                   otpVerify: "Pending",
                   otp: 0,
                 });
-                res
-                  .status(200)
-                  .send({ status: true, message: "User Created" });
+                res.status(200).send({ status: true, message: "User Created" });
               } else {
                 res
                   .status(200)
@@ -113,7 +114,7 @@ export default function (router) {
         subject: "OTP verification",
         html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + otpVal + "</b>",
       };
-      
+
       await mailer(mailOptions);
       callback(null, { status: 1000 });
     } catch (error) {
@@ -152,7 +153,7 @@ export default function (router) {
               });
             }
           });
-          
+
           try {
             await userInfo.updateOTP(email, otpVal);
             res.status(200).send({
@@ -177,7 +178,9 @@ export default function (router) {
     try {
       const data = await userInfo.find({ email: email, otp: req.body.otp });
       if (data.length == 0) {
-        res.status(200).send({ status: false, message: "Invalid OTP or Email" });
+        res
+          .status(200)
+          .send({ status: false, message: "Invalid OTP or Email" });
       } else {
         try {
           await userInfo.updateOne(
@@ -228,7 +231,12 @@ export default function (router) {
             });
           }
         } else {
-          res.status(200).send({ status: false, message: "Password doesn't met requirement" });
+          res
+            .status(200)
+            .send({
+              status: false,
+              message: "Password doesn't met requirement",
+            });
         }
       });
     }
@@ -254,7 +262,7 @@ export default function (router) {
 
     try {
       // Use the static method for better performance and consistency
-      const data = await userInfo.getUserByEmail(email);      
+      const data = await userInfo.getUserByEmail(email);
       if (!data) {
         res.status(200).send({ status: false, message: "User Not Found" });
       } else {
@@ -264,7 +272,6 @@ export default function (router) {
         let contact = data.contact;
         let id = data._id;
         utils.validatePassword(password, dbpass, function (err, data) {
-
           if (!err && data) {
             if (otpver == "verified") {
               let nameEmail = name + "," + email + "," + contact + "," + id;
@@ -325,4 +332,4 @@ export default function (router) {
       res.redirect("/");
     });
   });
-};
+}

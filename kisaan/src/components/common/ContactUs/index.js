@@ -126,7 +126,7 @@ export default function ContactUs() {
                         <div className="method-icon">📞</div>
                         <div className="method-details">
                           <h5>Phone Support</h5>
-                          <p>+91 1800-123-4567</p>
+                          <p>+91 9369935639</p>
                           <small>Mon-Sun: 9:00 AM - 9:00 PM</small>
                         </div>
                       </div>

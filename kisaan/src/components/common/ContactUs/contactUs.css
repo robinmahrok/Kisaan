@@ -190,6 +190,9 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .contact-form-card:hover {

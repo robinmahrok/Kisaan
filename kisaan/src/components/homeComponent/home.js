@@ -5,29 +5,24 @@ import { useHistory } from "react-router-dom";
 import Header from "../headerComponent";
 import Footer from "../footerComponent";
 import { Token } from "../../utils/utils";
-
+import { useTranslate } from "../../hooks/useTranslate";
 // Constants for better maintainability
 const ROLE_TYPES = {
-  SELLER: 'seller',
-  BUYER: 'buyer'
-};
-
-const NAVIGATION_STATES = {
-  IDLE: 'idle',
-  LOADING: 'loading'
+  SELLER: "seller",
+  BUYER: "buyer",
 };
 
 // Custom hook for user authentication
 const useUserAuth = () => {
   const history = useHistory();
-  
+
   const getUserFromToken = useCallback(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       history.push("/");
       return null;
     }
-    
+
     try {
       const nameEmail = Token(token);
       const [name, userId] = nameEmail.split(",");
@@ -38,7 +33,7 @@ const useUserAuth = () => {
       return null;
     }
   }, [history]);
-  
+
   return { getUserFromToken };
 };
 
@@ -46,22 +41,28 @@ const useUserAuth = () => {
 const useRoleNavigation = () => {
   const history = useHistory();
   const [loadingRole, setLoadingRole] = useState(null);
-  
-  const navigateToRole = useCallback((role) => {
-    setLoadingRole(role);
-    
-    // Add a small delay for better UX
-    setTimeout(() => {
-      history.push(`/${role}`);
-    }, 500);
-  }, [history]);
-  
-  const isRoleLoading = useCallback((role) => {
-    return loadingRole === role;
-  }, [loadingRole]);
-  
+
+  const navigateToRole = useCallback(
+    (role) => {
+      setLoadingRole(role);
+
+      // Add a small delay for better UX
+      setTimeout(() => {
+        history.push(`/${role}`);
+      }, 500);
+    },
+    [history]
+  );
+
+  const isRoleLoading = useCallback(
+    (role) => {
+      return loadingRole === role;
+    },
+    [loadingRole]
+  );
+
   const isAnyLoading = loadingRole !== null;
-  
+
   return { navigateToRole, isRoleLoading, isAnyLoading };
 };
 
@@ -69,63 +70,72 @@ export default function Home() {
   const [user, setUser] = useState({ name: "", email: "" });
   const { getUserFromToken } = useUserAuth();
   const { navigateToRole, isRoleLoading, isAnyLoading } = useRoleNavigation();
-
+  const { t } = useTranslate();
   useEffect(() => {
     const userData = getUserFromToken();
     if (userData) {
       setUser({
         name: userData.name,
-        email: userData.userId
+        email: userData.userId,
       });
     }
   }, [getUserFromToken]);
 
-  const handleRoleSelection = useCallback((e, role) => {
-    e.preventDefault();
-    navigateToRole(role);
-  }, [navigateToRole]);
-
-  const roleButtons = useMemo(() => [
-    {
-      type: ROLE_TYPES.SELLER,
-      label: 'Seller',
-      description: 'Sell your agricultural products',
-      icon: '🌾',
-      bgColor: 'bg-green-600 hover:bg-green-700',
-      textColor: 'text-white'
+  const handleRoleSelection = useCallback(
+    (e, role) => {
+      e.preventDefault();
+      navigateToRole(role);
     },
-    {
-      type: ROLE_TYPES.BUYER,
-      label: 'Buyer',
-      description: 'Buy fresh agricultural products',
-      icon: '🛒',
-      bgColor: 'bg-blue-600 hover:bg-blue-700',
-      textColor: 'text-white'
-    }
-  ], []);
+    [navigateToRole]
+  );
+
+  const roleButtons = useMemo(
+    () => [
+      {
+        type: ROLE_TYPES.SELLER,
+        label: "Seller",
+        description: "Sell your agricultural products",
+        icon: "🌾",
+        bgColor: "bg-green-600 hover:bg-green-700",
+        textColor: "text-white",
+      },
+      {
+        type: ROLE_TYPES.BUYER,
+        label: "Buyer",
+        description: "Buy fresh agricultural products",
+        icon: "🛒",
+        bgColor: "bg-blue-600 hover:bg-blue-700",
+        textColor: "text-white",
+      },
+    ],
+    []
+  );
 
   return (
     <div className="home-container">
       <Header />
-      
+
       <main className="home-content">
         {/* Welcome Section */}
         <div className="welcome-section">
           <div className="welcome-card">
             <div className="welcome-header">
-              <div className="avatar">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
+              <div className="avatar">{user.name.charAt(0).toUpperCase()}</div>
               <div className="welcome-text">
                 <h1 className="welcome-title">
-                  Welcome back, <span className="name-highlight">{user.name}</span>!
+                  {t("Welcome")},{" "}
+                  <span className="name-highlight">{user.name}</span>!
                 </h1>
                 <p className="welcome-subtitle">{user.email}</p>
               </div>
             </div>
-            
+
             <div className="welcome-description">
-              <p>Choose your role to continue with Kisaan - connecting farmers and buyers for a better agricultural marketplace.</p>
+              <p>
+                {t(
+                  "Choose your role to continue with Kisaan - connecting farmers and buyers for a better agricultural marketplace."
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -133,17 +143,23 @@ export default function Home() {
         {/* Role Selection Section */}
         <div className="role-selection-section">
           <div className="role-selection-container">
-            <h2 className="section-title">Select Your Role</h2>
-            <p className="section-subtitle">Choose how you'd like to participate in our marketplace</p>
-            
+            <h2 className="section-title">{t("Select Your Role")}</h2>
+            <p className="section-subtitle">
+              {t("Choose how you'd like to participate in our marketplace")}
+            </p>
+
             <div className="role-buttons-container">
               {roleButtons.map((role) => {
                 const isCurrentRoleLoading = isRoleLoading(role.type);
-                
+
                 return (
                   <button
                     key={role.type}
-                    className={`role-button ${role.bgColor} ${role.textColor} ${isCurrentRoleLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                    className={`role-button ${role.bgColor} ${role.textColor} ${
+                      isCurrentRoleLoading
+                        ? "opacity-75 cursor-not-allowed"
+                        : ""
+                    }`}
                     onClick={(e) => handleRoleSelection(e, role.type)}
                     disabled={isCurrentRoleLoading}
                   >
@@ -153,33 +169,35 @@ export default function Home() {
                         <h3 className="role-label">
                           {isCurrentRoleLoading ? (
                             <>
-                              {role.label}
-                              <Spinner 
-                                animation="border" 
-                                size="sm" 
+                              {t(role.label)}
+                              <Spinner
+                                animation="border"
+                                size="sm"
                                 className="ml-2 inline-block"
                               />
                             </>
                           ) : (
-                            role.label
+                            t(role.label)
                           )}
                         </h3>
-                        <p className="role-description">{role.description}</p>
+                        <p className="role-description">
+                          {t(role.description)}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="role-arrow">
-                      <svg 
-                        className="w-5 h-5" 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M9 5l7 7-7 7" 
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
                         />
                       </svg>
                     </div>
@@ -190,7 +208,7 @@ export default function Home() {
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

@@ -3,13 +3,11 @@ import { decodeToken } from "react-jwt";
 const Token = (token) => {
   try {
     const tokenValue = decodeToken(token);
-    // var decoded = jwt.verify(token, secret.TOKEN_SECRET);
-    var userId = tokenValue.email;
-    return userId;
+    return tokenValue.email;
   } catch (e) {
     return "error " + e;
   }
-}
+};
 
 const mobileValidator = (value) => {
   const regMobile = /^[0][1-9]\d{9}$|^[1-9]\d{9}$/;
@@ -17,7 +15,7 @@ const mobileValidator = (value) => {
     return true;
   }
   return false;
-}
+};
 
 // utils.js
 const emailValidator = (email) => {
@@ -25,4 +23,4 @@ const emailValidator = (email) => {
   return emailRegex.test(email);
 };
 
-export  { Token, mobileValidator, emailValidator };
+export { Token, mobileValidator, emailValidator };
