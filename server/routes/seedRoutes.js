@@ -18,502 +18,459 @@ const __dirname = path.dirname(__filename);
 // const { models } = require("mongoose");
 // const express = require("express");
 
-export default function (router) {
-  router.post("/products", (req, res) => {
-    let token = req.body.token;
+const products = (req, res) => {
+  try {
+    // Read crop varieties from JSON file
+    const cropVarietiesPath = path.join(
+      __dirname,
+      "../config/crop_varieties.json"
+    );
 
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      try {
-        // Read crop varieties from JSON file
-        const cropVarietiesPath = path.join(
-          __dirname,
-          "../config/crop_varieties.json"
-        );
+    const cropVarieties = JSON.parse(
+      fs.readFileSync(cropVarietiesPath, "utf8")
+    );
 
-        const cropVarieties = JSON.parse(
-          fs.readFileSync(cropVarietiesPath, "utf8")
-        );
+    // Transform the data to match the expected format
+    const productsData = {};
 
-        // Transform the data to match the expected format
-        const productsData = {};
+    Object.keys(cropVarieties).forEach((productName) => {
+      const varieties = cropVarieties[productName];
 
-        Object.keys(cropVarieties).forEach((productName) => {
-          const varieties = cropVarieties[productName];
+      // Create varieties object with indexed keys
+      const varietiesObj = {};
+      varieties.forEach((variety, index) => {
+        varietiesObj[index] = variety;
+      });
 
-          // Create varieties object with indexed keys
-          const varietiesObj = {};
-          varieties.forEach((variety, index) => {
-            varietiesObj[index] = variety;
-          });
+      productsData[productName] = [varietiesObj];
+    });
 
-          productsData[productName] = [varietiesObj];
-        });
+    res.status(200).send({
+      status: true,
+      message: productsData,
+    });
+  } catch (error) {
+    console.error("Error reading crop varieties:", error);
+    res.status(200).send({
+      status: false,
+      message: "Something went wrong",
+    });
+  }
+};
 
-        res.status(200).send({
-          status: true,
-          message: productsData,
-        });
-      } catch (error) {
-        console.error("Error reading crop varieties:", error);
-        res.status(200).send({
-          status: false,
-          message: "Something went wrong",
-        });
-      }
-    } else {
-      res.status(200).send({
+const uploadFile = async (req, res) => {
+  try {
+    if (!req.files || !req.files.file) {
+      return res.status(400).send({
         status: false,
-        message: "Invalid Token",
+        message: "No file uploaded",
       });
     }
-  });
 
-  router.post("/uploadFile", async (req, res) => {
-    try {
-      if (!req.files || !req.files.file) {
-        return res.status(400).send({
-          status: false,
-          message: "No file uploaded",
-        });
-      }
+    let imageFile = req.files.file;
+    let fileName = req.body.fileName;
 
-      let imageFile = req.files.file;
-      let fileName = req.body.fileName;
-
-      if (!fileName) {
-        return res.status(400).send({
-          status: false,
-          message: "No filename provided",
-        });
-      }
-
-      // Define the output path
-      const outputPath = `./public/images/${fileName}.jpg`;
-
-      // Check if file is an image
-      const allowedMimeTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-        "image/gif",
-      ];
-      if (!allowedMimeTypes.includes(imageFile.mimetype)) {
-        return res.status(400).send({
-          status: false,
-          message: "Only image files are allowed (JPEG, PNG, WebP, GIF)",
-        });
-      }
-
-      // Compress and save the image using Sharp
-      await sharp(imageFile.data)
-        .resize(800, 600, {
-          fit: "inside",
-          withoutEnlargement: true,
-        }) // Resize to max 800x600, maintaining aspect ratio
-        .jpeg({
-          quality: 80, // Compress to 80% quality
-          progressive: true,
-        })
-        .toFile(outputPath);
-
-      res.status(200).send({
-        status: true,
-        message: "Image uploaded and compressed successfully",
-      });
-    } catch (err) {
-      console.error("Error processing image:", err);
-      res.status(500).send({
+    if (!fileName) {
+      return res.status(400).send({
         status: false,
-        message: "Failed to process image: " + err.message,
+        message: "No filename provided",
       });
     }
-  });
 
-  router.post("/addSellerData", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
+    // Define the output path
+    const outputPath = `./public/images/${fileName}.jpg`;
 
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
-      let name = req.body.Name,
-        contact = req.body.Contact,
-        product = req.body.Product,
-        variety = req.body.Variety,
-        quantity = req.body.Quantity,
-        address = req.body.Address,
-        price = req.body.Price,
-        state = req.body.State,
-        city = req.body.City,
-        zip = req.body.Pin,
-        sellerId = req.body.SellerId,
-        harvestDate = req.body.HarvestDate;
+    // Check if file is an image
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+    if (!allowedMimeTypes.includes(imageFile.mimetype)) {
+      return res.status(400).send({
+        status: false,
+        message: "Only image files are allowed (JPEG, PNG, WebP, GIF)",
+      });
+    }
 
-      // Create seller data matching the new schema
-      const sellerData = {
-        sellerId: sellerId,
-        name: name,
-        email: email,
-        contact: contact,
-        product: product,
-        variety: variety,
-        address: {
-          street: address,
-          city: city,
-          state: state,
-          pinCode: zip,
-        },
-        quantity: {
-          value: parseFloat(quantity) || 0,
-          unit: "kg", // Default unit, can be made configurable later
-        },
-        price: {
-          value: parseFloat(price) || 0,
-          unit: "kg", // Default unit, can be made configurable later
-        },
-        harvestDate: harvestDate ? new Date(harvestDate) : new Date(), // Parse the date or use current date as fallback
-        isAvailable: true,
+    // Compress and save the image using Sharp
+    await sharp(imageFile.data)
+      .resize(800, 600, {
+        fit: "inside",
+        withoutEnlargement: true,
+      }) // Resize to max 800x600, maintaining aspect ratio
+      .jpeg({
+        quality: 80, // Compress to 80% quality
+        progressive: true,
+      })
+      .toFile(outputPath);
+
+    res.status(200).send({
+      status: true,
+      message: "Image uploaded and compressed successfully",
+    });
+  } catch (err) {
+    console.error("Error processing image:", err);
+    res.status(500).send({
+      status: false,
+      message: "Failed to process image: " + err.message,
+    });
+  }
+};
+
+const addSellerData = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
+  let name = req.body.Name,
+    contact = req.body.Contact,
+    product = req.body.Product,
+    variety = req.body.Variety,
+    quantity = req.body.Quantity,
+    address = req.body.Address,
+    price = req.body.Price,
+    state = req.body.State,
+    city = req.body.City,
+    zip = req.body.Pin,
+    sellerId = req.body.SellerId,
+    harvestDate = req.body.HarvestDate;
+
+  // Create seller data matching the new schema
+  const sellerData = {
+    sellerId: sellerId,
+    name: name,
+    email: email,
+    contact: contact,
+    product: product,
+    variety: variety,
+    address: {
+      street: address,
+      city: city,
+      state: state,
+      pinCode: zip,
+    },
+    quantity: {
+      value: parseFloat(quantity) || 0,
+      unit: "kg", // Default unit, can be made configurable later
+    },
+    price: {
+      value: parseFloat(price) || 0,
+      unit: "kg", // Default unit, can be made configurable later
+    },
+    harvestDate: harvestDate ? new Date(harvestDate) : new Date(), // Parse the date or use current date as fallback
+    isAvailable: true,
+  };
+
+  try {
+    const value = await SellerInfo.create(sellerData);
+    // Return the created document ID directly
+    res.status(200).send({
+      status: true,
+      message: value._id || value.id,
+    });
+  } catch (err) {
+    console.error("❌ Error creating seller data:", err);
+    console.error("Error details:", err.message);
+    if (err.errors) {
+      console.error("Validation errors:", err.errors);
+    }
+    res.status(200).send({
+      status: false,
+      message: err.message || "Cannot insert value",
+    });
+  }
+};
+
+const getItemsList = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
+
+  // Extract search and filter parameters
+  const {
+    search = "",
+    state = "",
+    city = "",
+    product = "",
+    minPrice = 0,
+    maxPrice = Number.MAX_SAFE_INTEGER,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.body;
+
+  try {
+    // Build the query filter - exclude current user's items
+    let query = {
+      email: { $ne: email }, // Use lowercase 'email' field from new schema
+      isAvailable: true, // Only show available items
+    };
+
+    // Add search filter (search in product name and variety)
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      query.$or = [{ product: searchRegex }, { variety: searchRegex }];
+    }
+
+    // Add location filters
+    if (state && state.trim()) {
+      query["address.state"] = new RegExp(state.trim(), "i");
+    }
+
+    if (city && city.trim()) {
+      query["address.city"] = new RegExp(city.trim(), "i");
+    }
+
+    // Add product type filter
+    if (product && product.trim()) {
+      query.product = new RegExp(product.trim(), "i");
+    }
+
+    // Add price range filter
+    if (minPrice > 0 || maxPrice < Number.MAX_SAFE_INTEGER) {
+      query["price.value"] = {
+        $gte: Number(minPrice),
+        $lte: Number(maxPrice),
       };
-
-      try {
-        const value = await SellerInfo.create(sellerData);
-        // Return the created document ID directly
-        res.status(200).send({
-          status: true,
-          message: value._id || value.id,
-        });
-      } catch (err) {
-        console.error("❌ Error creating seller data:", err);
-        console.error("Error details:", err.message);
-        if (err.errors) {
-          console.error("Validation errors:", err.errors);
-        }
-        res.status(200).send({
-          status: false,
-          message: err.message || "Cannot insert value",
-        });
-      }
-    } else {
-      console.log("❌ Authentication failed - Invalid Token");
-      res.status(200).send({ status: false, message: "Invalid Token" });
     }
-  });
 
-  router.post("/getItemsList", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
+    // Build sort options
+    const sortOptions = {};
+    const sortField =
+      sortBy === "price"
+        ? "price.value"
+        : sortBy === "quantity"
+        ? "quantity.value"
+        : sortBy === "harvestDate"
+        ? "harvestDate"
+        : "createdAt";
+    sortOptions[sortField] = sortOrder === "asc" ? 1 : -1;
 
-      // Extract search and filter parameters
-      const {
-        search = "",
-        state = "",
-        city = "",
-        product = "",
-        minPrice = 0,
-        maxPrice = Number.MAX_SAFE_INTEGER,
-        sortBy = "createdAt",
-        sortOrder = "desc",
-      } = req.body;
+    const data = await SellerInfo.find(query, { sort: sortOptions });
 
-      try {
-        // Build the query filter - exclude current user's items
-        let query = {
-          email: { $ne: email }, // Use lowercase 'email' field from new schema
-          isAvailable: true, // Only show available items
-        };
+    res.status(200).send({
+      status: true,
+      message: data,
+      totalCount: data.length,
+      filters: {
+        search,
+        state,
+        city,
+        product,
+        minPrice,
+        maxPrice,
+        sortBy,
+        sortOrder,
+      },
+    });
+  } catch (error) {
+    console.error("Error in getItemsList:", error);
+    res.status(200).send({ status: false, message: error.message });
+  }
+};
 
-        // Add search filter (search in product name and variety)
-        if (search && search.trim()) {
-          const searchRegex = new RegExp(search.trim(), "i");
-          query.$or = [{ product: searchRegex }, { variety: searchRegex }];
-        }
+const allItems = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
 
-        // Add location filters
-        if (state && state.trim()) {
-          query["address.state"] = new RegExp(state.trim(), "i");
-        }
-
-        if (city && city.trim()) {
-          query["address.city"] = new RegExp(city.trim(), "i");
-        }
-
-        // Add product type filter
-        if (product && product.trim()) {
-          query.product = new RegExp(product.trim(), "i");
-        }
-
-        // Add price range filter
-        if (minPrice > 0 || maxPrice < Number.MAX_SAFE_INTEGER) {
-          query["price.value"] = {
-            $gte: Number(minPrice),
-            $lte: Number(maxPrice),
-          };
-        }
-
-        // Build sort options
-        const sortOptions = {};
-        const sortField =
-          sortBy === "price"
-            ? "price.value"
-            : sortBy === "quantity"
-            ? "quantity.value"
-            : sortBy === "harvestDate"
-            ? "harvestDate"
-            : "createdAt";
-        sortOptions[sortField] = sortOrder === "asc" ? 1 : -1;
-
-        const data = await SellerInfo.find(query, { sort: sortOptions });
-
-        res.status(200).send({
-          status: true,
-          message: data,
-          totalCount: data.length,
-          filters: {
-            search,
-            state,
-            city,
-            product,
-            minPrice,
-            maxPrice,
-            sortBy,
-            sortOrder,
-          },
-        });
-      } catch (error) {
-        console.error("Error in getItemsList:", error);
-        res.status(200).send({ status: false, message: error.message });
+  try {
+    // Use the correct field names from the new schema
+    const data = await SellerInfo.find(
+      { email: email }, // Use lowercase 'email' field
+      {
+        projection: { name: 0, email: 0 }, // Use lowercase field names
+        sort: { _id: -1 },
       }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+    );
+    res.status(200).send({ status: true, message: data });
+  } catch (error) {
+    console.error("Error in allItems:", error);
+    res.status(200).send({ status: false, message: "No Items found" });
+  }
+};
 
-  router.post("/allItems", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
-      try {
-        // Use the correct field names from the new schema
-        const data = await SellerInfo.find(
-          { email: email }, // Use lowercase 'email' field
-          {
-            projection: { name: 0, email: 0 }, // Use lowercase field names
-            sort: { _id: -1 },
-          }
-        );
-        res.status(200).send({ status: true, message: data });
-      } catch (error) {
-        console.error("Error in allItems:", error);
-        res.status(200).send({ status: false, message: "No Items found" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const editItems = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
+  let id = req.body.id,
+    price = req.body.price,
+    quantity = req.body.quantity,
+    contact = req.body.contact,
+    address = req.body.address;
 
-  router.post("/editItems", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
-      let id = req.body.id,
-        price = req.body.price,
-        quantity = req.body.quantity,
-        contact = req.body.contact,
-        address = req.body.address;
+  try {
+    // Prepare update object
+    let updateData = {
+      "price.value": parseFloat(price) || 0, // Update nested price.value
+      "quantity.value": parseFloat(quantity) || 0, // Update nested quantity.value
+      contact: contact, // Use lowercase 'contact' field
+    };
 
-      try {
-        // Prepare update object
-        let updateData = {
-          "price.value": parseFloat(price) || 0, // Update nested price.value
-          "quantity.value": parseFloat(quantity) || 0, // Update nested quantity.value
-          contact: contact, // Use lowercase 'contact' field
-        };
+    // Handle address - support both old string format and new object format
+    if (typeof address === "object" && address !== null) {
+      // New format: address is an object with street, city, state, pinCode
+      if (address.street) updateData["address.street"] = address.street;
+      if (address.city) updateData["address.city"] = address.city;
+      if (address.state) updateData["address.state"] = address.state;
+      if (address.pinCode) updateData["address.pinCode"] = address.pinCode;
+    } else if (typeof address === "string") {
+      // Old format: address is a string (backward compatibility)
+      updateData["address.street"] = address;
+    }
 
-        // Handle address - support both old string format and new object format
-        if (typeof address === "object" && address !== null) {
-          // New format: address is an object with street, city, state, pinCode
-          if (address.street) updateData["address.street"] = address.street;
-          if (address.city) updateData["address.city"] = address.city;
-          if (address.state) updateData["address.state"] = address.state;
-          if (address.pinCode) updateData["address.pinCode"] = address.pinCode;
-        } else if (typeof address === "string") {
-          // Old format: address is a string (backward compatibility)
-          updateData["address.street"] = address;
-        }
+    // Convert ID to ObjectId if it's a string
+    const objectId = ObjectId.isValid(id) ? new ObjectId(id) : id;
 
-        // Convert ID to ObjectId if it's a string
-        const objectId = ObjectId.isValid(id) ? new ObjectId(id) : id;
+    // First, let's check if the document exists
+    const existingItem = await SellerInfo.findOne({
+      email: email,
+      _id: objectId,
+    });
 
-        // First, let's check if the document exists
-        const existingItem = await SellerInfo.findOne({
-          email: email,
-          _id: objectId,
-        });
+    if (!existingItem) {
+      res.status(200).send({
+        status: false,
+        message: "Item not found with provided email and ID",
+      });
+      return;
+    }
 
-        if (!existingItem) {
-          res.status(200).send({
-            status: false,
-            message: "Item not found with provided email and ID",
-          });
-          return;
-        }
+    const updatedItem = await SellerInfo.updateOne(
+      { email: email, _id: objectId }, // Filter criteria with proper ObjectId
+      updateData // Update data (repository handles $set automatically)
+    );
 
-        const updatedItem = await SellerInfo.updateOne(
-          { email: email, _id: objectId }, // Filter criteria with proper ObjectId
-          updateData // Update data (repository handles $set automatically)
-        );
+    if (!updatedItem) {
+      res
+        .status(200)
+        .send({ status: false, message: "No data found or update failed" });
+    } else {
+      res.status(200).send({ status: true, message: "Data is updated" });
+    }
+  } catch (err) {
+    console.error("Error updating item:", err);
+    console.error("Error stack:", err.stack);
+    res.status(200).send({ status: false, message: "Failed to update data" });
+  }
+};
 
-        if (!updatedItem) {
-          res
-            .status(200)
-            .send({ status: false, message: "No data found or update failed" });
-        } else {
-          res.status(200).send({ status: true, message: "Data is updated" });
-        }
-      } catch (err) {
-        console.error("Error updating item:", err);
-        console.error("Error stack:", err.stack);
-        res
-          .status(200)
-          .send({ status: false, message: "Failed to update data" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const deleteItems = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
+  let id = req.body.id;
 
-  router.post("/deleteItems", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
-      let id = req.body.id;
+  try {
+    // Use the correct field names from the new schema
+    const deletedItem = await SellerInfo.deleteOne({
+      email: email, // Use lowercase 'email' field
+      _id: id,
+    });
 
-      try {
-        // Use the correct field names from the new schema
-        const deletedItem = await SellerInfo.deleteOne({
-          email: email, // Use lowercase 'email' field
-          _id: id,
-        });
+    if (deletedItem.deletedCount === 0) {
+      res
+        .status(200)
+        .send({ status: false, message: "No item found to delete" });
+    } else {
+      res
+        .status(200)
+        .send({ status: true, message: "Data deleted successfully" });
+    }
+  } catch (err) {
+    console.error("Error deleting item:", err);
+    res.status(200).send({ status: false, message: "Failed to delete data" });
+  }
+};
 
-        if (deletedItem.deletedCount === 0) {
-          res
-            .status(200)
-            .send({ status: false, message: "No item found to delete" });
-        } else {
-          res
-            .status(200)
-            .send({ status: true, message: "Data deleted successfully" });
-        }
-      } catch (err) {
-        console.error("Error deleting item:", err);
-        res
-          .status(200)
-          .send({ status: false, message: "Failed to delete data" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const addRequest = async (req, res) => {
+  let sellerId = req.body.sellerId;
+  let buyerId = req.body.buyerId;
+  let sellerName = req.body.sellerName;
+  let buyerName = req.body.buyerName;
+  let buyerEmail = req.body.buyerEmail;
+  let buyerContact = req.body.buyerContact;
 
-  router.post("/addRequest", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let sellerId = req.body.sellerId;
-      let buyerId = req.body.buyerId;
-      let sellerName = req.body.sellerName;
-      let buyerName = req.body.buyerName;
-      let buyerEmail = req.body.buyerEmail;
-      let buyerContact = req.body.buyerContact;
+  try {
+    await RequestInfo.create({
+      sellerId: sellerId,
+      buyerId: buyerId,
+      sellerName: sellerName,
+      buyerName: buyerName,
+      buyerEmail: buyerEmail,
+      buyerContact: buyerContact,
+      status: "pending",
+    });
+    res.status(200).send({ status: true, message: "Request Sent" });
+  } catch (err) {
+    console.error("Error creating request:", err);
+    res.status(200).send({ status: false, message: "Can not send Request" });
+  }
+};
 
-      try {
-        await RequestInfo.create({
-          sellerId: sellerId,
-          buyerId: buyerId,
-          sellerName: sellerName,
-          buyerName: buyerName,
-          buyerEmail: buyerEmail,
-          buyerContact: buyerContact,
-          status: "pending",
-        });
-        res.status(200).send({ status: true, message: "Request Sent" });
-      } catch (err) {
-        console.error("Error creating request:", err);
-        res
-          .status(200)
-          .send({ status: false, message: "Can not send Request" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const getRequestData = async (req, res) => {
+  let sellerId = req.body.sellerId;
+  let buyerId = req.body.buyerId;
+  try {
+    const docs = await RequestInfo.find({
+      sellerId: sellerId,
+      buyerId: buyerId,
+    });
+    if (!docs || docs.length === 0) {
+      res.status(200).send({ status: false, message: "No Data" });
+    } else {
+      res
+        .status(200)
+        .send({ status: true, message: docs[0].status || "pending" });
+    }
+  } catch (err) {
+    console.error("Error fetching request data:", err);
+    res.status(200).send({ status: false, message: "No Data" });
+  }
+};
 
-  router.post("/getRequestData", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let sellerId = req.body.sellerId;
-      let buyerId = req.body.buyerId;
-      try {
-        const docs = await RequestInfo.find({
-          sellerId: sellerId,
-          buyerId: buyerId,
-        });
-        if (!docs || docs.length === 0) {
-          res.status(200).send({ status: false, message: "No Data" });
-        } else {
-          res
-            .status(200)
-            .send({ status: true, message: docs[0].status || "pending" });
-        }
-      } catch (err) {
-        console.error("Error fetching request data:", err);
-        res.status(200).send({ status: false, message: "No Data" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const allRequests = async (req, res) => {
+  let id = req.user?.email.split(",")[3];
+  try {
+    const data = await RequestInfo.find(
+      { sellerId: id },
+      { sort: { _id: -1 } }
+    );
+    res.status(200).send({ status: true, message: data });
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    res.status(200).send({ status: false, message: "No Requests found" });
+  }
+};
 
-  router.post("/allRequests", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let id = auth.email.split(",")[3];
-      try {
-        const data = await RequestInfo.find(
-          { sellerId: id },
-          { sort: { _id: -1 } }
-        );
-        res.status(200).send({ status: true, message: data });
-      } catch (error) {
-        console.error("Error fetching requests:", error);
-        res.status(200).send({ status: false, message: "No Requests found" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
+const ApproveOrDeny = async (req, res) => {
+  let email = req.user?.email.split(",")[1];
+  let id = req.body.id,
+    status = req.body.decision;
+  let value;
 
-  router.post("/ApproveOrDeny", async (req, res) => {
-    let token = req.body.token;
-    let auth = utils.authenticateToken(token);
-    if (auth != false) {
-      let email = auth.email.split(",")[1];
-      let id = req.body.id,
-        status = req.body.decision;
-      let value;
+  if (status == "Approve") value = "accepted";
+  else if (status == "Deny") value = "rejected";
+  else value = "pending";
 
-      if (status == "Approve") value = "accepted";
-      else if (status == "Deny") value = "rejected";
-      else value = "pending";
+  try {
+    const updatedRequest = await RequestInfo.updateOne(
+      { _id: id },
+      { status: value }
+    );
+    if (!updatedRequest) {
+      res.status(200).send({ status: false, message: "No data found" });
+    } else {
+      res.status(200).send({ status: true, message: "data is updated" });
+    }
+  } catch (err) {
+    console.error("Error updating request status:", err);
+    res.status(200).send({ status: false, message: "No data found" });
+  }
+};
 
-      try {
-        const updatedRequest = await RequestInfo.updateOne(
-          { _id: id },
-          { status: value }
-        );
-        if (!updatedRequest) {
-          res.status(200).send({ status: false, message: "No data found" });
-        } else {
-          res.status(200).send({ status: true, message: "data is updated" });
-        }
-      } catch (err) {
-        console.error("Error updating request status:", err);
-        res.status(200).send({ status: false, message: "No data found" });
-      }
-    } else res.status(200).send({ status: false, message: "Invalid Token" });
-  });
-}
+export default {
+  products,
+  uploadFile,
+  addSellerData,
+  getItemsList,
+  allItems,
+  editItems,
+  deleteItems,
+  addRequest,
+  getRequestData,
+  allRequests,
+  ApproveOrDeny,
+};
