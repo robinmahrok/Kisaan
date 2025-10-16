@@ -70,12 +70,11 @@ export default function Footer() {
           {/* Left side - Brand and message */}
           <div className="footer-left">
             <div className="footer-brand">
-              <span className="brand-icon">🌾</span>
-              <span className="brand-name">Kisaan</span>
-            </div>
-
-            <div className="footer-message">
-              {t("Empowering farmers, connecting communities")}
+              <img src="/khetihat.png" alt="Khetihat" className="brand-icon" />
+              <span className="brand-name">Khetihat</span>
+              <div className="footer-message">
+                {t("Uniting farmers, nurturing growth")}
+              </div>
             </div>
           </div>
           <LanguageSwitcher></LanguageSwitcher>
@@ -98,7 +97,7 @@ export default function Footer() {
             </div>
 
             <div className="copyright">
-              © {currentYear} {t("Kisaan. Made with")}{" "}
+              © {currentYear} {t("Khetihat. Made with")}{" "}
               <FontAwesomeIcon icon={faHeart} className="heart-icon" />{" "}
               {t("for farmers")}.
             </div>

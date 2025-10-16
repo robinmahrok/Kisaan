@@ -203,8 +203,8 @@ export default function Header() {
 
         {/* Logo/Brand - Center */}
         <div className="header-brand" onClick={() => handleNavigation("/home")}>
-          <div className="brand-icon">🌾</div>
-          <h1 className="brand-text">Kisaan</h1>
+          <img src="/khetihat.png" alt="Khetihat" className="brand-icon" />
+          <h1 className="brand-text">Khetihat</h1>
         </div>
 
         {/* Desktop Navigation - Hidden on mobile, shown on desktop */}

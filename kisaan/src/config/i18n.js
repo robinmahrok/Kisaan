@@ -54,7 +54,7 @@ const preTranslateCommonPhrases = async (lang) => {
     "About Us",
     "Contact Us",
     "Log Out",
-    "Empowering farmers, connecting communities",
+    "Uniting farmers, nurturing growth.",
     "Kisaan. Made with",
     "for farmers",
     "Welcome",

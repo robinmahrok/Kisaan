@@ -133,7 +133,7 @@ export default function Home() {
             <div className="welcome-description">
               <p>
                 {t(
-                  "Choose your role to continue with Kisaan - connecting farmers and buyers for a better agricultural marketplace."
+                  "Choose your role to continue with Khetihat - connecting farmers and buyers for a better agricultural marketplace."
                 )}
               </p>
             </div>

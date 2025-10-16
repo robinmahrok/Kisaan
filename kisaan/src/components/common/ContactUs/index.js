@@ -117,7 +117,7 @@ export default function ContactUs() {
                         <div className="method-icon">📧</div>
                         <div className="method-details">
                           <h5>Email Support</h5>
-                          <p>support@kisaan.com</p>
+                          <p>support@khetihat.com</p>
                           <small>Response within 2-4 hours</small>
                         </div>
                       </div>

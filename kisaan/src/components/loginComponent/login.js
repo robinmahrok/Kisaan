@@ -8,6 +8,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { emailValidator } from "../../utils/utils";
 import Footer from "../footerComponent";
 import { useTranslate } from "../../hooks/useTranslate";
+import "./login.css";
 
 // Constants for better maintainability
 const LOGIN_STATES = {
@@ -234,8 +235,11 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 flex flex-col">
       <div className="flex-1 flex justify-center items-center p-4">
         <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 hover:-translate-y-1 hover:shadow-3xl animate-fade-in">
+          <div>
+            <img src="/khetihat.png" alt="logo" className="logo-image" />
+          </div>
           <h2 className="text-center text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 sm:mb-8">
-            {t("Welcome Kisaan!")}
+            {t("Welcome to Khetihat!")}
           </h2>
 
           {displayError && (

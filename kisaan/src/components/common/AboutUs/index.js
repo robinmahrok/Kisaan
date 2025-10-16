@@ -4,10 +4,10 @@ import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Container, Card, Row, Col, Badge } from "react-bootstrap";
-
+import { useTranslate } from "../../../hooks/useTranslate";
 export default function AboutUs() {
   const history = useHistory();
-
+  const { t } = useTranslate();
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       history.push("/");
@@ -20,9 +20,9 @@ export default function AboutUs() {
       <div className="App-header">
         <Container>
           <div className="header-section">
-            <h2 className="page-title">About Kisaan</h2>
+            <h2 className="page-title">{t("About Khetihat")}</h2>
             <Badge variant="success" className="platform-badge">
-              Connecting Farmers Nationwide
+              {t("Connecting Farmers Nationwide")}
             </Badge>
           </div>
 
@@ -31,13 +31,11 @@ export default function AboutUs() {
             <Card className="about-card mission-card">
               <Card.Body>
                 <div className="card-icon">🌾</div>
-                <h3 className="section-title">Our Mission</h3>
+                <h3 className="section-title">{t("Our Mission")}</h3>
                 <p className="section-description">
-                  Kisaan is dedicated to revolutionizing agriculture by creating
-                  a seamless digital marketplace that connects farmers directly
-                  with buyers across India. We believe in empowering farmers
-                  with technology to get fair prices for their produce while
-                  ensuring buyers get fresh, quality agricultural products.
+                  {t(
+                    "Khetihat is dedicated to revolutionizing agriculture by creating a seamless digital marketplace that connects farmers directly with buyers across India. We believe in empowering farmers with technology to get fair prices for their produce while ensuring buyers get fresh, quality agricultural products."
+                  )}
                 </p>
               </Card.Body>
             </Card>
@@ -48,10 +46,11 @@ export default function AboutUs() {
                 <Card className="feature-card">
                   <Card.Body>
                     <div className="feature-icon">🚀</div>
-                    <h4 className="feature-title">Direct Connection</h4>
+                    <h4 className="feature-title">{t("Direct Connection")}</h4>
                     <p className="feature-description">
-                      Connect directly with farmers and buyers, eliminating
-                      middlemen and ensuring better prices for everyone.
+                      {t(
+                        "Connect directly with farmers and buyers, eliminating middlemen and ensuring better prices for everyone."
+                      )}
                     </p>
                   </Card.Body>
                 </Card>
@@ -61,10 +60,11 @@ export default function AboutUs() {
                 <Card className="feature-card">
                   <Card.Body>
                     <div className="feature-icon">🌍</div>
-                    <h4 className="feature-title">Nationwide Reach</h4>
+                    <h4 className="feature-title">{t("Nationwide Reach")}</h4>
                     <p className="feature-description">
-                      Access markets across India, from Punjab's wheat fields to
-                      Kerala's spice gardens.
+                      {t(
+                        "Access markets across India, from Punjab's wheat fields to Kerala's spice gardens."
+                      )}
                     </p>
                   </Card.Body>
                 </Card>
@@ -74,10 +74,11 @@ export default function AboutUs() {
                 <Card className="feature-card">
                   <Card.Body>
                     <div className="feature-icon">💰</div>
-                    <h4 className="feature-title">Fair Pricing</h4>
+                    <h4 className="feature-title">{t("Fair Pricing")}</h4>
                     <p className="feature-description">
-                      Transparent pricing system that ensures farmers get fair
-                      value for their hard work.
+                      {t(
+                        "Transparent pricing system that ensures farmers get fair value for their hard work."
+                      )}
                     </p>
                   </Card.Body>
                 </Card>
@@ -87,10 +88,11 @@ export default function AboutUs() {
                 <Card className="feature-card">
                   <Card.Body>
                     <div className="feature-icon">📱</div>
-                    <h4 className="feature-title">Easy to Use</h4>
+                    <h4 className="feature-title">{t("Easy to Use")}</h4>
                     <p className="feature-description">
-                      Simple, intuitive interface designed for farmers and
-                      buyers of all technical backgrounds.
+                      {t(
+                        "Simple, intuitive interface designed for farmers and buyers of all technical backgrounds."
+                      )}
                     </p>
                   </Card.Body>
                 </Card>
@@ -100,10 +102,11 @@ export default function AboutUs() {
                 <Card className="feature-card">
                   <Card.Body>
                     <div className="feature-icon">🤝</div>
-                    <h4 className="feature-title">24/7 Support</h4>
+                    <h4 className="feature-title">{t("24/7 Support")}</h4>
                     <p className="feature-description">
-                      Round-the-clock customer support to help you with any
-                      questions or issues.
+                      {t(
+                        "Round-the-clock customer support to help you with any questions or issues."
+                      )}
                     </p>
                   </Card.Body>
                 </Card>
@@ -114,14 +117,11 @@ export default function AboutUs() {
             <Card className="about-card vision-card">
               <Card.Body>
                 <div className="card-icon">🎯</div>
-                <h3 className="section-title">Our Vision</h3>
+                <h3 className="section-title">{t("Our Vision")}</h3>
                 <p className="section-description">
-                  To create a thriving agricultural ecosystem where technology
-                  bridges the gap between rural farmers and urban markets,
-                  fostering sustainable growth and prosperity for India's
-                  farming community. We envision a future where every farmer has
-                  access to fair markets and every consumer can trace their food
-                  back to its source.
+                  {t(
+                    "To create a thriving agricultural ecosystem where technology bridges the gap between rural farmers and urban markets, fostering sustainable growth and prosperity for India's farming community. We envision a future where every farmer has access to fair markets and every consumer can trace their food back to its source."
+                  )}
                 </p>
               </Card.Body>
             </Card>
@@ -129,23 +129,23 @@ export default function AboutUs() {
             {/* Impact Section */}
             <Card className="about-card impact-card">
               <Card.Body>
-                <h3 className="section-title">Our Impact</h3>
+                <h3 className="section-title">{t("Our Impact")}</h3>
                 <Row className="impact-stats">
                   <Col md={3} sm={6} className="stat-col">
                     <div className="stat-number">1000+</div>
-                    <div className="stat-label">Farmers Connected</div>
+                    <div className="stat-label">{t("Farmers Connected")}</div>
                   </Col>
                   <Col md={3} sm={6} className="stat-col">
                     <div className="stat-number">500+</div>
-                    <div className="stat-label">Buyers Registered</div>
+                    <div className="stat-label">{t("Buyers Registered")}</div>
                   </Col>
                   <Col md={3} sm={6} className="stat-col">
                     <div className="stat-number">50+</div>
-                    <div className="stat-label">Crop Varieties</div>
+                    <div className="stat-label">{t("Crop Varieties")}</div>
                   </Col>
                   <Col md={3} sm={6} className="stat-col">
                     <div className="stat-number">25+</div>
-                    <div className="stat-label">States Covered</div>
+                    <div className="stat-label">{t("States Covered")}</div>
                   </Col>
                 </Row>
               </Card.Body>
@@ -155,30 +155,28 @@ export default function AboutUs() {
             <Card className="about-card team-card">
               <Card.Body>
                 <div className="card-icon">👥</div>
-                <h3 className="section-title">Our Commitment</h3>
+                <h3 className="section-title">{t("Our Commitment")}</h3>
                 <p className="section-description">
-                  We work tirelessly, day and night, to achieve our goal of
-                  transforming Indian agriculture. Our dedicated team is
-                  committed to providing the best possible experience for both
-                  farmers and buyers. We continuously innovate and improve our
-                  platform based on user feedback and changing market needs.
+                  {t(
+                    "We work tirelessly, day and night, to achieve our goal of transforming Indian agriculture. Our dedicated team is committed to providing the best possible experience for both farmers and buyers. We continuously innovate and improve our platform based on user feedback and changing market needs."
+                  )}
                 </p>
                 <div className="commitment-points">
                   <div className="commitment-point">
                     <span className="point-icon">✓</span>
-                    <span>Continuous platform improvement</span>
+                    <span>{t("Continuous platform improvement")}</span>
                   </div>
                   <div className="commitment-point">
                     <span className="point-icon">✓</span>
-                    <span>User-centric design and features</span>
+                    <span>{t("User-centric design and features")}</span>
                   </div>
                   <div className="commitment-point">
                     <span className="point-icon">✓</span>
-                    <span>Sustainable agricultural practices</span>
+                    <span>{t("Sustainable agricultural practices")}</span>
                   </div>
                   <div className="commitment-point">
                     <span className="point-icon">✓</span>
-                    <span>Empowering rural communities</span>
+                    <span>{t("Empowering rural communities")}</span>
                   </div>
                 </div>
               </Card.Body>

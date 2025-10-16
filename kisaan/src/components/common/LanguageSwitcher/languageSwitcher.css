@@ -1,6 +1,7 @@
 .language-switcher {
   position: relative;
   display: inline-block;
+  width: 50%;
 }
 
 /* Trigger button - Adapts to context (header vs footer) */

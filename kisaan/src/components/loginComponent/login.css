@@ -7,6 +7,14 @@
   padding: 1rem;
 }
 
+.logo-image {
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  left: 30%;
+  position: relative;
+}
+
 .login-form {
   background: white;
   padding: 2.5rem;
