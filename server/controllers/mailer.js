@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const mailSettings = {
   host: "smtp.gmail.com",
-  port: 465,
+  port: 587,
   secure: true,
   service: "Gmail",
   from: `"${COMMON_NAME}"`,
