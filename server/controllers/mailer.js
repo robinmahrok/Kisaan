@@ -1,13 +1,13 @@
 import nodemailer from "nodemailer";
 import config from "../config/config.js";
-import path from 'path';
-import dotenv from 'dotenv';
+import path from "path";
+import dotenv from "dotenv";
 
 const EMAIL_USERNAME = "";
 const COMMON_NAME = "Robin Singh";
 const { credentials, token } = config;
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const mailSettings = {
   host: "smtp.gmail.com",
@@ -17,8 +17,8 @@ const mailSettings = {
   from: `"${COMMON_NAME}"`,
   auth: {
     user: process.env?.EMAIL_USERNAME,
-    pass: process.env?.EMAIL_PASSWORD  
-  }  
+    pass: process.env?.EMAIL_PASSWORD,
+  },
 };
 
 let transporter = nodemailer.createTransport(mailSettings);
@@ -27,14 +27,14 @@ const mailer = async (mailOptions) => {
   try {
     // Use provided mailOptions or create default OTP email
     const finalMailOptions = {
-      from: `"Kisaan" <${mailSettings.auth.user}>`,
-      ...mailOptions
+      from: `"Khetihat" <${mailSettings.auth.user}>`,
+      ...mailOptions,
     };
 
     const info = await transporter.sendMail(finalMailOptions);
-    return { status: 'success', messageId: info.messageId };
+    return { status: "success", messageId: info.messageId };
   } catch (error) {
-    console.error('Email sending failed:', error);
+    console.error("Email sending failed:", error);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 };

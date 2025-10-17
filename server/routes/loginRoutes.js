@@ -103,7 +103,6 @@ const emailOTP = async (recipient, otpVal, callback) => {
       subject: "OTP verification",
       html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + otpVal + "</b>",
     };
-
     await mailer(mailOptions);
     callback(null, { status: 1000 });
   } catch (error) {
@@ -113,7 +112,6 @@ const emailOTP = async (recipient, otpVal, callback) => {
 
 const sendOtp = async (req, res) => {
   let email = req.body.email;
-
   if (
     req.body.email == null ||
     typeof req.body.email == undefined ||
