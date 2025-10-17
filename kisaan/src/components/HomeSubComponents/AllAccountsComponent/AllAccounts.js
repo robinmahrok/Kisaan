@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import { Autocomplete } from "@material-ui/lab";
 import { TextField } from "@material-ui/core";
-import { baseUrl } from "../../../baseUrl";
+import { baseUrl, cloudinaryUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
@@ -435,8 +435,9 @@ export default function AllAccounts() {
               {data2.map((item, index) => (
                 <Card key={item._id || index} className="item-card">
                   <div className="item-image-container">
+                    {console.log(`${cloudinaryUrl}${item._id}.jpg`)}
                     <img
-                      src={`${baseUrl}/static/images/${item._id}.jpg`}
+                      src={`${cloudinaryUrl}${item._id}.jpg`}
                       alt={item.product || item.Product}
                       className="item-image"
                       onError={(e) => {

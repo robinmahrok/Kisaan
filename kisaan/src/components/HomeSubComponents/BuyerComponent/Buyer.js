@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Buyer.css";
-import { baseUrl } from "../../../baseUrl";
+import { baseUrl, cloudinaryUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
@@ -44,7 +44,7 @@ export default function Buyer() {
     buyerId: "",
   });
   const [sellerData, setSellerData] = useState(null);
-  const [imageLink, setImageLink] = useState("");
+  const [imageLink, setImageLink] = useState(`${cloudinaryUrl}`);
   const [productListState, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -146,7 +146,6 @@ export default function Buyer() {
         );
 
         if (response.data.status) {
-          setImageLink(`${baseUrl}/static/images/`);
           const products = response.data.message || [];
           setTotalCount(response.data.totalCount || products.length);
 

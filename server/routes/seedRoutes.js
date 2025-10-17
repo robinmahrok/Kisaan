@@ -11,6 +11,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { ObjectId } from "mongodb";
 import sharp from "sharp";
+import { uploadToCloudinary } from "../services/cloudinary.js";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -77,9 +78,6 @@ const uploadFile = async (req, res) => {
       });
     }
 
-    // Define the output path
-    const outputPath = `./public/images/${fileName}.jpg`;
-
     // Check if file is an image
     const allowedMimeTypes = [
       "image/jpeg",
@@ -95,21 +93,28 @@ const uploadFile = async (req, res) => {
       });
     }
 
-    // Compress and save the image using Sharp
-    await sharp(imageFile.data)
+    // Optionally pre-process with Sharp before uploading
+    const processedBuffer = await sharp(imageFile.data)
       .resize(800, 600, {
         fit: "inside",
         withoutEnlargement: true,
-      }) // Resize to max 800x600, maintaining aspect ratio
+      })
       .jpeg({
-        quality: 80, // Compress to 80% quality
+        quality: 80,
         progressive: true,
       })
-      .toFile(outputPath);
+      .toBuffer();
+
+    // Upload to Cloudinary
+    const uploadResult = await uploadToCloudinary(processedBuffer, fileName);
 
     res.status(200).send({
       status: true,
-      message: "Image uploaded and compressed successfully",
+      message: "Image uploaded successfully",
+      data: {
+        url: uploadResult.url,
+        publicId: uploadResult.publicId,
+      },
     });
   } catch (err) {
     console.error("Error processing image:", err);
