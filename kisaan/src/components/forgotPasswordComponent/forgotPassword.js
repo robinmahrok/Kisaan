@@ -1,38 +1,43 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import './forgotPassword.css';
+import "./forgotPassword.css";
 import { Spinner, Alert } from "react-bootstrap";
 import { baseUrl } from "../../baseUrl";
 import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEye,
+  faEyeSlash,
+  faArrowLeft,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function ForgotPassword() {
   const history = useHistory();
 
   const [email, setEmail] = useState("");
   const [send, setSend] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
   const [verify, setVerify] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Loading states
   const [loadingSendOtp, setLoadingSendOtp] = useState(false);
   const [loadingVerifyOtp, setLoadingVerifyOtp] = useState(false);
   const [loadingUpdatePassword, setLoadingUpdatePassword] = useState(false);
-  
+
   // Message states
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // Validation states
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  
+
   // Resend functionality
   const [canResend, setCanResend] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -42,10 +47,18 @@ export default function ForgotPassword() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+  const mobileValidator = (value) => {
+    const regMobile = /^[0][1-9]\d{9}$|^[1-9]\d{9}$/;
+    if (value.length === 10 && regMobile.test(value)) {
+      return true;
+    }
+    return false;
+  };
 
   // Password validation
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{6,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{6,}$/;
     return passwordRegex.test(password);
   };
 
@@ -65,10 +78,13 @@ export default function ForgotPassword() {
     setEmail(emailValue);
     setEmailError("");
     setErrorMessage("");
-    
-    if (emailValue && !validateEmail(emailValue)) {
-      setEmailError("Please enter a valid email address");
-    }
+
+    const isMobileNumber =
+      mobileValidator(emailValue) && emailValue.length === 10;
+    setIsMobile(isMobileNumber);
+    if (emailValue && !validateEmail(emailValue) && !isMobileNumber) {
+      setEmailError("Please enter a valid email/mobile number");
+    } else setEmailError("");
   };
 
   const handlePasswordChange = (e) => {
@@ -76,11 +92,13 @@ export default function ForgotPassword() {
     setPassword(passwordValue);
     setPasswordError("");
     setErrorMessage("");
-    
+
     if (passwordValue && !validatePassword(passwordValue)) {
-      setPasswordError("Password must contain at least 6 characters including uppercase, lowercase, number and special character");
+      setPasswordError(
+        "Password must contain at least 6 characters including uppercase, lowercase, number and special character"
+      );
     }
-    
+
     // Revalidate confirm password if it exists
     if (confirmPassword && passwordValue !== confirmPassword) {
       setConfirmPasswordError("Passwords do not match");
@@ -94,14 +112,14 @@ export default function ForgotPassword() {
     setConfirmPassword(confirmPasswordValue);
     setConfirmPasswordError("");
     setErrorMessage("");
-    
+
     if (confirmPasswordValue && confirmPasswordValue !== password) {
       setConfirmPasswordError("Passwords do not match");
     }
   };
 
   const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+    const value = e.target.value.replace(/\D/g, ""); // Only allow digits
     if (value.length <= 6) {
       setEnteredOtp(value);
       setErrorMessage("");
@@ -110,29 +128,34 @@ export default function ForgotPassword() {
 
   const sendOTP = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!email) {
       setEmailError("Email is required");
       return;
     }
-    
-    if (!validateEmail(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
+
+    if (email && !validateEmail(email) && !isMobile) {
+      setEmailError("Please enter a valid email/mobile number");
     }
-    
+
     setLoadingSendOtp(true);
     setErrorMessage("");
     setSuccessMessage("");
     setEmailError("");
 
     try {
-      const response = await axios.post(`${baseUrl}/sendOtp`, { email });
+      const params = { method: isMobile ? "sms" : "email" };
+      if (isMobile) {
+        params.contact = email;
+      } else {
+        params.email = email;
+      }
+      const response = await axios.post(`${baseUrl}/sendOtp`, params);
       setLoadingSendOtp(false);
-      
+
       if (response.data.status) {
-        setSuccessMessage("OTP sent successfully! Please check your email.");
+        setSuccessMessage("OTP sent successfully!");
         setSend(true);
         setCanResend(false);
         setCountdown(60); // 60 seconds countdown
@@ -143,21 +166,21 @@ export default function ForgotPassword() {
       setLoadingSendOtp(false);
       console.error("Send OTP error:", err);
       setErrorMessage(
-        err.response?.data?.message || 
-        "Failed to send OTP. Please check your internet connection and try again."
+        err.response?.data?.message ||
+          "Failed to send OTP. Please check your internet connection and try again."
       );
     }
   };
 
   const verifyOtp = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!enteredOtp) {
       setErrorMessage("Please enter the OTP");
       return;
     }
-    
+
     if (enteredOtp.length !== 6) {
       setErrorMessage("OTP must be 6 digits");
       return;
@@ -168,48 +191,54 @@ export default function ForgotPassword() {
     setSuccessMessage("");
 
     try {
-      const response = await axios.post(`${baseUrl}/verifyOtp`, { 
-        email, 
-        otp: parseInt(enteredOtp) 
+      const response = await axios.post(`${baseUrl}/verifyOtp`, {
+        email,
+        otp: parseInt(enteredOtp),
       });
-      
+
       setLoadingVerifyOtp(false);
-      
+
       if (response.data.status) {
-        setSuccessMessage("OTP verified successfully! Now you can set a new password.");
+        setSuccessMessage(
+          "OTP verified successfully! Now you can set a new password."
+        );
         setVerify(true);
       } else {
-        setErrorMessage(response.data.message || "Invalid OTP. Please try again.");
+        setErrorMessage(
+          response.data.message || "Invalid OTP. Please try again."
+        );
       }
     } catch (err) {
       setLoadingVerifyOtp(false);
       console.error("Verify OTP error:", err);
       setErrorMessage(
-        err.response?.data?.message || 
-        "Failed to verify OTP. Please check your internet connection and try again."
+        err.response?.data?.message ||
+          "Failed to verify OTP. Please check your internet connection and try again."
       );
     }
   };
 
   const updatePassword = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!password) {
       setPasswordError("Password is required");
       return;
     }
-    
+
     if (!validatePassword(password)) {
-      setPasswordError("Password must contain at least 6 characters including uppercase, lowercase, number and special character");
+      setPasswordError(
+        "Password must contain at least 6 characters including uppercase, lowercase, number and special character"
+      );
       return;
     }
-    
+
     if (!confirmPassword) {
       setConfirmPasswordError("Please confirm your password");
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setConfirmPasswordError("Passwords do not match");
       return;
@@ -222,15 +251,17 @@ export default function ForgotPassword() {
     setConfirmPasswordError("");
 
     try {
-      const response = await axios.post(`${baseUrl}/changePassword`, { 
-        email, 
-        password 
+      const response = await axios.post(`${baseUrl}/changePassword`, {
+        email,
+        password,
       });
-      
+
       setLoadingUpdatePassword(false);
-      
+
       if (response.data.status) {
-        setSuccessMessage("Password updated successfully! Redirecting to login...");
+        setSuccessMessage(
+          "Password updated successfully! Redirecting to login..."
+        );
         setTimeout(() => {
           history.push("/login");
         }, 2000);
@@ -241,8 +272,8 @@ export default function ForgotPassword() {
       setLoadingUpdatePassword(false);
       console.error("Update password error:", err);
       setErrorMessage(
-        err.response?.data?.message || 
-        "Failed to update password. Please check your internet connection and try again."
+        err.response?.data?.message ||
+          "Failed to update password. Please check your internet connection and try again."
       );
     }
   };
@@ -287,15 +318,15 @@ export default function ForgotPassword() {
     <div className="forgot-password-container">
       <div className="forgot-password-form">
         <div className="form-header">
-          <button
-            type="button"
-            className="back-button w-max"
-            onClick={goBack}
-          >
+          <button type="button" className="back-button w-max" onClick={goBack}>
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
           <h2>
-            {verify ? "Set New Password" : send ? "Verify OTP" : "Forgot Password"}
+            {verify
+              ? "Set New Password"
+              : send
+              ? "Verify OTP"
+              : "Forgot Password"}
           </h2>
         </div>
 
@@ -315,17 +346,19 @@ export default function ForgotPassword() {
         {!send && !verify && (
           <form onSubmit={sendOTP}>
             <div className="form-group">
-              <label>Email Address</label>
+              <label>Email Address/Mobile Number</label>
               <input
-                type="email"
-                className={`form-control ${emailError ? 'is-invalid' : ''}`}
+                type="text"
+                className={`form-control ${emailError ? "is-invalid" : ""}`}
                 placeholder="Enter your email address"
                 value={email}
                 onChange={handleEmailChange}
                 required
                 autoComplete="email"
               />
-              {emailError && <div className="invalid-feedback">{emailError}</div>}
+              {emailError && (
+                <div className="invalid-feedback">{emailError}</div>
+              )}
               <small className="form-text text-muted">
                 We'll send an OTP to this email address
               </small>
@@ -415,7 +448,9 @@ export default function ForgotPassword() {
               <div className="input-with-icon">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`form-control ${passwordError ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    passwordError ? "is-invalid" : ""
+                  }`}
                   placeholder="Enter new password"
                   value={password}
                   onChange={handlePasswordChange}
@@ -430,7 +465,9 @@ export default function ForgotPassword() {
                   <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                 </button>
               </div>
-              {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+              {passwordError && (
+                <div className="invalid-feedback">{passwordError}</div>
+              )}
               <small className="form-text text-muted">
                 Must contain uppercase, lowercase, number and special character
               </small>
@@ -441,7 +478,9 @@ export default function ForgotPassword() {
               <div className="input-with-icon">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  className={`form-control ${confirmPasswordError ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    confirmPasswordError ? "is-invalid" : ""
+                  }`}
                   placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
@@ -453,20 +492,24 @@ export default function ForgotPassword() {
                   className="password-toggle"
                   onClick={toggleConfirmPasswordVisibility}
                 >
-                  <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                  <FontAwesomeIcon
+                    icon={showConfirmPassword ? faEyeSlash : faEye}
+                  />
                 </button>
               </div>
-              {confirmPasswordError && <div className="invalid-feedback">{confirmPasswordError}</div>}
+              {confirmPasswordError && (
+                <div className="invalid-feedback">{confirmPasswordError}</div>
+              )}
             </div>
 
             <button
               type="submit"
               className="btn btn-success btn-block"
               disabled={
-                loadingUpdatePassword || 
-                !password || 
-                !confirmPassword || 
-                passwordError || 
+                loadingUpdatePassword ||
+                !password ||
+                !confirmPassword ||
+                passwordError ||
                 confirmPasswordError ||
                 password !== confirmPassword
               }

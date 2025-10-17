@@ -66,7 +66,7 @@ const signup = async (req, res) => {
                 email: email,
                 contact: contact,
                 password: hashedpass,
-                otpVerify: "Pending",
+                otpVerify: "Verified",
                 otp: 0,
               });
               res.status(200).send({ status: true, message: "User Created" });
