@@ -202,7 +202,6 @@ export default function Login() {
           history.push("/home");
         } else if (data.message === "Otp not verified.") {
           // Email not verified
-          alert(ERROR_MESSAGES.EMAIL_NOT_VERIFIED);
           sessionStorage.setItem("email", formData.email);
           history.push("/otpVerify");
         } else {

@@ -96,17 +96,17 @@ const signup = async (req, res) => {
   }
 };
 
-const emailOTP = async (recipient, otpVal, callback) => {
+const emailOTP = async (recipient, otpVal) => {
   try {
     const mailOptions = {
       to: recipient,
       subject: "OTP verification",
       html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + otpVal + "</b>",
     };
-    await mailer(mailOptions);
-    callback(null, { status: 1000 });
+    let result = await mailer(mailOptions);
+    return { status: true, message: result };
   } catch (error) {
-    callback("Unable to send OTP through email", null);
+    return { status: false, message: "Unable to send OTP through email" };
   }
 };
 
@@ -131,25 +131,21 @@ const sendOtp = async (req, res) => {
         }
 
         let otpVal = genOTP(100000, 900000);
-        emailOTP(email, otpVal, (err) => {
-          if (err) {
-            res.status(400).send({
-              status: false,
-              message: err,
-            });
+        let result = await emailOTP(email, otpVal);
+        if (result.status) {
+          console.log("result", result);
+          try {
+            await userInfo.updateOTP(email, otpVal);
+            res
+              .status(200)
+              .send({ status: true, message: "OTP sent successfully!!" });
+          } catch (error) {
+            res
+              .status(200)
+              .send({ status: false, message: "Unable to update User data" });
           }
-        });
-
-        try {
-          await userInfo.updateOTP(email, otpVal);
-          res.status(200).send({
-            status: true,
-          });
-        } catch (error) {
-          res.status(400).send({
-            status: false,
-            message: error.message,
-          });
+        } else {
+          res.status(400).send({ status: false, message: result.message });
         }
       }
     } catch (error) {

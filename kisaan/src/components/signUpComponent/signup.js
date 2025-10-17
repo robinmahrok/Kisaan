@@ -256,7 +256,6 @@ export default function SignUp() {
         if (data.status) {
           // Signup successful
           sessionStorage.setItem("email", formData.email);
-          alert("Account created successfully! Please verify your email.");
           history.push("/otpVerify");
         } else {
           // Signup failed with specific message
