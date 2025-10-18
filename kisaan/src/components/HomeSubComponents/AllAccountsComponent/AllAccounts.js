@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import axios from "axios";
 import "./AllAccounts.css";
 import {
   Spinner,
@@ -11,13 +10,15 @@ import {
 } from "react-bootstrap";
 import { Autocomplete } from "@material-ui/lab";
 import { TextField } from "@material-ui/core";
-import { baseUrl, cloudinaryUrl } from "../../../baseUrl";
+import { cloudinaryUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
 import { useTranslate } from "../../../hooks/useTranslate";
+import { itemService } from "../../../services";
+import { getAuthToken } from "../../../utils/cookies";
 
 export default function AllAccounts() {
   const history = useHistory();
@@ -52,7 +53,7 @@ export default function AllAccounts() {
 
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     if (!token) return null;
 
     try {
@@ -98,15 +99,15 @@ export default function AllAccounts() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       if (!token) {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.post(`${baseUrl}/allItems`, { token });
+      const result = await itemService.getAllItems();
 
-      if (response.data.status) {
-        const items = response.data.message || [];
+      if (result.success && result.data.status) {
+        const items = result.data.message || [];
         setData2(items);
 
         // Initialize action loading states
@@ -116,14 +117,14 @@ export default function AllAccounts() {
         });
         setActionLoading(loadingStates);
       } else {
-        setError(response.data.message || "Failed to fetch items");
+        setError(
+          result.error || result.data?.message || "Failed to fetch items"
+        );
         setData2([]);
       }
     } catch (err) {
       console.error("Error fetching items:", err);
-      setError(
-        err.response?.data?.message || err.message || "Failed to fetch items"
-      );
+      setError(err.message || "Failed to fetch items");
       setData2([]);
     } finally {
       setLoading(false);
@@ -199,7 +200,6 @@ export default function AllAccounts() {
 
         const item = data2[index];
         const requestData = {
-          token: localStorage.getItem("token"),
           id: item._id,
           price: formData.price,
           quantity: formData.quantity,
@@ -212,9 +212,9 @@ export default function AllAccounts() {
           },
         };
 
-        const response = await axios.post(`${baseUrl}/editItems`, requestData);
+        const result = await itemService.editItem(requestData);
 
-        if (response.data.status) {
+        if (result.success && result.data.status) {
           setSuccessMessage("Item updated successfully!");
           setEditingIndex(-1);
           setFormData({
@@ -228,13 +228,13 @@ export default function AllAccounts() {
           });
           await fetchItems();
         } else {
-          setError(response.data.message || "Failed to update item");
+          setError(
+            result.error || result.data?.message || "Failed to update item"
+          );
         }
       } catch (err) {
         console.error("Error updating item:", err);
-        setError(
-          err.response?.data?.message || err.message || "Failed to update item"
-        );
+        setError(err.message || "Failed to update item");
       } finally {
         setActionLoading((prev) => ({ ...prev, [index]: false }));
       }
@@ -257,26 +257,22 @@ export default function AllAccounts() {
 
         const item = data2[index];
         const requestData = {
-          token: localStorage.getItem("token"),
           id: item._id,
         };
 
-        const response = await axios.post(
-          `${baseUrl}/deleteItems`,
-          requestData
-        );
+        const result = await itemService.deleteItem(requestData);
 
-        if (response.data.status) {
+        if (result.success && result.data.status) {
           setSuccessMessage("Item deleted successfully!");
           await fetchItems();
         } else {
-          setError(response.data.message || "Failed to delete item");
+          setError(
+            result.error || result.data?.message || "Failed to delete item"
+          );
         }
       } catch (err) {
         console.error("Error deleting item:", err);
-        setError(
-          err.response?.data?.message || err.message || "Failed to delete item"
-        );
+        setError(err.message || "Failed to delete item");
       } finally {
         setActionLoading((prev) => ({ ...prev, [index]: false }));
       }

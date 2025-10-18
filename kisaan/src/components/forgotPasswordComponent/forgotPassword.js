@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./forgotPassword.css";
 import { Spinner, Alert } from "react-bootstrap";
-import { baseUrl } from "../../baseUrl";
 import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,6 +7,8 @@ import {
   faEyeSlash,
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
+import { authService } from "../../services";
+import "./forgotPassword.css";
 
 export default function ForgotPassword() {
   const history = useHistory();
@@ -144,30 +143,25 @@ export default function ForgotPassword() {
     setSuccessMessage("");
     setEmailError("");
 
-    try {
-      const params = { method: isMobile ? "sms" : "email" };
-      if (isMobile) {
-        params.contact = email;
-      } else {
-        params.email = email;
-      }
-      const response = await axios.post(`${baseUrl}/sendOtp`, params);
-      setLoadingSendOtp(false);
+    // Use authService instead of axios
+    const params = { method: isMobile ? "sms" : "email" };
+    if (isMobile) {
+      params.contact = email;
+    } else {
+      params.email = email;
+    }
 
-      if (response.data.status) {
-        setSuccessMessage("OTP sent successfully!");
-        setSend(true);
-        setCanResend(false);
-        setCountdown(60); // 60 seconds countdown
-      } else {
-        setErrorMessage(response.data.message || "Failed to send OTP");
-      }
-    } catch (err) {
-      setLoadingSendOtp(false);
-      console.error("Send OTP error:", err);
+    const result = await authService.sendOTPWithMethod(params);
+    setLoadingSendOtp(false);
+
+    if (result.success && result.data.status) {
+      setSuccessMessage("OTP sent successfully!");
+      setSend(true);
+      setCanResend(false);
+      setCountdown(60); // 60 seconds countdown
+    } else {
       setErrorMessage(
-        err.response?.data?.message ||
-          "Failed to send OTP. Please check your internet connection and try again."
+        result.error || result.data?.message || "Failed to send OTP"
       );
     }
   };
@@ -190,30 +184,22 @@ export default function ForgotPassword() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/verifyOtp`, {
-        email,
-        otp: parseInt(enteredOtp),
-      });
+    // Use authService instead of axios
+    const result = await authService.verifyOTP({
+      email,
+      otp: parseInt(enteredOtp),
+    });
 
-      setLoadingVerifyOtp(false);
+    setLoadingVerifyOtp(false);
 
-      if (response.data.status) {
-        setSuccessMessage(
-          "OTP verified successfully! Now you can set a new password."
-        );
-        setVerify(true);
-      } else {
-        setErrorMessage(
-          response.data.message || "Invalid OTP. Please try again."
-        );
-      }
-    } catch (err) {
-      setLoadingVerifyOtp(false);
-      console.error("Verify OTP error:", err);
+    if (result.success && result.data.status) {
+      setSuccessMessage(
+        "OTP verified successfully! Now you can set a new password."
+      );
+      setVerify(true);
+    } else {
       setErrorMessage(
-        err.response?.data?.message ||
-          "Failed to verify OTP. Please check your internet connection and try again."
+        result.error || result.data?.message || "Invalid OTP. Please try again."
       );
     }
   };
@@ -250,30 +236,24 @@ export default function ForgotPassword() {
     setPasswordError("");
     setConfirmPasswordError("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/changePassword`, {
-        email,
-        password,
-      });
+    // Use authService instead of axios
+    const result = await authService.changePassword({
+      email,
+      password,
+    });
 
-      setLoadingUpdatePassword(false);
+    setLoadingUpdatePassword(false);
 
-      if (response.data.status) {
-        setSuccessMessage(
-          "Password updated successfully! Redirecting to login..."
-        );
-        setTimeout(() => {
-          history.push("/login");
-        }, 2000);
-      } else {
-        setErrorMessage(response.data.message || "Failed to update password");
-      }
-    } catch (err) {
-      setLoadingUpdatePassword(false);
-      console.error("Update password error:", err);
+    if (result.success && result.data.status) {
+      setSuccessMessage(
+        "Password updated successfully! Redirecting to login..."
+      );
+      setTimeout(() => {
+        history.push("/login");
+      }, 2000);
+    } else {
       setErrorMessage(
-        err.response?.data?.message ||
-          "Failed to update password. Please check your internet connection and try again."
+        result.error || result.data?.message || "Failed to update password"
       );
     }
   };

@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import axios from "axios";
 import "./Seller.css";
 import { Spinner, Alert } from "react-bootstrap";
 import { Autocomplete } from "@material-ui/lab";
 import { TextField } from "@material-ui/core";
-import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import statesofIndia from "../../../utils/states";
 import { useTranslate } from "../../../hooks/useTranslate";
+import { itemService } from "../../../services";
+import { getAuthToken } from "../../../utils/cookies";
 
 // Constants
 const INITIAL_FORM_DATA = {
@@ -136,36 +136,39 @@ export default function Seller() {
 
   // Initialize user data and products
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken(); // Get token from cookies
     if (!token) {
       history.push("/");
       return;
     }
 
-    try {
-      const nameEmail = Token(token);
-      const [name, userId, contact] = nameEmail.split(",");
-      setUserInfo({ email: userId, name, contact });
+    const loadUserDataAndProducts = async () => {
+      try {
+        const nameEmail = Token(token);
+        const [name, userId, contact] = nameEmail.split(",");
+        setUserInfo({ email: userId, name, contact });
 
-      // Fetch products
-      axios
-        .post(`${baseUrl}/products`, { token })
-        .then((response) => {
-          if (response.data.status) {
-            const prodVarData = response.data.message;
-            localStorage.setItem("prodVarData", JSON.stringify(prodVarData));
-            setProductList(Object.keys(prodVarData));
-          } else {
-            setErrorMessage(response.data.message);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          setErrorMessage("Failed to load products. Please try again.");
-        });
-    } catch (error) {
-      history.push("/");
-    }
+        // Fetch products using itemService (token in headers automatically)
+        const result = await itemService.getProducts();
+
+        if (result.success && result.data.status) {
+          const prodVarData = result.data.message;
+          localStorage.setItem("prodVarData", JSON.stringify(prodVarData));
+          setProductList(Object.keys(prodVarData));
+        } else {
+          setErrorMessage(
+            result.error ||
+              result.data?.message ||
+              "Failed to load products. Please try again."
+          );
+        }
+      } catch (error) {
+        console.error("Error loading user info:", error);
+        history.push("/");
+      }
+    };
+
+    loadUserDataAndProducts();
   }, [history]);
 
   // Optimized input change handler
@@ -294,7 +297,7 @@ export default function Seller() {
       }
 
       try {
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         const sellerId = Token(token).split(",")[3];
 
         const data = {
@@ -314,28 +317,30 @@ export default function Seller() {
           token,
         };
 
-        const response = await axios.post(`${baseUrl}/addSellerData`, data);
+        const result = await itemService.addSellerData(data);
 
-        if (response.data.status) {
-          const id = response.data.message;
+        if (result.success && result.data.status) {
+          const id = result.data.message;
 
           const formDataUpload = new FormData();
           formDataUpload.append("file", image.image);
           formDataUpload.append("fileName", id);
 
-          const uploadResponse = await fetch(`${baseUrl}/uploadFile`, {
-            method: "POST",
-            body: formDataUpload,
-          });
+          const uploadResult = await itemService.uploadFile(formDataUpload);
 
-          if (uploadResponse.status === 200) {
+          if (uploadResult.success) {
             setSuccessMessage("Product added successfully! Redirecting...");
             setTimeout(() => history.push("/home"), 200);
           } else {
-            setErrorMessage("Could not upload the image. Please try again.");
+            setErrorMessage(
+              uploadResult.error ||
+                "Could not upload the image. Please try again."
+            );
           }
         } else {
-          setErrorMessage(response.data.message || "Failed to add product");
+          setErrorMessage(
+            result.error || result.data?.message || "Failed to add product"
+          );
         }
       } catch (err) {
         setErrorMessage("An error occurred. Please try again.");

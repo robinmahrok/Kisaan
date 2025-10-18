@@ -9,13 +9,14 @@ import "./header.css";
 import { useHistory } from "react-router-dom";
 import { Token } from "../../utils/utils";
 import { useTranslate } from "../../hooks/useTranslate";
+import { getAuthToken, removeAuthToken } from "../../utils/cookies";
 
 // Custom hook for user authentication
 const useUserAuth = () => {
   const history = useHistory();
 
   const getUserFromToken = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken(); // Get token from cookies
     if (!token) {
       history.push("/");
       return null;
@@ -47,7 +48,7 @@ const useNavigation = () => {
   );
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem("token");
+    removeAuthToken(); // Remove token from cookies
     history.push("/");
   }, [history]);
 

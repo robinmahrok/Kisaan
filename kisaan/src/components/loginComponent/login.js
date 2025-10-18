@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import axios from "axios";
 import { Spinner } from "react-bootstrap";
-import { baseUrl } from "../../baseUrl";
 import { Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { emailValidator } from "../../utils/utils";
-import Footer from "../footerComponent";
 import { useTranslate } from "../../hooks/useTranslate";
+import { authService } from "../../services";
+import { setAuthToken } from "../../utils/cookies";
+import Footer from "../footerComponent";
 import "./login.css";
 
 // Constants for better maintainability
@@ -52,41 +52,29 @@ const useFormValidation = () => {
   return { validateForm };
 };
 
-// Custom hook for login API call
+// Custom hook for login API call using authService
 const useLoginApi = () => {
   const [loginState, setLoginState] = useState(LOGIN_STATES.IDLE);
   const [apiError, setApiError] = useState("");
+
   const login = useCallback(async (credentials) => {
     setLoginState(LOGIN_STATES.LOADING);
     setApiError("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/login`, {
-        email: credentials.email,
-        password: credentials.password,
-      });
+    // Use authService instead of axios directly
+    const result = await authService.login({
+      email: credentials.email,
+      password: credentials.password,
+    });
 
+    if (result.success) {
       setLoginState(LOGIN_STATES.SUCCESS);
-      return {
-        success: true,
-        data: response.data,
-      };
-    } catch (error) {
+    } else {
       setLoginState(LOGIN_STATES.ERROR);
-
-      if (error.response?.data?.message) {
-        setApiError(error.response.data.message);
-      } else if (error.code === "NETWORK_ERROR" || !error.response) {
-        setApiError(ERROR_MESSAGES.NETWORK_ERROR);
-      } else {
-        setApiError(ERROR_MESSAGES.GENERIC_ERROR);
-      }
-
-      return {
-        success: false,
-        error: error.response?.data?.message || ERROR_MESSAGES.GENERIC_ERROR,
-      };
+      setApiError(result.error || ERROR_MESSAGES.GENERIC_ERROR);
     }
+
+    return result;
   }, []);
 
   const resetLoginState = useCallback(() => {
@@ -197,8 +185,8 @@ export default function Login() {
         const { data } = result;
 
         if (data.status) {
-          // Login successful
-          localStorage.setItem("token", data.message);
+          // Login successful - store token in cookies
+          setAuthToken(data.message, 7); // Store for 7 days
           history.push("/home");
         } else if (data.message === "Otp not verified.") {
           // Email not verified

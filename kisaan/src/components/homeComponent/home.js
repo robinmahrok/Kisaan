@@ -6,6 +6,7 @@ import Header from "../headerComponent";
 import Footer from "../footerComponent";
 import { Token } from "../../utils/utils";
 import { useTranslate } from "../../hooks/useTranslate";
+import { getAuthToken } from "../../utils/cookies";
 // Constants for better maintainability
 const ROLE_TYPES = {
   SELLER: "seller",
@@ -17,7 +18,7 @@ const useUserAuth = () => {
   const history = useHistory();
 
   const getUserFromToken = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken(); // Get token from cookies
     if (!token) {
       history.push("/");
       return null;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import "./Request.css";
 import {
   Table,
@@ -9,12 +8,13 @@ import {
   Container,
   Badge,
 } from "react-bootstrap";
-import { baseUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
 import { useTranslate } from "../../../hooks/useTranslate";
+import { requestService } from "../../../services";
+import { getAuthToken } from "../../../utils/cookies";
 // Constants
 const REQUEST_STATUS = {
   PENDING: "pending",
@@ -44,7 +44,7 @@ export default function Request() {
 
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     if (!token) return null;
 
     try {
@@ -82,24 +82,24 @@ export default function Request() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("token");
+      const token = getAuthToken();
       if (!token) {
         throw new Error("No authentication token found");
       }
 
-      const response = await axios.post(`${baseUrl}/allRequests`, { token });
+      const result = await requestService.getAllRequests();
 
-      if (response.data.status) {
-        setRequests(response.data.message || []);
+      if (result.success && result.data.status) {
+        setRequests(result.data.message || []);
       } else {
-        setError(response.data.message || "Failed to fetch requests");
+        setError(
+          result.error || result.data?.message || "Failed to fetch requests"
+        );
         setRequests([]);
       }
     } catch (err) {
       console.error("Error fetching requests:", err);
-      setError(
-        err.response?.data?.message || err.message || "Failed to fetch requests"
-      );
+      setError(err.message || "Failed to fetch requests");
       setRequests([]);
     } finally {
       setLoading(false);
@@ -114,38 +114,32 @@ export default function Request() {
         setError("");
         setSuccessMessage("");
 
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         if (!token) {
           throw new Error("No authentication token found");
         }
 
         const requestData = {
-          token,
           id: requestId,
           decision: action,
         };
 
-        const response = await axios.post(
-          `${baseUrl}/ApproveOrDeny`,
-          requestData
-        );
+        const result = await requestService.approveOrDenyRequest(requestData);
 
-        if (response.data.status) {
+        if (result.success && result.data.status) {
           setSuccessMessage(`Request ${action.toLowerCase()}d successfully`);
           // Refresh requests to show updated status
           await fetchRequests();
         } else {
           setError(
-            response.data.message || `Failed to ${action.toLowerCase()} request`
+            result.error ||
+              result.data?.message ||
+              `Failed to ${action.toLowerCase()} request`
           );
         }
       } catch (err) {
         console.error(`Error ${action.toLowerCase()}ing request:`, err);
-        setError(
-          err.response?.data?.message ||
-            err.message ||
-            `Failed to ${action.toLowerCase()} request`
-        );
+        setError(err.message || `Failed to ${action.toLowerCase()} request`);
       } finally {
         setActionLoading((prev) => ({ ...prev, [requestId]: false }));
       }

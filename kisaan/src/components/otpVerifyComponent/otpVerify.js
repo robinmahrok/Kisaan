@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./otpVerify.css";
 import { Spinner, Alert } from "react-bootstrap";
-import { baseUrl } from "../../baseUrl";
 import { useHistory } from "react-router-dom";
 import { useTranslate } from "../../hooks/useTranslate";
+import { authService } from "../../services";
+import "./otpVerify.css";
 export default function OtpVerify() {
   const history = useHistory();
   const { t } = useTranslate();
@@ -49,24 +48,18 @@ export default function OtpVerify() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/sendOtp`, { email });
-      setLoad(false);
+    // Use authService instead of axios
+    const result = await authService.sendOTP(email);
+    setLoad(false);
 
-      if (response.data.status) {
-        setSuccessMessage("OTP sent successfully! Please check your email.");
-        setSend(true);
-        setCanResend(false);
-        setCountdown(60); // 60 seconds countdown for resend
-      } else {
-        setErrorMessage(response.data.message || "Failed to send OTP");
-      }
-    } catch (err) {
-      setLoad(false);
-      console.error("Send OTP error:", err);
+    if (result.success && result.data.status) {
+      setSuccessMessage("OTP sent successfully! Please check your email.");
+      setSend(true);
+      setCanResend(false);
+      setCountdown(60); // 60 seconds countdown for resend
+    } else {
       setErrorMessage(
-        err.response?.data?.message ||
-          "Failed to send OTP. Please check your internet connection and try again."
+        result.error || result.data?.message || "Failed to send OTP"
       );
     }
   };
@@ -98,33 +91,25 @@ export default function OtpVerify() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/verifyOtp`, {
-        email,
-        otp: parseInt(enteredOtp), // Ensure OTP is sent as number
-      });
+    // Use authService instead of axios
+    const result = await authService.verifyOTP({
+      email,
+      otp: parseInt(enteredOtp),
+    });
 
-      setLoad2(false);
+    setLoad2(false);
 
-      if (response.data.status) {
-        setSuccessMessage("OTP verified successfully! Redirecting...");
-        sessionStorage.removeItem("email");
+    if (result.success && result.data.status) {
+      setSuccessMessage("OTP verified successfully! Redirecting...");
+      sessionStorage.removeItem("email");
 
-        // Redirect after a short delay to show success message
-        setTimeout(() => {
-          history.push("/");
-        }, 2000);
-      } else {
-        setErrorMessage(
-          response.data.message || "Invalid OTP. Please try again."
-        );
-      }
-    } catch (err) {
-      setLoad2(false);
-      console.error("Verify OTP error:", err);
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        history.push("/");
+      }, 2000);
+    } else {
       setErrorMessage(
-        err.response?.data?.message ||
-          "Failed to verify OTP. Please check your internet connection and try again."
+        result.error || result.data?.message || "Invalid OTP. Please try again."
       );
     }
   };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import "./Buyer.css";
-import { baseUrl, cloudinaryUrl } from "../../../baseUrl";
+import { cloudinaryUrl } from "../../../baseUrl";
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
@@ -9,6 +8,8 @@ import { Token } from "../../../utils/utils";
 import { Spinner, Alert, Button, Container, Badge } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { useTranslate } from "../../../hooks/useTranslate";
+import { itemService, requestService } from "../../../services";
+import { getAuthToken } from "../../../utils/cookies";
 
 // Constants
 const REQUEST_STATUS = {
@@ -78,7 +79,7 @@ export default function Buyer() {
 
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     if (!token) return null;
 
     try {
@@ -125,7 +126,6 @@ export default function Buyer() {
         const filtersToUse = searchFilters || filters;
 
         const requestData = {
-          token: localStorage.getItem("token"),
           search: filtersToUse.search || "",
           state: filtersToUse.state || "",
           city: filtersToUse.city || "",
@@ -140,14 +140,11 @@ export default function Buyer() {
 
         console.log("Sending request with filters:", requestData);
 
-        const response = await axios.post(
-          `${baseUrl}/getItemsList`,
-          requestData
-        );
+        const result = await itemService.getItemsList(requestData);
 
-        if (response.data.status) {
-          const products = response.data.message || [];
-          setTotalCount(response.data.totalCount || products.length);
+        if (result.success && result.data.status) {
+          const products = result.data.message || [];
+          setTotalCount(result.data.totalCount || products.length);
 
           if (products.length === 0) {
             setNullItems(true);
@@ -160,7 +157,9 @@ export default function Buyer() {
           // Reset pagination to first page when filters change
           setCurrent(0);
         } else {
-          setError(response.data.message || "Failed to fetch products");
+          setError(
+            result.error || result.data?.message || "Failed to fetch products"
+          );
           setNullItems(true);
           setProductList([]);
           setTotalCount(0);
@@ -181,7 +180,7 @@ export default function Buyer() {
 
   // Initial load
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (!getAuthToken()) {
       history.push("/");
       return;
     }
@@ -283,14 +282,13 @@ export default function Buyer() {
       const data = {
         sellerId: selectedSeller.sellerId,
         buyerId: userInfo.buyerId,
-        token: localStorage.getItem("token"),
         buyerName: userInfo.name,
         sellerName: selectedSeller.name,
       };
 
-      const response = await axios.post(`${baseUrl}/getRequestData`, data);
+      const result = await requestService.getRequestData(data);
 
-      if (response.data.status === false) {
+      if (!result.success || result.data.status === false) {
         setFollowSeller("Follow");
       } else {
         const statusMap = {
@@ -298,7 +296,7 @@ export default function Buyer() {
           pending: "Requested",
           accepted: "Following",
         };
-        setFollowSeller(statusMap[response.data.message] || "Follow");
+        setFollowSeller(statusMap[result.data.message] || "Follow");
       }
     } catch (err) {
       console.error("Error fetching seller details:", err);
@@ -321,27 +319,30 @@ export default function Buyer() {
       const data = {
         sellerId: sellerData.sellerId,
         buyerId: userInfo.buyerId,
-        token: localStorage.getItem("token"),
         buyerName: userInfo.name,
         buyerEmail: userInfo.email,
         buyerContact: userInfo.contact,
         sellerName: sellerData.name,
       };
 
-      const response = await axios.post(`${baseUrl}/getRequestData`, data);
+      const result = await requestService.getRequestData(data);
 
-      if (response.data.status === false) {
+      if (!result.success || result.data.status === false) {
         // Send new request
-        const addResponse = await axios.post(`${baseUrl}/addRequest`, data);
-        setSuccessMessage("Request sent successfully!");
-        setFollowSeller("Requested");
+        const addResult = await requestService.addRequest(data);
+        if (addResult.success) {
+          setSuccessMessage("Request sent successfully!");
+          setFollowSeller("Requested");
+        } else {
+          setError(addResult.error || "Failed to send request");
+        }
       } else {
         const statusMap = {
           rejected: "Declined",
           pending: "Requested",
           accepted: "Following",
         };
-        const currentStatus = statusMap[response.data.message];
+        const currentStatus = statusMap[result.data.message];
         setFollowSeller(currentStatus || "Follow");
 
         if (currentStatus === "Following") {

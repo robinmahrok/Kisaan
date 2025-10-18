@@ -3,32 +3,9 @@ import express from "express";
 // Import your existing route modules (keeping them as they are)
 import loginRoutes from "./loginRoutes.js";
 import seedRoutes from "./seedRoutes.js";
-import utils from "../controllers/utils.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
-
-// Custom middleware to authenticate token from request body
-const authenticateFromBody = (req, res, next) => {
-  try {
-    const token = req.body.token;
-
-    if (!token) {
-      return res.status(401).json({
-        status: false,
-        message: "Access token required",
-      });
-    }
-
-    const user = utils.authenticateToken(token);
-    req.user = user;
-    next();
-  } catch (err) {
-    return res.status(403).json({
-      status: false,
-      message: "Invalid or expired token",
-    });
-  }
-};
 
 const { ping, signup, sendOtp, verifyOtp, changePassword, login, logout } =
   loginRoutes;
@@ -55,16 +32,16 @@ router.post("/verifyOtp", verifyOtp);
 router.post("/changePassword", changePassword);
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/products", authenticateFromBody, products);
+router.post("/products", authenticateToken, products);
 router.post("/uploadFile", uploadFile);
-router.post("/addSellerData", authenticateFromBody, addSellerData);
-router.post("/getItemsList", authenticateFromBody, getItemsList);
-router.post("/allItems", authenticateFromBody, allItems);
-router.post("/editItems", authenticateFromBody, editItems);
-router.post("/deleteItems", authenticateFromBody, deleteItems);
-router.post("/addRequest", authenticateFromBody, addRequest);
-router.post("/getRequestData", authenticateFromBody, getRequestData);
-router.post("/allRequests", authenticateFromBody, allRequests);
-router.post("/ApproveOrDeny", authenticateFromBody, ApproveOrDeny);
+router.post("/addSellerData", authenticateToken, addSellerData);
+router.post("/getItemsList", authenticateToken, getItemsList);
+router.get("/allItems", authenticateToken, allItems);
+router.post("/editItems", authenticateToken, editItems);
+router.post("/deleteItems", authenticateToken, deleteItems);
+router.post("/addRequest", authenticateToken, addRequest);
+router.post("/getRequestData", authenticateToken, getRequestData);
+router.get("/allRequests", authenticateToken, allRequests);
+router.post("/ApproveOrDeny", authenticateToken, ApproveOrDeny);
 
 export default router;

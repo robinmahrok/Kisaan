@@ -13,6 +13,7 @@ import {
   Alert,
   Badge,
 } from "react-bootstrap";
+import { hasAuthToken } from "../../../utils/cookies";
 
 export default function ContactUs() {
   const history = useHistory();
@@ -27,7 +28,8 @@ export default function ContactUs() {
   const [alertType, setAlertType] = useState("success");
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (!hasAuthToken()) {
+      // Check token in cookies
       history.push("/");
     }
   }, [history]);

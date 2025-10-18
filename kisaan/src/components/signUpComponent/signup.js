@@ -1,14 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import axios from "axios";
 import { Spinner } from "react-bootstrap";
-import { baseUrl } from "../../baseUrl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { mobileValidator, emailValidator } from "../../utils/utils";
-import "./signup.css";
 import { useHistory } from "react-router";
-import Footer from "../footerComponent";
 import { useTranslate } from "../../hooks/useTranslate";
+import { authService } from "../../services";
+import Footer from "../footerComponent";
+import "./signup.css";
 
 // Constants for better maintainability
 const SIGNUP_STATES = {
@@ -87,7 +86,7 @@ const useFormValidation = (t) => {
   return { validateForm };
 };
 
-// Custom hook for signup API call
+// Custom hook for signup API call using authService
 const useSignupApi = () => {
   const [signupState, setSignupState] = useState(SIGNUP_STATES.IDLE);
   const [apiError, setApiError] = useState("");
@@ -96,30 +95,17 @@ const useSignupApi = () => {
     setSignupState(SIGNUP_STATES.LOADING);
     setApiError("");
 
-    try {
-      const response = await axios.post(`${baseUrl}/signup`, userData);
+    // Use authService instead of axios directly
+    const result = await authService.signup(userData);
 
+    if (result.success) {
       setSignupState(SIGNUP_STATES.SUCCESS);
-      return {
-        success: true,
-        data: response.data,
-      };
-    } catch (error) {
+    } else {
       setSignupState(SIGNUP_STATES.ERROR);
-
-      if (error.response?.data?.message) {
-        setApiError(error.response.data.message);
-      } else if (error.code === "NETWORK_ERROR" || !error.response) {
-        setApiError(ERROR_MESSAGES.NETWORK_ERROR);
-      } else {
-        setApiError(ERROR_MESSAGES.GENERIC_ERROR);
-      }
-
-      return {
-        success: false,
-        error: error.response?.data?.message || ERROR_MESSAGES.GENERIC_ERROR,
-      };
+      setApiError(result.error || ERROR_MESSAGES.GENERIC_ERROR);
     }
+
+    return result;
   }, []);
 
   const resetSignupState = useCallback(() => {
