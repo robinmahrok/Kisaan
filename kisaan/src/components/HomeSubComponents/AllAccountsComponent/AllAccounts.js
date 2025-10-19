@@ -689,7 +689,7 @@ export default function AllAccounts() {
                   onClick={() => history.push("/seller")}
                   className="mt-3 add-product-button"
                 >
-                  {t("Add Your First Product")}
+                  {t("+ Add Your First Product")}
                 </Button>
               </Alert>
             </div>

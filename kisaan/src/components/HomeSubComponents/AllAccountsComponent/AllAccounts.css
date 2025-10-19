@@ -183,12 +183,13 @@
 }
 
 .add-product-button {
-  width: 20%;
+  width: 80%;
   border-radius: 20px;
   padding: 0.5rem 1rem;
   font-weight: 500;
   font-size: 0.875rem;
   transition: all 0.3s ease;
+  background: green;
   box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
