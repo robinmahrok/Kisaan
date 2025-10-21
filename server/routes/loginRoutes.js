@@ -101,7 +101,30 @@ const emailOTP = async (recipient, otpVal) => {
     const mailOptions = {
       to: recipient,
       subject: "OTP verification",
-      html: "<h1>Hello</h1><p>Your OTP is : </p><b>" + otpVal + "</b>",
+      html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; text-align: center;">Khetihat</h1>
+      </div>
+      <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h2 style="color: #333; margin-top: 0;">Email Verification</h2>
+        <p style="color: #666; font-size: 16px; line-height: 1.6;">Hello,</p>
+        <p style="color: #666; font-size: 16px; line-height: 1.6;">Thank you for registering with Khetihat! Please use the following OTP to verify your email:</p>
+        
+        <div style="background: #f0f0f0; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
+          <p style="margin: 0; color: #666; font-size: 14px;">Your OTP Code</p>
+          <h1 style="margin: 10px 0; color: #667eea; font-size: 36px; letter-spacing: 5px; font-weight: bold;">${otpVal}</h1>
+          <p style="margin: 0; color: #999; font-size: 12px;">Valid for 10 minutes</p>
+        </div>
+        
+        <p style="color: #666; font-size: 14px; line-height: 1.6;">If you didn't request this verification, please ignore this email.</p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+          <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+            This is an automated email, please do not reply.
+          </p>
+        </div>
+      </div>
+    </div>`,
     };
     let result = await mailer(mailOptions);
     return { status: true, message: result };
