@@ -1,11 +1,8 @@
 import nodemailer from "nodemailer";
-import config from "../config/config.js";
 import path from "path";
 import dotenv from "dotenv";
 
-const EMAIL_USERNAME = "";
-const COMMON_NAME = "Robin Singh";
-const { credentials, token } = config;
+const COMMON_NAME = "Khetihat";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -42,7 +39,7 @@ const mailer = async (mailOptions) => {
 // Legacy function for backward compatibility
 const legacyMailer = (data, cb) => {
   let mailOptions = {
-    from: `"Kisaan" <${mailSettings.auth.user}>`,
+    from: `"Khetihat" <${mailSettings.auth.user}>`,
     to: data.email,
     subject: "OTP verification",
     html: `<h1>Hello</h1><p>Your OTP is : </p><b>${data.otpVal}</b>`,
