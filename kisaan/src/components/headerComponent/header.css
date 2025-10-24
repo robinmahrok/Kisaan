@@ -91,6 +91,19 @@
   min-width: 48px; /* Ensure minimum width */
 }
 
+/* Login Button - For unauthenticated users */
+.login-button {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-300;
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+  @apply hover:from-blue-600 hover:to-blue-700 hover:shadow-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
+}
+
 .user-menu-trigger {
   @apply flex items-center gap-3 px-2 py-2 rounded-lg transition-all duration-300;
   @apply text-gray-700 hover:text-blue-600 hover:bg-blue-50;
@@ -285,6 +298,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-container {
+    margin: .4rem 0;
     @apply px-4 h-14;
   }
   
@@ -315,6 +329,12 @@
   
   .mobile-overlay {
     top: 3.5rem;
+  }
+  
+  /* Login button on tablet */
+  .login-button {
+    @apply px-3 py-2 text-sm;
+    min-width: 70px;
   }
 }
 
@@ -369,6 +389,14 @@
   .mobile-overlay {
     top: 3rem;
   }
+  
+  /* Login button on mobile - compact version */
+  .login-button {
+    @apply px-2 py-1.5 text-xs;
+    width: 4rem;
+    margin-top: 0;
+    font-weight: 600;
+  }
 }
 
 /* Focus states for accessibility */
@@ -376,7 +404,8 @@
 .user-menu-trigger:focus,
 .mobile-menu-toggle:focus,
 .mobile-nav-item:focus,
-.mobile-user-action:focus {
+.mobile-user-action:focus,
+.login-button:focus {
   @apply outline-none ring-2 ring-blue-500 ring-opacity-50;
 }
 

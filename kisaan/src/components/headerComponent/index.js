@@ -13,13 +13,10 @@ import { getAuthToken, removeAuthToken } from "../../utils/cookies";
 
 // Custom hook for user authentication
 const useUserAuth = () => {
-  const history = useHistory();
-
   const getUserFromToken = useCallback(() => {
     const token = getAuthToken(); // Get token from cookies
     if (!token) {
-      history.push("/");
-      return null;
+      return null; // Don't redirect, just return null
     }
 
     try {
@@ -28,10 +25,9 @@ const useUserAuth = () => {
       return { name };
     } catch (error) {
       console.error("Error parsing token:", error);
-      history.push("/");
-      return null;
+      return null; // Don't redirect, just return null
     }
-  }, [history]);
+  }, []);
 
   return { getUserFromToken };
 };
@@ -57,6 +53,7 @@ const useNavigation = () => {
 
 export default function Header() {
   const [user, setUser] = useState({ name: "" });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeItem, setActiveItem] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -85,6 +82,10 @@ export default function Header() {
     const userData = getUserFromToken();
     if (userData) {
       setUser(userData);
+      setIsAuthenticated(true);
+    } else {
+      setUser({ name: "Guest" });
+      setIsAuthenticated(false);
     }
   }, [getUserFromToken]);
 
@@ -221,52 +222,61 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* User Menu - Right Side */}
-        <div className="user-menu" ref={userMenuRef}>
-          <button
-            className="user-menu-trigger"
-            onClick={toggleUserMenu}
-            aria-expanded={isUserMenuOpen}
-            aria-haspopup="true"
-          >
-            <div className="user-avatar">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <span className="user-name">{user.name}</span>
-            <svg
-              className={`chevron ${isUserMenuOpen ? "open" : ""}`}
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
+        {/* User Menu / Login Button - Right Side */}
+        {isAuthenticated ? (
+          <div className="user-menu" ref={userMenuRef}>
+            <button
+              className="user-menu-trigger"
+              onClick={toggleUserMenu}
+              aria-expanded={isUserMenuOpen}
+              aria-haspopup="true"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
+              <div className="user-avatar">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="user-name">{user.name}</span>
+              <svg
+                className={`chevron ${isUserMenuOpen ? "open" : ""}`}
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
 
-          {isUserMenuOpen && !isMenuOpen && (
-            <div className="user-menu-dropdown">
-              {userMenuItems.map((item, index) => (
-                <button
-                  key={index}
-                  className="user-menu-item"
-                  onClick={() => {
-                    item.action();
-                    setIsUserMenuOpen(false);
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+            {isUserMenuOpen && !isMenuOpen && (
+              <div className="user-menu-dropdown">
+                {userMenuItems.map((item, index) => (
+                  <button
+                    key={index}
+                    className="user-menu-item"
+                    onClick={() => {
+                      item.action();
+                      setIsUserMenuOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            className="login-button"
+            onClick={() => handleNavigation("/login")}
+          >
+            {t("Login")}
+          </button>
+        )}
       </div>
 
       {/* Mobile Navigation */}

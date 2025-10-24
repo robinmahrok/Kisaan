@@ -22,6 +22,7 @@ const {
   getRequestData,
   allRequests,
   ApproveOrDeny,
+  getSellerDetails,
 } = seedRoutes;
 
 // Define endpoints
@@ -35,7 +36,7 @@ router.post("/logout", logout);
 router.post("/products", authenticateToken, products);
 router.post("/uploadFile", uploadFile);
 router.post("/addSellerData", authenticateToken, addSellerData);
-router.post("/getItemsList", authenticateToken, getItemsList);
+router.post("/getItemsList", getItemsList);
 router.get("/allItems", authenticateToken, allItems);
 router.post("/editItems", authenticateToken, editItems);
 router.post("/deleteItems", authenticateToken, deleteItems);
@@ -43,5 +44,6 @@ router.post("/addRequest", authenticateToken, addRequest);
 router.post("/getRequestData", authenticateToken, getRequestData);
 router.get("/allRequests", authenticateToken, allRequests);
 router.post("/ApproveOrDeny", authenticateToken, ApproveOrDeny);
+router.get("/getSellerDetails/:sellerId", authenticateToken, getSellerDetails);
 
 export default router;

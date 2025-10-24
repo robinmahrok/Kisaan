@@ -153,6 +153,21 @@ const itemService = {
       };
     }
   },
+  getSellerDetails: async (itemId) => {
+    try {
+      const response = await apiClient.get(`/getSellerDetails/${itemId}`);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.message || "Failed to fetch seller details",
+      };
+    }
+  },
 };
 
 export default itemService;

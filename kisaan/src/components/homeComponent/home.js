@@ -15,13 +15,10 @@ const ROLE_TYPES = {
 
 // Custom hook for user authentication
 const useUserAuth = () => {
-  const history = useHistory();
-
   const getUserFromToken = useCallback(() => {
     const token = getAuthToken(); // Get token from cookies
     if (!token) {
-      history.push("/");
-      return null;
+      return null; // Return null instead of redirecting
     }
 
     try {
@@ -30,10 +27,9 @@ const useUserAuth = () => {
       return { name, userId };
     } catch (error) {
       console.error("Error parsing token:", error);
-      history.push("/");
       return null;
     }
-  }, [history]);
+  }, []);
 
   return { getUserFromToken };
 };
@@ -69,9 +65,11 @@ const useRoleNavigation = () => {
 
 export default function Home() {
   const [user, setUser] = useState({ name: "", email: "" });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { getUserFromToken } = useUserAuth();
   const { navigateToRole, isRoleLoading, isAnyLoading } = useRoleNavigation();
   const { t } = useTranslate();
+
   useEffect(() => {
     const userData = getUserFromToken();
     if (userData) {
@@ -79,8 +77,16 @@ export default function Home() {
         name: userData.name,
         email: userData.userId,
       });
+      setIsAuthenticated(true);
+    } else {
+      setUser({
+        name: "Guest",
+        email: "",
+      });
+      setIsAuthenticated(false);
     }
-  }, [getUserFromToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRoleSelection = useCallback(
     (e, role) => {
@@ -127,15 +133,26 @@ export default function Home() {
                   {t("Welcome")},{" "}
                   <span className="name-highlight">{user.name}</span>!
                 </h1>
-                <p className="welcome-subtitle">{user.email}</p>
+                {isAuthenticated && user.email && (
+                  <p className="welcome-subtitle">{user.email}</p>
+                )}
+                {!isAuthenticated && (
+                  <p className="welcome-subtitle">
+                    {t("Please login to access all features")}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="welcome-description">
               <p>
-                {t(
-                  "Choose your role to continue with Khetihat - connecting farmers and buyers for a better agricultural marketplace."
-                )}
+                {isAuthenticated
+                  ? t(
+                      "Choose your role to continue with Khetihat - connecting farmers and buyers for a better agricultural marketplace."
+                    )
+                  : t(
+                      "Browse available products or login to sell your agricultural products."
+                    )}
               </p>
             </div>
           </div>

@@ -11,6 +11,7 @@ import statesofIndia from "../../../utils/states";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { itemService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
+import AuthRequiredModal from "../../common/AuthRequiredModal";
 
 // Constants
 const INITIAL_FORM_DATA = {
@@ -127,6 +128,7 @@ export default function Seller() {
   const [showOther, setShowOther] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Memoized state options
   const stateOptions = useMemo(
@@ -138,37 +140,37 @@ export default function Seller() {
   useEffect(() => {
     const token = getAuthToken(); // Get token from cookies
     if (!token) {
-      history.push("/");
-      return;
-    }
+      // Show auth modal instead of immediate redirect
+      setShowAuthModal(true);
+      // Delay redirect to allow modal to be visible
+    } else {
+      const loadUserDataAndProducts = async () => {
+        try {
+          const nameEmail = Token(token);
+          const [name, userId, contact] = nameEmail.split(",");
+          setUserInfo({ email: userId, name, contact });
 
-    const loadUserDataAndProducts = async () => {
-      try {
-        const nameEmail = Token(token);
-        const [name, userId, contact] = nameEmail.split(",");
-        setUserInfo({ email: userId, name, contact });
+          // Fetch products using itemService (token in headers automatically)
+          const result = await itemService.getProducts();
 
-        // Fetch products using itemService (token in headers automatically)
-        const result = await itemService.getProducts();
-
-        if (result.success && result.data.status) {
-          const prodVarData = result.data.message;
-          localStorage.setItem("prodVarData", JSON.stringify(prodVarData));
-          setProductList(Object.keys(prodVarData));
-        } else {
-          setErrorMessage(
-            result.error ||
-              result.data?.message ||
-              "Failed to load products. Please try again."
-          );
+          if (result.success && result.data.status) {
+            const prodVarData = result.data.message;
+            localStorage.setItem("prodVarData", JSON.stringify(prodVarData));
+            setProductList(Object.keys(prodVarData));
+          } else {
+            setErrorMessage(
+              result.error ||
+                result.data?.message ||
+                "Failed to load products. Please try again."
+            );
+          }
+        } catch (error) {
+          console.error("Error loading user info:", error);
+          setShowAuthModal(true);
         }
-      } catch (error) {
-        console.error("Error loading user info:", error);
-        history.push("/");
-      }
-    };
-
-    loadUserDataAndProducts();
+      };
+      loadUserDataAndProducts();
+    }
   }, [history]);
 
   // Optimized input change handler
@@ -420,6 +422,15 @@ export default function Seller() {
   return (
     <div className="seller-page">
       <Header />
+
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        show={showAuthModal}
+        onHide={() => {
+          setShowAuthModal(false);
+          history.push("/");
+        }}
+      />
 
       <div className="seller-container">
         <div className="seller-content">

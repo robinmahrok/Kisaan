@@ -1,0 +1,232 @@
+/* Custom Modal Overlay - matching Buyer modal */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+/* Modal Content */
+.auth-modal-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header - matching Buyer modal style */
+.auth-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid #e9ecef;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.auth-modal-title {
+  color: #2c3e50;
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.auth-modal-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.auth-modal-close:hover {
+  background: #dc3545;
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* Modal Body */
+.auth-modal-body {
+  padding: 2rem;
+  text-align: center;
+}
+
+.auth-modal-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.auth-modal-message {
+  font-size: 1rem;
+  color: #495057;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Modal Footer - matching Buyer modal style */
+.auth-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #e9ecef;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+/* Buttons - matching Buyer modal style */
+.auth-btn {
+  border-radius: 25px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.auth-btn-primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  color: white;
+}
+
+.auth-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.auth-btn-signup {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  color: white;
+}
+
+.auth-btn-signup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  background: linear-gradient(135deg, #1e7e34, #155724);
+}
+
+.auth-btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.auth-btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .auth-modal-content {
+    max-width: 90%;
+    width: 90%;
+  }
+
+  .auth-modal-header,
+  .auth-modal-body,
+  .auth-modal-footer {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .auth-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-modal-icon {
+    font-size: 3rem;
+  }
+
+  .auth-modal-message {
+    font-size: 0.9rem;
+  }
+
+  .auth-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .auth-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-modal-content {
+    max-width: 95%;
+    width: 95%;
+  }
+
+  .auth-modal-header,
+  .auth-modal-body,
+  .auth-modal-footer {
+    padding: 1rem;
+  }
+
+  .auth-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .auth-modal-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .auth-modal-message {
+    font-size: 0.875rem;
+    padding: 0 0.5rem;
+  }
+
+  .auth-modal-footer {
+    flex-direction: column;
+  }
+
+  .auth-btn {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+}

@@ -16,7 +16,8 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/" exact component={Login} />
+        <Route path="/" exact component={Home} />
+        <Route path="/login" component={Login} />
         <Route path="/signUp" component={SignUp} />
         <Route path="/forgotPassword" component={forgotPassword} />
         <Route path="/otpVerify" component={OtpVerify} />
@@ -26,8 +27,7 @@ function App() {
         <Route path="/ContactUs" component={ContactUs} />
         <Route path="/seller" component={Seller} />
         <Route path="/buyer" component={Buyer} />
-        <Route path="/request" component={Request}/>
-
+        <Route path="/request" component={Request} />
       </Switch>
     </BrowserRouter>
   );

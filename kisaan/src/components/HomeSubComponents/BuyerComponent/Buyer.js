@@ -10,6 +10,7 @@ import ReactPaginate from "react-paginate";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { itemService, requestService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
+import AuthRequiredModal from "../../common/AuthRequiredModal";
 
 // Constants
 const REQUEST_STATUS = {
@@ -38,6 +39,7 @@ const SORT_OPTIONS = [
 export default function Buyer() {
   const history = useHistory();
   const { t } = useTranslate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -54,6 +56,7 @@ export default function Buyer() {
   const [followSeller, setFollowSeller] = useState("");
   const [loadingRequest, setLoadingRequest] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
   // Filter and Search States
@@ -99,15 +102,16 @@ export default function Buyer() {
     }
   }, []);
 
-  // Initialize user info
+  // Initialize user info - allow unauthenticated access
   useEffect(() => {
     const user = getUserInfo();
-    if (!user) {
-      history.push("/");
-      return;
+    if (user) {
+      setUserInfo(user);
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
-    setUserInfo(user);
-  }, [history, getUserInfo]);
+  }, [getUserInfo]);
 
   // Fetch products list with filters
   const fetchProductsList = useCallback(
@@ -115,12 +119,6 @@ export default function Buyer() {
       try {
         setSearchLoading(true);
         setError("");
-
-        const user = getUserInfo();
-        if (!user) {
-          history.push("/");
-          return;
-        }
 
         // Use current filters if no searchFilters provided
         const filtersToUse = searchFilters || filters;
@@ -137,8 +135,6 @@ export default function Buyer() {
           sortBy: filtersToUse.sortBy || "createdAt",
           sortOrder: filtersToUse.sortOrder || "desc",
         };
-
-        console.log("Sending request with filters:", requestData);
 
         const result = await itemService.getItemsList(requestData);
 
@@ -175,17 +171,13 @@ export default function Buyer() {
         setSearchLoading(false);
       }
     },
-    [history, getUserInfo]
+    [filters]
   );
 
-  // Initial load
+  // Initial load - allow without authentication
   useEffect(() => {
-    if (!getAuthToken()) {
-      history.push("/");
-      return;
-    }
     fetchProductsList();
-  }, [history]); // Remove fetchProductsList from dependencies
+  }, []); // Run only on mount
 
   // Auto-hide success message
   useEffect(() => {
@@ -270,6 +262,11 @@ export default function Buyer() {
 
   const viewDetails = async (e, id) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
 
     try {
       const selectedSeller = productListState.find((item) => item._id === id);
@@ -718,6 +715,12 @@ export default function Buyer() {
           )}
         </Container>
       </div>
+
+      {/* Auth Required Modal */}
+      <AuthRequiredModal
+        show={showAuthModal}
+        onHide={() => setShowAuthModal(false)}
+      />
 
       {/* Custom Modal */}
       {showModal && (

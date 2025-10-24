@@ -440,9 +440,6 @@ export default function AllAccounts() {
                         e.target.src = "/logo192.png";
                       }}
                     />
-                    <Badge variant="success" className="availability-badge">
-                      {t("Available")}
-                    </Badge>
                   </div>
 
                   <Card.Body className="item-content">

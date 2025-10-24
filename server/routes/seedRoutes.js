@@ -466,6 +466,36 @@ const ApproveOrDeny = async (req, res) => {
   }
 };
 
+const getSellerDetails = async (req, res) => {
+  let itemId = req.params.itemId;
+  try {
+    const data = await SellerInfo.findOne(
+      { _id: itemId },
+      {
+        name: 1,
+        email: 1,
+        contact: 1,
+        product: 1,
+        variety: 1,
+        address: 1,
+        quantity: 1,
+        price: 1,
+        harvestDate: 1,
+      }
+    );
+    if (!data) {
+      res
+        .status(200)
+        .send({ status: false, message: "No seller details found" });
+    } else {
+      res.status(200).send({ status: true, message: data });
+    }
+  } catch (error) {
+    console.error("Error fetching seller details:", error);
+    res.status(200).send({ status: false, message: "No seller details found" });
+  }
+};
+
 export default {
   products,
   uploadFile,
@@ -478,4 +508,5 @@ export default {
   getRequestData,
   allRequests,
   ApproveOrDeny,
+  getSellerDetails,
 };
