@@ -82,7 +82,7 @@ export default function ForgotPassword() {
       mobileValidator(emailValue) && emailValue.length === 10;
     setIsMobile(isMobileNumber);
     if (emailValue && !validateEmail(emailValue) && !isMobileNumber) {
-      setEmailError("Please enter a valid email/mobile number");
+      setEmailError("Please enter a valid email");
     } else setEmailError("");
   };
 
@@ -135,7 +135,7 @@ export default function ForgotPassword() {
     }
 
     if (email && !validateEmail(email) && !isMobile) {
-      setEmailError("Please enter a valid email/mobile number");
+      setEmailError("Please enter a valid email");
     }
 
     setLoadingSendOtp(true);
