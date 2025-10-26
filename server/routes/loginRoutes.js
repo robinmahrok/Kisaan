@@ -1,6 +1,7 @@
 import { userInfo } from "../repositories/index.js";
 import { mailer } from "../controllers/mailer.js";
 import utils from "../controllers/utils.js";
+import axios from "axios";
 
 const ping = (req, res) => {
   res.status(200).send({ message: "Working" });
@@ -126,8 +127,9 @@ const emailOTP = async (recipient, otpVal) => {
       </div>
     </div>`,
     };
-    let result = await mailer(mailOptions);
-    return { status: true, message: result };
+    // let result = await mailer(mailOptions);
+    let result = await axios.post("https://vqiiflny4m.execute-api.us-east-1.amazonaws.com/default/email-sender", mailOptions);
+    return { status: true, message: result.data };
   } catch (error) {
     return { status: false, message: "Unable to send OTP through email" };
   }
