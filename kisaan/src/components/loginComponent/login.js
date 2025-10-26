@@ -381,7 +381,7 @@ export default function Login() {
             )}
           </form>
 
-          {/* <div className="text-center mt-6">
+          <div className="text-center mt-6">
             <Link
               to="/forgotPassword"
               className="text-indigo-600 hover:text-indigo-800 text-sm font-medium hover:underline transition-colors duration-200"
@@ -389,7 +389,7 @@ export default function Login() {
             >
               {t("Forgot Password?")}
             </Link>
-          </div> */}
+          </div>
 
           <div className="text-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
             <p className="text-gray-600 text-sm mb-3">

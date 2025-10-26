@@ -1,20 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./aboutUs.css";
-import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Container, Card, Row, Col, Badge } from "react-bootstrap";
 import { useTranslate } from "../../../hooks/useTranslate";
-import { hasAuthToken } from "../../../utils/cookies";
 export default function AboutUs() {
-  const history = useHistory();
   const { t } = useTranslate();
-  useEffect(() => {
-    if (!hasAuthToken()) {
-      // Check token in cookies
-      history.push("/");
-    }
-  }, [history]);
 
   return (
     <div className="App-about">

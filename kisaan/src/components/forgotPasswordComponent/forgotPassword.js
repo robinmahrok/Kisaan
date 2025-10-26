@@ -288,7 +288,7 @@ export default function ForgotPassword() {
       setCanResend(false);
       setCountdown(0);
     } else {
-      history.push("/");
+      history.push("/login");
     }
     setErrorMessage("");
     setSuccessMessage("");
@@ -509,7 +509,7 @@ export default function ForgotPassword() {
           <button
             type="button"
             className="btn btn-outline-secondary"
-            onClick={() => history.push("/")}
+            onClick={() => history.push("/login")}
           >
             Back to Login
           </button>

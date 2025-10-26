@@ -199,6 +199,8 @@ const getItemsList = async (req, res) => {
     maxPrice = Number.MAX_SAFE_INTEGER,
     sortBy = "createdAt",
     sortOrder = "desc",
+    page = 1,
+    limit = 10,
   } = req.body;
 
   try {
@@ -248,12 +250,28 @@ const getItemsList = async (req, res) => {
         : "createdAt";
     sortOptions[sortField] = sortOrder === "asc" ? 1 : -1;
 
-    const data = await SellerInfo.find(query, { sort: sortOptions });
+    // Calculate pagination
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Get total count for pagination metadata
+    const totalCount = await SellerInfo.count(query);
+
+    // Get paginated data
+    const data = await SellerInfo.find(query, {
+      sort: sortOptions,
+      skip: skip,
+      limit: limitNumber,
+    });
 
     res.status(200).send({
       status: true,
       message: data,
-      totalCount: data.length,
+      totalCount: totalCount,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalCount / limitNumber),
+      itemsPerPage: limitNumber,
       filters: {
         search,
         state,

@@ -24,7 +24,7 @@ export default function OtpVerify() {
         "No email found! Please start the verification process again."
       );
       setTimeout(() => {
-        history.push("/");
+        history.push("/login");
       }, 3000);
     } else {
       setEmail(emailFromSession);
@@ -224,9 +224,9 @@ export default function OtpVerify() {
           <button
             type="button"
             className="btn btn-outline-secondary"
-            onClick={() => history.push("/")}
+            onClick={() => history.push("/login")}
           >
-            {t("Back to Home")}
+            {t("Back to Login")}
           </button>
         </div>
       </div>

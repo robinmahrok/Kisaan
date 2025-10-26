@@ -15,6 +15,7 @@ import { Token } from "../../../utils/utils";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { requestService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
+import AuthRequiredModal from "../../common/AuthRequiredModal";
 // Constants
 const REQUEST_STATUS = {
   PENDING: "pending",
@@ -41,36 +42,35 @@ export default function Request() {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
     const token = getAuthToken();
-    if (!token) return null;
+    if (!token) {
+      setShowAuthModal(true);
+    } else {
+      try {
+        const nameEmail = Token(token);
+        if (!nameEmail) return null;
 
-    try {
-      const nameEmail = Token(token);
-      if (!nameEmail) return null;
-
-      const parts = nameEmail.split(",");
-      return {
-        name: parts[0] || "",
-        email: parts[1] || "",
-        contact: parts[2] || "",
-        sellerId: parts[3] || "",
-      };
-    } catch (error) {
-      console.error("Error parsing token:", error);
-      return null;
+        const parts = nameEmail.split(",");
+        return {
+          name: parts[0] || "",
+          email: parts[1] || "",
+          contact: parts[2] || "",
+          sellerId: parts[3] || "",
+        };
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return null;
+      }
     }
   }, []);
 
   // Initialize component
   useEffect(() => {
     const user = getUserInfo();
-    if (!user) {
-      history.push("/");
-      return;
-    }
 
     setUserInfo(user);
     fetchRequests();
@@ -177,6 +177,13 @@ export default function Request() {
   return (
     <div className="App-request">
       <Header />
+      <AuthRequiredModal
+        show={showAuthModal}
+        onHide={() => {
+          setShowAuthModal(false);
+          history.push("/");
+        }}
+      />
       <div className="App-header">
         <Container className="request-container">
           <div className="request-title">

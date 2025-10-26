@@ -254,7 +254,7 @@ export default function SignUp() {
 
   // Handle login redirect
   const handleLoginRedirect = useCallback(() => {
-    history.push("/");
+    history.push("/login");
   }, [history]);
 
   // Handle Enter key press for better UX

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./contactUs.css";
-import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import {
@@ -13,10 +12,8 @@ import {
   Alert,
   Badge,
 } from "react-bootstrap";
-import { hasAuthToken } from "../../../utils/cookies";
 
 export default function ContactUs() {
-  const history = useHistory();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,13 +23,6 @@ export default function ContactUs() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
-
-  useEffect(() => {
-    if (!hasAuthToken()) {
-      // Check token in cookies
-      history.push("/");
-    }
-  }, [history]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -16,7 +16,7 @@ const AuthRequiredModal = ({ show, onHide, message }) => {
     onHide();
     history.push("/signUp");
   };
-
+  console.log("show", show);
   if (!show) return null;
 
   return (

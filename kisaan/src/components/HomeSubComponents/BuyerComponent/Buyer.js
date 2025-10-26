@@ -58,6 +58,8 @@ export default function Buyer() {
   const [showModal, setShowModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter and Search States
   const [filters, setFilters] = useState({
@@ -74,11 +76,8 @@ export default function Buyer() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [debounceTimer, setDebounceTimer] = useState(null);
 
-  const [current, setCurrent] = useState(0);
-  const PER_PAGE = 9;
-  const offset = current * PER_PAGE;
-  const currentPageData = productListState.slice(offset, offset + PER_PAGE);
-  const pageCount = Math.ceil(productListState.length / PER_PAGE);
+  // Pagination settings
+  const ITEMS_PER_PAGE = 10;
 
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
@@ -113,9 +112,9 @@ export default function Buyer() {
     }
   }, [getUserInfo]);
 
-  // Fetch products list with filters
+  // Fetch products list with filters and pagination
   const fetchProductsList = useCallback(
-    async (searchFilters) => {
+    async (searchFilters, page = currentPage) => {
       try {
         setSearchLoading(true);
         setError("");
@@ -134,13 +133,17 @@ export default function Buyer() {
             : Number.MAX_SAFE_INTEGER,
           sortBy: filtersToUse.sortBy || "createdAt",
           sortOrder: filtersToUse.sortOrder || "desc",
+          page: page,
+          limit: ITEMS_PER_PAGE,
         };
 
         const result = await itemService.getItemsList(requestData);
 
         if (result.success && result.data.status) {
           const products = result.data.message || [];
-          setTotalCount(result.data.totalCount || products.length);
+          setTotalCount(result.data.totalCount || 0);
+          setTotalPages(result.data.totalPages || 0);
+          setCurrentPage(result.data.currentPage || 1);
 
           if (products.length === 0) {
             setNullItems(true);
@@ -149,9 +152,6 @@ export default function Buyer() {
             setNullItems(false);
             setProductList(products);
           }
-
-          // Reset pagination to first page when filters change
-          setCurrent(0);
         } else {
           setError(
             result.error || result.data?.message || "Failed to fetch products"
@@ -159,6 +159,7 @@ export default function Buyer() {
           setNullItems(true);
           setProductList([]);
           setTotalCount(0);
+          setTotalPages(0);
         }
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -166,12 +167,13 @@ export default function Buyer() {
         setNullItems(true);
         setProductList([]);
         setTotalCount(0);
+        setTotalPages(0);
       } finally {
         setLoading(false);
         setSearchLoading(false);
       }
     },
-    [filters]
+    [filters, currentPage, ITEMS_PER_PAGE]
   );
 
   // Initial load - allow without authentication
@@ -208,7 +210,8 @@ export default function Buyer() {
       }
 
       const timer = setTimeout(() => {
-        fetchProductsList(newFilters);
+        setCurrentPage(1); // Reset to first page
+        fetchProductsList(newFilters, 1);
       }, 500); // 500ms delay
 
       setDebounceTimer(timer);
@@ -218,7 +221,8 @@ export default function Buyer() {
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchProductsList(filters);
+    setCurrentPage(1); // Reset to first page
+    fetchProductsList(filters, 1);
   };
 
   // Handle clear filters
@@ -234,7 +238,8 @@ export default function Buyer() {
       sortOrder: "desc",
     };
     setFilters(clearedFilters);
-    fetchProductsList(clearedFilters);
+    setCurrentPage(1); // Reset to first page
+    fetchProductsList(clearedFilters, 1);
   };
 
   // Handle sort change
@@ -249,15 +254,20 @@ export default function Buyer() {
         sortOrder: selectedOption.order,
       };
       setFilters(newFilters);
+      setCurrentPage(1); // Reset to first page
       // Call API immediately with new filters
-      fetchProductsList(newFilters);
+      fetchProductsList(newFilters, 1);
     }
   };
 
   const handlePageClick = ({ selected: selectedPage }) => {
-    setCurrent(selectedPage);
+    const newPage = selectedPage + 1; // react-paginate uses 0-based index
+    setCurrentPage(newPage);
+    fetchProductsList(filters, newPage);
     setShowModal(false);
     setSellerData(null);
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const viewDetails = async (e, id) => {
@@ -541,8 +551,9 @@ export default function Buyer() {
           {!nullItems && (
             <div className="results-summary">
               <span className="results-count">
-                {t("Showing")} {currentPageData.length} {t("of")} {totalCount}{" "}
-                {t("products")}
+                {t("Showing")} {productListState.length} {t("of")} {totalCount}{" "}
+                {t("products")} ({t("Page")} {currentPage} {t("of")}{" "}
+                {totalPages})
               </span>
               {(filters.search ||
                 filters.state ||
@@ -622,7 +633,7 @@ export default function Buyer() {
           ) : (
             <>
               <div className="products-grid">
-                {currentPageData.map((itemDetail) => (
+                {productListState.map((itemDetail) => (
                   <div key={itemDetail._id} className="product-card">
                     <div className="product-image-container">
                       <img
@@ -633,9 +644,6 @@ export default function Buyer() {
                           e.target.src = "/logo192.png";
                         }}
                       />
-                      <Badge variant="success" className="availability-badge">
-                        {t("Available")}
-                      </Badge>
                     </div>
 
                     <div className="product-content">
@@ -696,18 +704,20 @@ export default function Buyer() {
                 ))}
               </div>
 
-              {pageCount > 1 && (
+              {totalPages > 1 && (
                 <div className="pagination-container">
                   <ReactPaginate
                     previousLabel={t("← Previous")}
                     nextLabel={t("Next →")}
-                    pageCount={pageCount}
+                    pageCount={totalPages}
                     onPageChange={handlePageClick}
+                    forcePage={currentPage - 1}
                     containerClassName={"pagination"}
                     previousLinkClassName={"pagination__link"}
                     nextLinkClassName={"pagination__link"}
                     disabledClassName={"pagination__link--disabled"}
                     activeClassName={"pagination__link--active"}
+                    pageClassName={"pagination-links"}
                   />
                 </div>
               )}

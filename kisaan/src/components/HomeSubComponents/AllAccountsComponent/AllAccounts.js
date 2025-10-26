@@ -19,6 +19,7 @@ import statesofIndia from "../../../utils/states";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { itemService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
+import AuthRequiredModal from "../../common/AuthRequiredModal";
 
 export default function AllAccounts() {
   const history = useHistory();
@@ -44,7 +45,7 @@ export default function AllAccounts() {
   const [actionLoading, setActionLoading] = useState({});
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [showAuthModal, setShowAuthModal] = useState(false);
   // Memoized state options
   const stateOptions = useMemo(
     () => statesofIndia.map((state) => state.name),
@@ -54,32 +55,33 @@ export default function AllAccounts() {
   // Helper function to get user info from token
   const getUserInfo = useCallback(() => {
     const token = getAuthToken();
-    if (!token) return null;
+    if (!token) {
+      setShowAuthModal(true);
+    } else {
+      try {
+        const nameEmail = Token(token);
+        if (!nameEmail) {
+          setShowAuthModal(true);
+          return null;
+        }
 
-    try {
-      const nameEmail = Token(token);
-      if (!nameEmail) return null;
-
-      const parts = nameEmail.split(",");
-      return {
-        name: parts[0] || "",
-        email: parts[1] || "",
-        contact: parts[2] || "",
-        sellerId: parts[3] || "",
-      };
-    } catch (error) {
-      console.error("Error parsing token:", error);
-      return null;
+        const parts = nameEmail.split(",");
+        return {
+          name: parts[0] || "",
+          email: parts[1] || "",
+          contact: parts[2] || "",
+          sellerId: parts[3] || "",
+        };
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        return null;
+      }
     }
   }, []);
 
   // Initialize component
   useEffect(() => {
     const user = getUserInfo();
-    if (!user) {
-      history.push("/");
-      return;
-    }
 
     setUserInfo(user);
     fetchItems();
@@ -380,6 +382,13 @@ export default function AllAccounts() {
   return (
     <div className="App-items">
       <Header />
+      <AuthRequiredModal
+        show={showAuthModal}
+        onHide={() => {
+          setShowAuthModal(false);
+          history.push("/");
+        }}
+      />
       <div className="App-header">
         <Container>
           <div className="header-section">
