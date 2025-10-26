@@ -105,7 +105,7 @@ export default function OtpVerify() {
 
       // Redirect after a short delay to show success message
       setTimeout(() => {
-        history.push("/");
+        history.push("/login");
       }, 2000);
     } else {
       setErrorMessage(

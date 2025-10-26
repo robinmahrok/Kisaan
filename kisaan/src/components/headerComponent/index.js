@@ -45,7 +45,7 @@ const useNavigation = () => {
 
   const handleLogout = useCallback(() => {
     removeAuthToken(); // Remove token from cookies
-    history.push("/");
+    history.push("/login");
   }, [history]);
 
   return { navigateTo, handleLogout };
