@@ -467,15 +467,6 @@ export default function ForgotPassword() {
                   required
                   autoComplete="new-password"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={toggleConfirmPasswordVisibility}
-                >
-                  <FontAwesomeIcon
-                    icon={showConfirmPassword ? faEyeSlash : faEye}
-                  />
-                </button>
               </div>
               {confirmPasswordError && (
                 <div className="invalid-feedback">{confirmPasswordError}</div>

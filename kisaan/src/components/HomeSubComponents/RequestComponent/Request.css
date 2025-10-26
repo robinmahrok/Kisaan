@@ -117,6 +117,8 @@
 
 .no-requests {
   text-align: center;
+  display: flex;
+  justify-content: center;
   padding: 3rem 2rem;
 }
 

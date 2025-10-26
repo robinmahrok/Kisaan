@@ -111,10 +111,16 @@
   color: white;
 }
 
+.no-items {
+  display: flex;
+  justify-content: center;
+}
+
 .no-items-alert {
   background: linear-gradient(135deg, #74c0fc, #339af0);
   color: white;
   text-align: center;
+  width: 50%;
   border-radius: 15px;
   border: none;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -537,6 +543,9 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .no-items-alert{
+    width: 100%;
+  }
   .App-header {
     padding: 1rem 0;
   }

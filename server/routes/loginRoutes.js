@@ -128,7 +128,10 @@ const emailOTP = async (recipient, otpVal) => {
     </div>`,
     };
     // let result = await mailer(mailOptions);
-    let result = await axios.post("https://vqiiflny4m.execute-api.us-east-1.amazonaws.com/default/email-sender", mailOptions);
+    let result = await axios.post(
+      "https://vqiiflny4m.execute-api.us-east-1.amazonaws.com/default/email-sender",
+      mailOptions
+    );
     return { status: true, message: result.data };
   } catch (error) {
     return { status: false, message: "Unable to send OTP through email" };
@@ -214,7 +217,7 @@ const changePassword = async (req, res) => {
   if (!!utils.passwordCheck(userpass)) {
     utils.generateHash(userpass, async function (err, hash) {
       if (!err && hash) {
-        hashedpass = hash;
+        const hashedpass = hash;
 
         // Update password with hash value
         try {
