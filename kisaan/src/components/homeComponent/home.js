@@ -7,6 +7,7 @@ import Footer from "../footerComponent";
 import { Token } from "../../utils/utils";
 import { useTranslate } from "../../hooks/useTranslate";
 import { getAuthToken } from "../../utils/cookies";
+import SEO from "../common/SEO";
 // Constants for better maintainability
 const ROLE_TYPES = {
   SELLER: "seller",
@@ -118,8 +119,24 @@ export default function Home() {
     []
   );
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Khetihat Home",
+    description:
+      "Agricultural marketplace connecting farmers with buyers and sellers",
+    url: "https://khetihat.com/home",
+  };
+
   return (
     <div className="home-container">
+      <SEO
+        title="Home - Khetihat Agricultural Marketplace"
+        description="Browse agricultural products, connect with farmers, buyers and sellers. Your one-stop marketplace for all farming needs."
+        keywords="farming marketplace, agricultural products, buy crops, sell crops, farm supplies, khetihat"
+        url="/home"
+        structuredData={structuredData}
+      />
       <Header />
 
       <main className="home-content">

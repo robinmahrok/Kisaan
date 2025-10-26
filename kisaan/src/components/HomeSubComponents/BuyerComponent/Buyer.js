@@ -1,29 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./Buyer.css";
 import { cloudinaryUrl } from "../../../baseUrl";
-import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Token } from "../../../utils/utils";
-import { Spinner, Alert, Button, Container, Badge } from "react-bootstrap";
+import { Spinner, Alert, Button, Container } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { itemService, requestService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
 import AuthRequiredModal from "../../common/AuthRequiredModal";
-
-// Constants
-const REQUEST_STATUS = {
-  PENDING: "pending",
-  ACCEPTED: "accepted",
-  REJECTED: "rejected",
-};
-
-const STATUS_DISPLAY = {
-  [REQUEST_STATUS.PENDING]: { variant: "warning", text: "Requested" },
-  [REQUEST_STATUS.ACCEPTED]: { variant: "success", text: "Following" },
-  [REQUEST_STATUS.REJECTED]: { variant: "danger", text: "Declined" },
-};
+import SEO from "../../common/SEO";
 
 const SORT_OPTIONS = [
   { value: "createdAt", label: "Latest First", order: "desc" },
@@ -37,8 +24,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function Buyer() {
-  const history = useHistory();
   const { t } = useTranslate();
+  const imageLink = `${cloudinaryUrl}`;
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -47,7 +35,6 @@ export default function Buyer() {
     buyerId: "",
   });
   const [sellerData, setSellerData] = useState(null);
-  const [imageLink, setImageLink] = useState(`${cloudinaryUrl}`);
   const [productListState, setProductList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -383,8 +370,23 @@ export default function Buyer() {
     );
   }
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Buyers - Khetihat",
+    description: "Buy fresh agricultural products directly from farmers",
+    url: "https://khetihat.com/buyer",
+  };
+
   return (
     <div className="App-buyer">
+      <SEO
+        title="Buy Agricultural Products - Khetihat"
+        description="Purchase fresh agricultural products directly from farmers. Browse quality crops and farm produce on Khetihat."
+        keywords="buy crops, agricultural buyer, farming products, fresh produce, khetihat"
+        url="/buyer"
+        structuredData={structuredData}
+      />
       <Header />
       <div className="App-header">
         <Container>

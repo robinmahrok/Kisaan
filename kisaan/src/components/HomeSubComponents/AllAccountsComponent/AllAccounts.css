@@ -119,6 +119,7 @@
 .no-items-alert {
   background: linear-gradient(135deg, #74c0fc, #339af0);
   color: white;
+  padding: 2rem;
   text-align: center;
   width: 50%;
   border-radius: 15px;

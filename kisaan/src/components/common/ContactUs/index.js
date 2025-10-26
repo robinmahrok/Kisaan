@@ -109,19 +109,19 @@ export default function ContactUs() {
                         <div className="method-icon">📧</div>
                         <div className="method-details">
                           <h5>Email Support</h5>
-                          <p>support@khetihat.com</p>
+                          <p>khetihat@gmail.com</p>
                           <small>Response within 2-4 hours</small>
                         </div>
                       </div>
 
-                      <div className="contact-method">
+                      {/* <div className="contact-method">
                         <div className="method-icon">📞</div>
                         <div className="method-details">
                           <h5>Phone Support</h5>
                           <p>+91 9369935639</p>
                           <small>Mon-Sun: 9:00 AM - 9:00 PM</small>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="social-links">

@@ -12,6 +12,7 @@ import { useTranslate } from "../../../hooks/useTranslate";
 import { itemService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
 import AuthRequiredModal from "../../common/AuthRequiredModal";
+import SEO from "../../common/SEO";
 
 // Constants
 const INITIAL_FORM_DATA = {
@@ -419,8 +420,23 @@ export default function Seller() {
     []
   );
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Sellers - Khetihat",
+    description: "Sell your agricultural products on Khetihat marketplace",
+    url: "https://khetihat.com/seller",
+  };
+
   return (
     <div className="seller-page">
+      <SEO
+        title="Sell Agricultural Products - Khetihat"
+        description="List and sell your agricultural products to buyers across the region. Join Khetihat's seller marketplace today."
+        keywords="sell crops, agricultural seller, farming products, crop marketplace, khetihat"
+        url="/seller"
+        structuredData={structuredData}
+      />
       <Header />
 
       {/* Auth Required Modal */}

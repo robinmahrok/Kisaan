@@ -24,12 +24,6 @@ import AuthRequiredModal from "../../common/AuthRequiredModal";
 export default function AllAccounts() {
   const history = useHistory();
   const { t } = useTranslate();
-  const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    sellerId: "",
-  });
   const [formData, setFormData] = useState({
     price: "",
     quantity: "",
@@ -81,9 +75,7 @@ export default function AllAccounts() {
 
   // Initialize component
   useEffect(() => {
-    const user = getUserInfo();
-
-    setUserInfo(user);
+    getUserInfo();
     fetchItems();
   }, [history, getUserInfo]);
 

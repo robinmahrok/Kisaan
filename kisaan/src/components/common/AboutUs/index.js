@@ -4,11 +4,29 @@ import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
 import { Container, Card, Row, Col, Badge } from "react-bootstrap";
 import { useTranslate } from "../../../hooks/useTranslate";
+import SEO from "../SEO";
+
 export default function AboutUs() {
   const { t } = useTranslate();
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "About Khetihat",
+    description:
+      "Learn about Khetihat's mission to connect farmers with buyers and sellers",
+    url: "https://khetihat.com/aboutUs",
+  };
+
   return (
     <div className="App-about">
+      <SEO
+        title="About Us - Khetihat"
+        description="Learn about Khetihat's mission to empower farmers and revolutionize the agricultural marketplace. Connecting farmers, buyers and sellers across India."
+        keywords="about khetihat, agricultural marketplace, farming platform, farmer empowerment"
+        url="/aboutUs"
+        structuredData={structuredData}
+      />
       <Header />
       <div className="App-header">
         <Container>

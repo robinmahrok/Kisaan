@@ -1,3 +1,10 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /login
+Disallow: /signUp
+Disallow: /forgotPassword
+Disallow: /otpVerify
+
+# Sitemap
+Sitemap: https://khetihat.com/sitemap.xml
