@@ -24,6 +24,8 @@ app.use(
         "http://localhost:3005",
         "https://kisaan.netlify.app",
         "https://kisaanapp.netlify.app",
+        "https://khetihat.com",
+        "https://www.khetihat.com",
       ];
 
       // In production, allow all HTTPS origins for flexibility
