@@ -16,13 +16,20 @@ const SEO = ({
     "Connect farmers with buyers and sellers. Buy and sell agricultural products, request farm supplies, and grow your agricultural business with Khetihat.";
   const defaultKeywords =
     "farming, agriculture, farmers marketplace, buy crops, sell crops, agricultural products, farm supplies, kisaan, khetihat";
-  const defaultImage = "/khetihat.png";
   const siteUrl = "https://khetihat.com";
+  
+  // Use absolute URL for default image
+  const defaultImage = `${siteUrl}/khetihat.png`;
 
   const seoTitle = title || defaultTitle;
   const seoDescription = description || defaultDescription;
   const seoKeywords = keywords || defaultKeywords;
-  const seoImage = image || defaultImage;
+  
+  // Convert relative image paths to absolute URLs
+  const seoImage = image 
+    ? (image.startsWith('http') ? image : `${siteUrl}${image}`)
+    : defaultImage;
+  
   const seoUrl = url ? `${siteUrl}${url}` : siteUrl;
 
   return (
@@ -41,6 +48,10 @@ const SEO = ({
       <meta property="og:title" content={seoTitle} />
       <meta property="og:description" content={seoDescription} />
       <meta property="og:image" content={seoImage} />
+      <meta property="og:image:secure_url" content={seoImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={seoTitle} />
       <meta property="og:site_name" content="Khetihat" />
 
       {/* Twitter */}
@@ -49,6 +60,7 @@ const SEO = ({
       <meta property="twitter:title" content={seoTitle} />
       <meta property="twitter:description" content={seoDescription} />
       <meta property="twitter:image" content={seoImage} />
+      <meta property="twitter:image:alt" content={seoTitle} />
 
       {/* Structured Data */}
       {structuredData && (
