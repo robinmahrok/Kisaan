@@ -229,6 +229,83 @@ button:disabled {
   box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
 }
 
+/* Consent Notice Section */
+.consent-notice {
+  padding: 12px 16px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.consent-container {
+  display: flex;
+  align-items: flex-start;
+}
+
+.consent-checkbox {
+  width: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.consent-text-wrapper {
+  margin-left: 8px;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1e40af;
+  text-align: justify;
+}
+
+.consent-label {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  margin: 0;
+  display: inline;
+}
+
+.consent-label-collapsed {
+  display: inline;
+}
+
+.consent-label-expanded {
+  display: inline;
+}
+
+.consent-toggle-btn {
+  margin-left: 4px;
+  font-size: 13px;
+  color: #0369a1;
+  font-weight: 600;
+  width: auto;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-align: left;
+  display: inline;
+  vertical-align: baseline;
+}
+
+.consent-toggle-btn:hover:not(:disabled) {
+  color: #075985;
+  background: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.consent-toggle-btn:disabled {
+  background: none;
+  opacity: 0.5;
+}
+
 /* Screen reader only content */
 .sr-only {
   position: absolute;

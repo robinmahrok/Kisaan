@@ -136,9 +136,11 @@ export default function SignUp() {
     contact: "",
     password: "",
     confirmPassword: "",
+    dataConsent: false,
   });
   const [validationErrors, setValidationErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showFullConsent, setShowFullConsent] = useState(false);
 
   // Refs for form elements
   const nameRef = useRef(null);
@@ -454,11 +456,48 @@ export default function SignUp() {
                 )}
               </div>
 
+              <div className="consent-notice">
+                <div className="consent-container">
+                  <input
+                    type="checkbox"
+                    id="dataConsent"
+                    className="consent-checkbox"
+                    checked={formData.dataConsent}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        dataConsent: e.target.checked,
+                      }))
+                    }
+                    required
+                    disabled={isLoading}
+                  />
+                  <div className="consent-text-wrapper">
+                    <label htmlFor="dataConsent" className="consent-label">
+                      {showFullConsent
+                        ? t(
+                            "By creating an account, you agree that your name, contact information, and location will be visible to other users when you list products for sale. This helps facilitate transactions between buyers and sellers on our platform."
+                          )
+                        : t(
+                            "By creating an account, you agree that your name, contact information..."
+                          )}
+                    </label>
+                    <button
+                      type="button"
+                      className="consent-toggle-btn"
+                      onClick={() => setShowFullConsent(!showFullConsent)}
+                      disabled={isLoading}
+                    >
+                      {showFullConsent ? t("Show Less") : t("Show More")}
+                    </button>
+                  </div>
+                </div>
+              </div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !formData.dataConsent}
                 className={`w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-lg font-medium text-white text-base transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-green-300 ${
-                  isLoading
+                  isLoading || !formData.dataConsent
                     ? "bg-gray-400 cursor-not-allowed opacity-70"
                     : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0"
                 } mt-6 sm:mt-8`}
