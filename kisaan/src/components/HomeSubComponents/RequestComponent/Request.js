@@ -11,11 +11,11 @@ import {
 import { useHistory } from "react-router-dom";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
-import { Token } from "../../../utils/utils";
 import { useTranslate } from "../../../hooks/useTranslate";
 import { requestService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
 import AuthRequiredModal from "../../common/AuthRequiredModal";
+
 // Constants
 const REQUEST_STATUS = {
   PENDING: "pending",
@@ -32,11 +32,6 @@ const STATUS_DISPLAY = {
 export default function Request() {
   const history = useHistory();
   const { t } = useTranslate();
-  const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-    sellerId: "",
-  });
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,37 +39,10 @@ export default function Request() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Helper function to get user info from token
-  const getUserInfo = useCallback(() => {
-    const token = getAuthToken();
-    if (!token) {
-      setShowAuthModal(true);
-    } else {
-      try {
-        const nameEmail = Token(token);
-        if (!nameEmail) return null;
-
-        const parts = nameEmail.split(",");
-        return {
-          name: parts[0] || "",
-          email: parts[1] || "",
-          contact: parts[2] || "",
-          sellerId: parts[3] || "",
-        };
-      } catch (error) {
-        console.error("Error parsing token:", error);
-        return null;
-      }
-    }
-  }, []);
-
   // Initialize component
   useEffect(() => {
-    const user = getUserInfo();
-
-    setUserInfo(user);
     fetchRequests();
-  }, [history, getUserInfo]);
+  }, [history]);
 
   // Fetch requests from server
   const fetchRequests = useCallback(async () => {

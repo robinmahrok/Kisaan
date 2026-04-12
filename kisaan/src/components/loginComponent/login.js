@@ -187,7 +187,7 @@ export default function Login() {
         if (data.status) {
           // Login successful - store token in cookies
           setAuthToken(data.message, 7); // Store for 7 days
-          history.push("/home");
+          history.push("/");
         } else if (data.message === "Otp not verified.") {
           // Email not verified
           sessionStorage.setItem("email", formData.email);

@@ -410,7 +410,9 @@ export default function AllAccounts() {
               onClose={() => setSuccessMessage("")}
               className="alert-message"
             >
-              <strong>✅{t("Success:")}</strong> {t(`${successMessage}`)}
+              <div className="alert-content">
+                <strong>✅{t("Success:")}</strong> {t(`${successMessage}`)}
+              </div>
             </Alert>
           )}
 
@@ -422,7 +424,9 @@ export default function AllAccounts() {
               onClose={() => setError("")}
               className="alert-message"
             >
-              <strong>⚠️{t("Error:")}</strong> {t(`${error}`)}
+              <div className="alert-content">
+                <strong>⚠️{t("Error:")}</strong> {t(`${error}`)}
+              </div>
             </Alert>
           )}
 

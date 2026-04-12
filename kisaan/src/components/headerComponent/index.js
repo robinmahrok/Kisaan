@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import { Token } from "../../utils/utils";
 import { useTranslate } from "../../hooks/useTranslate";
 import { getAuthToken, removeAuthToken } from "../../utils/cookies";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 // Custom hook for user authentication
 const useUserAuth = () => {
@@ -69,7 +70,7 @@ export default function Header() {
   // Navigation items with translations
   const navigationItems = useMemo(
     () => [
-      { path: "/home", label: t("Home") },
+      { path: "/", label: t("Home") },
       { path: "/allAccounts", label: t("My Items") },
       { path: "/request", label: t("Requests") },
       { path: "/aboutUs", label: t("About Us") },
@@ -204,7 +205,7 @@ export default function Header() {
         </button>
 
         {/* Logo/Brand - Center */}
-        <div className="header-brand" onClick={() => handleNavigation("/home")}>
+        <div className="header-brand" onClick={() => handleNavigation("/")}>
           <img src="/khetihat.png" alt="Khetihat" className="brand-icon" />
           <h1 className="brand-text">Khetihat</h1>
         </div>

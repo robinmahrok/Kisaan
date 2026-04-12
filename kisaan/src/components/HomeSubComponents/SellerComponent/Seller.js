@@ -333,7 +333,7 @@ export default function Seller() {
 
           if (uploadResult.success) {
             setSuccessMessage("Product added successfully! Redirecting...");
-            setTimeout(() => history.push("/home"), 200);
+            setTimeout(() => history.push("/"), 200);
           } else {
             setErrorMessage(
               uploadResult.error ||

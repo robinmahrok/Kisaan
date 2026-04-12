@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import "./App.css";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
 
 // Lazy load components for better performance
 const Login = lazy(() => import("./components/loginComponent/login"));
@@ -53,7 +53,7 @@ function App() {
           <Route path="/signUp" component={SignUp} />
           <Route path="/forgotPassword" component={ForgotPassword} />
           <Route path="/otpVerify" component={OtpVerify} />
-          <Route path="/home" component={Home} />
+          <Redirect from="/home" to="/" />
           <Route path="/allAccounts" component={AllAccounts} />
           <Route path="/aboutUs" component={AboutUs} />
           <Route path="/ContactUs" component={ContactUs} />

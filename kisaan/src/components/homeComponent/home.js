@@ -125,7 +125,7 @@ export default function Home() {
     name: "Khetihat Home",
     description:
       "Agricultural marketplace connecting farmers with buyers and sellers",
-    url: "https://khetihat.com/home",
+    url: "https://khetihat.com",
   };
 
   return (
@@ -134,7 +134,7 @@ export default function Home() {
         title="Home - Khetihat Agricultural Marketplace"
         description="Browse agricultural products, connect with farmers, buyers and sellers. Your one-stop marketplace for all farming needs."
         keywords="farming marketplace, agricultural products, buy crops, sell crops, farm supplies, khetihat"
-        url="/home"
+        url=""
         structuredData={structuredData}
       />
       <Header />

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./contactUs.css";
 import Header from "../../headerComponent";
 import Footer from "../../footerComponent";
+import SEO from "../SEO";
 import {
   Container,
   Card,
@@ -14,6 +15,14 @@ import {
 } from "react-bootstrap";
 
 export default function ContactUs() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: "Contact Khetihat",
+    description: "Get in touch with Khetihat for support and inquiries",
+    url: "https://khetihat.com/ContactUs",
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -71,6 +80,13 @@ export default function ContactUs() {
 
   return (
     <div className="App-contact">
+      <SEO
+        title="Contact Us - Khetihat"
+        description="Have questions or need support? Contact the Khetihat team. We're here to help farmers, buyers, and sellers."
+        keywords="contact khetihat, agricultural support, farmer help, customer service"
+        url="/ContactUs"
+        structuredData={structuredData}
+      />
       <Header />
       <div className="App-header">
         <Container>
@@ -124,7 +140,7 @@ export default function ContactUs() {
                       </div> */}
                     </div>
 
-                    <div className="social-links">
+                    {/* <div className="social-links">
                       <h5>Follow Us</h5>
                       <div className="social-icons">
                         <span className="social-icon">📘</span>
@@ -132,7 +148,7 @@ export default function ContactUs() {
                         <span className="social-icon">📷</span>
                         <span className="social-icon">💼</span>
                       </div>
-                    </div>
+                    </div> */}
                   </Card.Body>
                 </Card>
               </Col>
