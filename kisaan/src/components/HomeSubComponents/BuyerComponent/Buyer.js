@@ -11,6 +11,7 @@ import { itemService, requestService } from "../../../services";
 import { getAuthToken } from "../../../utils/cookies";
 import AuthRequiredModal from "../../common/AuthRequiredModal";
 import SEO from "../../common/SEO";
+import { useHistory } from "react-router-dom";
 
 const SORT_OPTIONS = [
   { value: "createdAt", label: "Latest First", order: "desc" },
@@ -26,7 +27,7 @@ const SORT_OPTIONS = [
 export default function Buyer() {
   const { t } = useTranslate();
   const imageLink = `${cloudinaryUrl}`;
-
+  const history = useHistory();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -406,234 +407,210 @@ export default function Buyer() {
                   t("Refresh")
                 )}
               </Button>
-            </div>
-          </div>
-
-          {/* Search and Filter Section */}
-          <div
-            className={`search-filter-section ${showFilters ? "expanded" : ""}`}
-          >
-            <form onSubmit={handleSearch} className="search-form">
-              <div className="search-row">
-                <div className="search-input-group">
-                  <input
-                    type="text"
-                    placeholder={t("Search products, varieties...")}
-                    value={filters.search}
-                    onChange={(e) =>
-                      handleFilterChange("search", e.target.value)
-                    }
-                    className="search-input"
-                  />
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={searchLoading}
-                    className="search-button"
-                  >
-                    {searchLoading ? (
-                      <Spinner animation="border" size="sm" />
-                    ) : (
-                      t("Search")
-                    )}
-                  </Button>
-                </div>
-
-                <div className="sort-group">
-                  <select
-                    value={`${filters.sortBy}-${filters.sortOrder}`}
-                    onChange={handleSortChange}
-                    className="sort-select"
-                  >
-                    {SORT_OPTIONS.map((option, index) => (
-                      <option
-                        key={index}
-                        value={`${option.value}-${option.order}`}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="filter-toggle-button"
-                  >
-                    {showFilters ? t("Hide Filters") : t("+Show Filters")}
-                  </Button>
-                </div>
-              </div>
-
-              {showFilters && (
-                <div className="filters-grid">
-                  <div className="filter-group">
-                    <label>{t("Product Type")}</label>
-                    <input
-                      type="text"
-                      placeholder={t("e.g., Rice, Wheat, Tomato")}
-                      value={filters.product}
-                      onChange={(e) =>
-                        handleFilterChange("product", e.target.value)
-                      }
-                      className="filter-input"
-                    />
-                  </div>
-
-                  <div className="filter-group">
-                    <label>{t("State")}</label>
-                    <input
-                      type="text"
-                      placeholder={t("e.g., Punjab, Maharashtra")}
-                      value={filters.state}
-                      onChange={(e) =>
-                        handleFilterChange("state", e.target.value)
-                      }
-                      className="filter-input"
-                    />
-                  </div>
-
-                  <div className="filter-group">
-                    <label>{t("City")}</label>
-                    <input
-                      type="text"
-                      placeholder={t("e.g., Mumbai, Delhi")}
-                      value={filters.city}
-                      onChange={(e) =>
-                        handleFilterChange("city", e.target.value)
-                      }
-                      className="filter-input"
-                    />
-                  </div>
-
-                  <div className="filter-group">
-                    <label>{t("Min Price (₹)")}</label>
-                    <input
-                      type="number"
-                      placeholder={t("0")}
-                      value={filters.minPrice}
-                      onChange={(e) =>
-                        handleFilterChange("minPrice", e.target.value)
-                      }
-                      className="filter-input"
-                      min="0"
-                    />
-                  </div>
-
-                  <div className="filter-group">
-                    <label>{t("Max Price (₹)")}</label>
-                    <input
-                      type="number"
-                      placeholder={t("No limit")}
-                      value={filters.maxPrice}
-                      onChange={(e) =>
-                        handleFilterChange("maxPrice", e.target.value)
-                      }
-                      className="filter-input"
-                      min="0"
-                    />
-                  </div>
-
-                  <div className="filter-actions">
-                    <Button
-                      type="button"
-                      variant="outline-secondary"
-                      onClick={clearFilters}
-                      className="clear-filters-button"
-                    >
-                      {t("Clear All")}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </form>
-          </div>
-
-          {/* Results Summary */}
-          {!nullItems && (
-            <div className="results-summary">
-              <span className="results-count">
-                {t("Showing")} {productListState.length} {t("of")} {totalCount}{" "}
-                {t("products")} ({t("Page")} {currentPage} {t("of")}{" "}
-                {totalPages})
-              </span>
-              {(filters.search ||
-                filters.state ||
-                filters.city ||
-                filters.product ||
-                filters.minPrice ||
-                filters.maxPrice) && (
-                <span className="active-filters">• {t("Filters applied")}</span>
-              )}
-            </div>
-          )}
-
-          {/* Success Alert */}
-          {successMessage && (
-            <Alert
-              variant="success"
-              dismissible
-              onClose={() => setSuccessMessage("")}
-              className="alert-message"
-            >
-              {successMessage}
-            </Alert>
-          )}
-
-          {/* Error Alert */}
-          {error && (
-            <Alert
-              variant="danger"
-              dismissible
-              onClose={() => setError("")}
-              className="alert-message"
-            >
-              {error}
               <Button
-                variant="outline-danger"
-                onClick={() => fetchProductsList()}
-                className="retry-button"
-                size="sm"
+                variant="primary"
+                onClick={() => history.push("/seller")}
+                className="add-product-button"
               >
-                Retry
+                {t("+ Add Your Product")}
               </Button>
-            </Alert>
-          )}
+            </div>
+          </div>
 
-          {nullItems && !loading && !searchLoading ? (
-            <Alert variant="info" className="no-products-alert">
-              <h5>{t("No Products Found")}</h5>
-              <p>
-                {filters.search ||
-                filters.state ||
-                filters.city ||
-                filters.product ||
-                filters.minPrice ||
-                filters.maxPrice
-                  ? t(
-                      "No products match your search criteria. Try adjusting your filters."
-                    )
-                  : t(
-                      "There are no products available at the moment. Please check back later."
-                    )}
-              </p>
-              {(filters.search ||
-                filters.state ||
-                filters.city ||
-                filters.product ||
-                filters.minPrice ||
-                filters.maxPrice) && (
-                <Button
-                  variant="outline-info"
-                  onClick={clearFilters}
-                  className="mt-2"
-                >
-                  {t("Clear Filters")}
-                </Button>
-              )}
-            </Alert>
+          {(nullItems && !loading && !searchLoading) || error ? (
+            <div className="no-items">
+              <Alert variant="info" className="no-products-alert">
+                <h5>{t("No Products Found")}</h5>
+                <p>
+                  {filters.search ||
+                  filters.state ||
+                  filters.city ||
+                  filters.product ||
+                  filters.minPrice ||
+                  filters.maxPrice
+                    ? t(
+                        "No products match your search criteria. Try adjusting your filters."
+                      )
+                    : t(
+                        "There are no products available at the moment. Please check back later."
+                      )}
+                </p>
+                {(filters.search ||
+                  filters.state ||
+                  filters.city ||
+                  filters.product ||
+                  filters.minPrice ||
+                  filters.maxPrice) && (
+                  <Button
+                    variant="outline-primary"
+                    onClick={clearFilters}
+                    className="mt-2"
+                  >
+                    {t("Clear Filters")}
+                  </Button>
+                )}
+              </Alert>
+            </div>
           ) : (
             <>
+              <div
+                className={`search-filter-section ${
+                  showFilters ? "expanded" : ""
+                }`}
+              >
+                <form onSubmit={handleSearch} className="search-form">
+                  <div className="search-row">
+                    <div className="search-input-group">
+                      <input
+                        type="text"
+                        placeholder={t("Search products, varieties...")}
+                        value={filters.search}
+                        onChange={(e) =>
+                          handleFilterChange("search", e.target.value)
+                        }
+                        className="search-input"
+                      />
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={searchLoading}
+                        className="search-button"
+                      >
+                        {searchLoading ? (
+                          <Spinner animation="border" size="sm" />
+                        ) : (
+                          t("Search")
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="sort-group">
+                      <select
+                        value={`${filters.sortBy}-${filters.sortOrder}`}
+                        onChange={handleSortChange}
+                        className="sort-select"
+                      >
+                        {SORT_OPTIONS.map((option, index) => (
+                          <option
+                            key={index}
+                            value={`${option.value}-${option.order}`}
+                          >
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="filter-toggle-button"
+                      >
+                        {showFilters ? t("Hide Filters") : t("+Show Filters")}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {showFilters && (
+                    <div className="filters-grid">
+                      <div className="filter-group">
+                        <label>{t("Product Type")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("e.g., Rice, Wheat, Tomato")}
+                          value={filters.product}
+                          onChange={(e) =>
+                            handleFilterChange("product", e.target.value)
+                          }
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>{t("State")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("e.g., Punjab, Maharashtra")}
+                          value={filters.state}
+                          onChange={(e) =>
+                            handleFilterChange("state", e.target.value)
+                          }
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>{t("City")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("e.g., Mumbai, Delhi")}
+                          value={filters.city}
+                          onChange={(e) =>
+                            handleFilterChange("city", e.target.value)
+                          }
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>{t("Min Price (₹)")}</label>
+                        <input
+                          type="number"
+                          placeholder={t("0")}
+                          value={filters.minPrice}
+                          onChange={(e) =>
+                            handleFilterChange("minPrice", e.target.value)
+                          }
+                          className="filter-input"
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>{t("Max Price (₹)")}</label>
+                        <input
+                          type="number"
+                          placeholder={t("No limit")}
+                          value={filters.maxPrice}
+                          onChange={(e) =>
+                            handleFilterChange("maxPrice", e.target.value)
+                          }
+                          className="filter-input"
+                          min="0"
+                        />
+                      </div>
+
+                      <div className="filter-actions">
+                        <Button
+                          type="button"
+                          variant="outline-secondary"
+                          onClick={clearFilters}
+                          className="clear-filters-button"
+                        >
+                          {t("Clear All")}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </form>
+              </div>
+
+              <div className="results-summary">
+                <span className="results-count">
+                  {t("Showing")} {productListState.length} {t("of")}{" "}
+                  {totalCount} {t("products")} ({t("Page")} {currentPage}{" "}
+                  {t("of")} {totalPages})
+                </span>
+                {(filters.search ||
+                  filters.state ||
+                  filters.city ||
+                  filters.product ||
+                  filters.minPrice ||
+                  filters.maxPrice) && (
+                  <span className="active-filters">
+                    • {t("Filters applied")}
+                  </span>
+                )}
+              </div>
               <div className="products-grid">
                 {productListState.map((itemDetail) => (
                   <div key={itemDetail._id} className="product-card">

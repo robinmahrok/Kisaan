@@ -399,6 +399,13 @@ export default function AllAccounts() {
                   t("Refresh")
                 )}
               </Button>
+              <Button
+                variant="primary"
+                onClick={() => history.push("/seller")}
+                className="add-product-button"
+              >
+                {t("+ Add New Product")}
+              </Button>
             </div>
           </div>
 

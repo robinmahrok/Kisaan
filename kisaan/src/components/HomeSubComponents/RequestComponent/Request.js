@@ -110,6 +110,7 @@ export default function Request() {
         setError(err.message || `Failed to ${action.toLowerCase()} request`);
       } finally {
         setActionLoading((prev) => ({ ...prev, [requestId]: false }));
+        fetchRequests();
       }
     },
     [fetchRequests]

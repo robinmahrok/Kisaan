@@ -180,8 +180,13 @@ class BaseRepository {
         },
       };
 
+      const normalizedFilter = { ...filter };
+      if (normalizedFilter._id) {
+        normalizedFilter._id = this.toObjectId(normalizedFilter._id);
+      }
+
       // Use updateOne instead of findOneAndUpdate, then fetch the document
-      const updateResult = await collection.updateOne(filter, update);
+      const updateResult = await collection.updateOne(normalizedFilter, update);
 
       console.log(
         `[${this.collectionName}] UpdateOne - MatchedCount:`,
