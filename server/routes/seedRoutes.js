@@ -187,11 +187,6 @@ const addSellerData = async (req, res) => {
 };
 
 const getItemsList = async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
-  const tokenEmail = utils.authenticateToken(token);
-  const email = tokenEmail?.email.split(",")[1];
-
   // Extract search and filter parameters
   const {
     search = "",
@@ -207,23 +202,26 @@ const getItemsList = async (req, res) => {
   } = req.body;
 
   try {
-    const normalizedEmail = email?.trim().toLowerCase();
-    const escapedEmail = normalizedEmail?.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&"
-    );
-
     // Build the query filter - exclude current user's items
     let query = {
-      email: { $not: new RegExp(`^${escapedEmail}$`, "i") },
       isAvailable: true, // Only show available items
     };
-    if (escapedEmail) {
+    const authHeader = req.headers["authorization"];
+    if (authHeader) {
+      const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+      const tokenEmail = utils.authenticateToken(token);
+      const email = tokenEmail?.email.split(",")[1];
+      const normalizedEmail = email?.trim().toLowerCase();
+      const escapedEmail = normalizedEmail?.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
       query = {
         email: { $not: new RegExp(`^${escapedEmail}$`, "i") },
         isAvailable: true, // Only show available items
       };
     }
+
     // Add search filter (search in product name and variety)
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
