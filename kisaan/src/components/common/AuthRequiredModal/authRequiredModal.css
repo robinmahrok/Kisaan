@@ -73,7 +73,6 @@
 .auth-modal-close:hover {
   background: #dc3545;
   color: white;
-  transform: rotate(90deg);
 }
 
 /* Modal Body */
