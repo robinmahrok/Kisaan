@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const DISMISSED_KEY = 'pwa_install_dismissed_until';
-const DISMISS_DAYS = 30;
+const DISMISS_DAYS = 10;
 
 function isAlreadyInstalled() {
   return (
