@@ -5,6 +5,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "./config/i18n";
 import { HelmetProvider } from "react-helmet-async";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -15,4 +16,5 @@ ReactDOM.render(
   document.getElementById("root")
 );
 
+serviceWorkerRegistration.register();
 reportWebVitals();

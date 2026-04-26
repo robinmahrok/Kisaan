@@ -1,6 +1,8 @@
 import React, { Suspense, lazy } from "react";
 import "./App.css";
 import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
+import { usePWAInstall } from "./hooks/usePWAInstall";
+import InstallPWAModal from "./components/common/InstallPWAModal";
 
 // Lazy load components for better performance
 const Login = lazy(() => import("./components/loginComponent/login"));
@@ -44,8 +46,17 @@ const LoadingFallback = () => (
 );
 
 function App() {
+  const { showModal, platform, install, dismiss } = usePWAInstall();
+
   return (
     <BrowserRouter>
+      {showModal && (
+        <InstallPWAModal
+          platform={platform}
+          onInstall={install}
+          onDismiss={dismiss}
+        />
+      )}
       <Suspense fallback={<LoadingFallback />}>
         <Switch>
           <Route path="/" exact component={Home} />

@@ -1,0 +1,274 @@
+.pwa-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pwa-modal-content {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 520px;
+  padding: 0;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* drag handle */
+.pwa-modal-handle {
+  width: 40px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+
+.pwa-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px 12px;
+}
+
+.pwa-modal-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.pwa-modal-app-info {
+  flex: 1;
+}
+
+.pwa-modal-app-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px;
+}
+
+.pwa-modal-app-tagline {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pwa-modal-close {
+  background: #f3f4f6;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.pwa-modal-close:hover {
+  background: #e5e7eb;
+}
+
+.pwa-modal-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0 24px;
+}
+
+/* Android install section */
+.pwa-modal-body {
+  padding: 20px 24px;
+}
+
+.pwa-modal-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pwa-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.pwa-benefit-icon {
+  font-size: 1.3rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pwa-modal-install-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}
+
+.pwa-modal-install-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
+}
+
+.pwa-modal-install-btn:active {
+  transform: translateY(0);
+}
+
+.pwa-modal-skip {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pwa-modal-skip:hover {
+  color: #6b7280;
+}
+
+/* iOS steps section */
+.pwa-ios-steps {
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pwa-ios-intro {
+  font-size: 0.9rem;
+  color: #374151;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.pwa-ios-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.pwa-ios-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pwa-ios-step-text {
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.pwa-ios-step-text strong {
+  color: #111827;
+}
+
+.pwa-ios-step-icon {
+  display: inline-block;
+  font-style: normal;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.pwa-ios-got-it {
+  width: 100%;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 14px;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s;
+}
+
+.pwa-ios-got-it:hover {
+  background: #e5e7eb;
+}
+
+/* pointer arrow for iOS bottom bar */
+.pwa-ios-arrow {
+  text-align: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  margin-top: -4px;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
+
+@media (min-width: 521px) {
+  .pwa-modal-overlay {
+    align-items: center;
+  }
+
+  .pwa-modal-content {
+    border-radius: 24px;
+    margin: 16px;
+    max-width: 420px;
+  }
+
+  .pwa-ios-arrow {
+    display: none;
+  }
+}
