@@ -399,13 +399,15 @@ export default function AllAccounts() {
                   t("Refresh")
                 )}
               </Button>
-              <Button
-                variant="primary"
-                onClick={() => history.push("/seller")}
-                className="add-product-button"
-              >
-                {t("+ Add New Product")}
-              </Button>
+              {data2.length > 0 && (
+                <Button
+                  variant="primary"
+                  onClick={() => history.push("/seller")}
+                  className="add-product-button"
+                >
+                  {t("+ Add New Product")}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -547,7 +549,7 @@ export default function AllAccounts() {
                                 }),
                               t("Search and select state..."),
                               false,
-                              "No states found"
+                              "No states found",
                             )}
                           </div>
 
@@ -690,7 +692,7 @@ export default function AllAccounts() {
                 <h5>📦 {t("No Products Found")}</h5>
                 <p className="mb-0">
                   {t(
-                    "You haven't added any products yet. Start by adding your first product to reach potential buyers!"
+                    "You haven't added any products yet. Start by adding your first product to reach potential buyers!",
                   )}
                 </p>
                 <Button
