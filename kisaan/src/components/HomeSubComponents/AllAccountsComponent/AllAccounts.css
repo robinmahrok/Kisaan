@@ -202,6 +202,7 @@
   font-size: 0.875rem;
   transition: all 0.3s ease;
   background: green;
+  color: white;
   box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
@@ -549,74 +550,74 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .no-items-alert{
+  .no-items-alert {
     width: 100%;
   }
   .App-header {
     padding: 1rem 0;
   }
-  
+
   .container {
     margin: 1rem;
     padding: 1.5rem;
     border-radius: 15px;
   }
-  
+
   .header-section {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .page-title {
     font-size: 1.5rem;
     text-align: left;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .refresh-button {
     min-width: 70px;
     max-width: 70px;
     font-size: 0.8rem;
   }
-  
+
   .items-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .item-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .detail-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
+
   .detail-value {
     text-align: left;
     font-weight: 600;
   }
-  
+
   .address-text {
     text-align: left;
     max-width: none;
   }
-  
+
   .edit-actions,
   .view-actions {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .edit-button,
   .save-button,
   .delete-button,
@@ -631,33 +632,33 @@
     margin: 0.5rem;
     padding: 1rem;
   }
-  
+
   .page-title {
     font-size: 1.3rem;
   }
-  
+
   .item-image {
     height: 160px;
   }
-  
+
   .item-content {
     padding: 1rem;
   }
-  
+
   .edit-form {
     padding: 1.5rem;
   }
-  
+
   .form-group {
     margin-bottom: 1rem;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .modern-input,
   .modern-textarea {
     padding: 0.75rem 1rem;
