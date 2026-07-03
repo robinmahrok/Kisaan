@@ -43,6 +43,26 @@ const authService = {
   },
 
   /**
+   * Login / sign up with a Google ID token credential
+   * @param {string} credential - Google ID token returned by @react-oauth/google
+   * @returns {Promise}
+   */
+  googleLogin: async (credential) => {
+    try {
+      const response = await apiClient.post("/googleLogin", { credential });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Google sign-in failed",
+      };
+    }
+  },
+
+  /**
    * Send OTP to email
    * @param {string} email
    * @returns {Promise}

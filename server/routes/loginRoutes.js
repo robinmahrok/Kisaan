@@ -1,7 +1,11 @@
 import { userInfo } from "../repositories/index.js";
 import { mailer } from "../controllers/mailer.js";
 import utils from "../controllers/utils.js";
+import config from "../config/config.js";
+import { OAuth2Client } from "google-auth-library";
 import axios from "axios";
+
+const googleClient = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 
 const ping = (req, res) => {
   res.status(200).send({ message: "Working" });
@@ -41,13 +45,13 @@ const signup = async (req, res) => {
   //password check with Minimum six characters, at least one uppercase letter, one lowercase letter, one number and one special character
   function passwordCheck(password1) {
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{6,}$/.test(
-      password1
+      password1,
     );
   }
 
   function emailCheck(password1) {
     return /^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
-      password1
+      password1,
     );
   }
   let hashedpass = "";
@@ -130,7 +134,7 @@ const emailOTP = async (recipient, otpVal) => {
     // let result = await mailer(mailOptions);
     let result = await axios.post(
       "https://vqiiflny4m.execute-api.us-east-1.amazonaws.com/default/email-sender",
-      mailOptions
+      mailOptions,
     );
     return { status: true, message: result.data };
   } catch (error) {
@@ -193,7 +197,7 @@ const verifyOtp = async (req, res) => {
       try {
         await userInfo.updateOne(
           { email: email },
-          { otpVerify: "verified", isActive: true }
+          { otpVerify: "verified", isActive: true },
         );
         res
           .status(200)
@@ -223,7 +227,7 @@ const changePassword = async (req, res) => {
         try {
           const passwordUpdate = await userInfo.updateOne(
             { email: email },
-            { password: hashedpass }
+            { password: hashedpass },
           );
           if (passwordUpdate) {
             res.status(200).send({
@@ -294,6 +298,60 @@ const login = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res
+      .status(200)
+      .send({ status: false, message: "Missing Google credential" });
+  }
+
+  try {
+    // Verify the Google ID token and ensure it was issued for our app
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: config.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = (payload.email || "").toLowerCase();
+    const name = payload.name || (email ? email.split("@")[0] : "");
+
+    if (!email) {
+      return res
+        .status(200)
+        .send({ status: false, message: "Google account has no email" });
+    }
+
+    let user = await userInfo.getUserByEmail(email);
+    if (!user) {
+      user = await userInfo.create({
+        name,
+        email,
+        otp: 0,
+        otpVerify: "verified",
+        isActive: true,
+        role: "buyer",
+        authProvider: "google",
+      });
+    }
+
+    // Build the same "name,email,contact,id" payload the rest of the app expects
+    const contact = user.contact || "";
+    const id = user.id || user._id;
+    const nameEmail = `${user.name},${email},${contact},${id}`;
+    const token = utils.generateAccessToken(nameEmail);
+
+    res.status(200).send({ status: true, message: token });
+  } catch (error) {
+    console.error("Google login error:", error);
+    res
+      .status(200)
+      .send({ status: false, message: "Google authentication failed" });
+  }
+};
+
 const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -310,5 +368,6 @@ export default {
   verifyOtp,
   changePassword,
   login,
+  googleLogin,
   logout,
 };

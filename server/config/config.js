@@ -37,6 +37,11 @@ const config = {
     process.env.MONGODB_URI ||
     `mongodb+srv://robinsingh:Robin%401998@cluster0.q7iqp.mongodb.net/farmers?retryWrites=true&w=majority&appName=Cluster0`,
 
+  // Google Sign-In: OAuth 2.0 Web client ID (must match the one used on the frontend)
+  GOOGLE_CLIENT_ID:
+    process.env.GOOGLE_CLIENT_ID ||
+    "585644332299-eoh3g5hr965tjlqrpp6cvdmhn3qu5ml1.apps.googleusercontent.com",
+
   // JWT configuration
   TOKEN_SECRET: process.env.JWT_SECRET || `Letsdosomefunwithtoken1998`,
   REFRESH_TOKEN_SECRET:

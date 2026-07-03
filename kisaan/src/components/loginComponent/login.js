@@ -3,6 +3,7 @@ import { Spinner } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { GoogleLogin } from "@react-oauth/google";
 import { emailValidator } from "../../utils/utils";
 import { useTranslate } from "../../hooks/useTranslate";
 import { authService } from "../../services";
@@ -201,6 +202,35 @@ export default function Login() {
     [formData, validateForm, login, history]
   );
 
+  // Handle a successful Google sign-in: send the ID token to the backend,
+  // then store the returned app token exactly like a normal login.
+  const handleGoogleSuccess = useCallback(
+    async (credentialResponse) => {
+      const credential = credentialResponse?.credential;
+      if (!credential) {
+        setValidationErrors({ general: "Google sign-in failed. Please try again." });
+        return;
+      }
+
+      const result = await authService.googleLogin(credential);
+
+      if (result.success && result.data?.status) {
+        setAuthToken(result.data.message, 7); // Store for 7 days
+        history.push("/");
+      } else {
+        setValidationErrors({
+          general:
+            result.data?.message || result.error || "Google sign-in failed",
+        });
+      }
+    },
+    [history]
+  );
+
+  const handleGoogleError = useCallback(() => {
+    setValidationErrors({ general: "Google sign-in failed. Please try again." });
+  }, []);
+
   // Handle Enter key press for better UX
   const handleKeyPress = useCallback(
     (e) => {
@@ -380,6 +410,23 @@ export default function Login() {
               </div>
             )}
           </form>
+
+          <div className="flex items-center my-6">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="mx-4 text-gray-400 text-sm">{t("OR")}</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="continue_with"
+              shape="rectangular"
+              width="320"
+              useOneTap={false}
+            />
+          </div>
 
           <div className="text-center mt-6">
             <Link

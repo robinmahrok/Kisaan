@@ -7,8 +7,16 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-const { ping, signup, sendOtp, verifyOtp, changePassword, login, logout } =
-  loginRoutes;
+const {
+  ping,
+  signup,
+  sendOtp,
+  verifyOtp,
+  changePassword,
+  login,
+  googleLogin,
+  logout,
+} = loginRoutes;
 
 const {
   products,
@@ -32,6 +40,7 @@ router.post("/sendOtp", sendOtp); // PUT /api/users/:id
 router.post("/verifyOtp", verifyOtp);
 router.post("/changePassword", changePassword);
 router.post("/login", login);
+router.post("/googleLogin", googleLogin);
 router.post("/logout", logout);
 router.post("/products", authenticateToken, products);
 router.post("/uploadFile", uploadFile);
